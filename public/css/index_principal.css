@@ -1,0 +1,235 @@
+/* ==========================================================================
+   Estilos Exclusivos para la Página Principal (index.html)
+   ========================================================================== */
+/*
+.top-banner-header {
+    color: #ffffff;
+    padding: 0px 0px;
+    color: #ffffff;
+}
+
+.top-images-container {
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    gap:  5px;
+}
+
+.header-img {
+    max-height: 100px;
+    height: auto;
+    width: auto;
+    object-fit: contain;
+    border-radius: 0; 
+    box-shadow: none;  
+}
+
+
+.header-img {
+    max-height: 100px;
+    height: auto;
+    width: auto;
+    border-radius: 0px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+    */
+
+.header-img:hover {
+    transform: scale(1.05);
+}
+
+:root {
+    --primary-color: #2d2d2d;
+    --accent-color: #007acc;
+    --bg-light: #ffffff;
+    --text-dark: #333333;
+    --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* --- Hero Section --- */
+.hero-section {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    padding: 60px 20px;
+    text-align: center;
+    border-bottom: 4px solid var(--accent-color);
+}
+
+.hero-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+.hero-text {
+    flex: 1 1 500px;
+    text-align: left;
+}
+
+.hero-text h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    color: #cbd5e1;
+    font-weight: 700;
+}
+
+.hero-text h2 {
+    font-size: 1.2rem;
+    color: #38bdf8;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.hero-text p {
+    font-size: 1rem;
+    color: #cbd5e1;
+    margin-bottom: 25px;
+}
+
+.hero-image {
+    flex: 1 1 300px;
+    text-align: center;
+}
+
+.hero-image img {
+    max-width: 260px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.hero-image img:hover {
+    transform: scale(1.03);
+}
+
+.badge-tag {
+    display: inline-block;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* --- Sección de Características / Módulos --- */
+.features-section {
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 40px;
+    color: var(--primary-color);
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.feature-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid var(--accent-color);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.feature-card h3 {
+    margin-top: 0;
+    color: #1e293b;
+    font-size: 1.3rem;
+}
+
+.feature-card p {
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+/* --- Banner de Imagen Promocional --- */
+.banner-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    position: relative;
+}
+
+.banner-card {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), 
+                url('https://vigorant11web.blob.core.windows.net/media/assets/Best_Practices_for_Front_End_Web_Development_f026e3d040.webp');
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    padding: 50px 30px;
+    color: #ffffff;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+}
+
+.banner-card h3 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.banner-card p {
+    font-size: 1.05rem;
+    max-width: 700px;
+    margin: 0 auto 20px auto;
+    color: #e2e8f0;
+}
+
+.btn-repo {
+    display: inline-block;
+    background-color: var(--accent-color);
+    color: #ffffff;
+    padding: 12px 28px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-repo:hover {
+    background-color: #005999;
+}
+
+/* --- Pie de Página --- */
+footer {
+    background-color: #0f172a;
+    color: #94a3b8;
+    text-align: center;
+    padding: 30px 20px;
+    margin-top: 60px;
+}
+
+footer p {
+    margin: 5px 0;
+}

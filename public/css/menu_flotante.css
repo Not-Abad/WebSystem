@@ -1,0 +1,191 @@
+/* ==========================================================================
+   Estilos Globales del Menú Flotante y Banner Superior (Ancho 100%)
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+}
+
+/* --- Banner Superior con Logos --- */
+.top-banner-header {
+  background-color: #ffffff;
+  width: 100%;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.top-banner-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+}
+
+/* Secciones de Alineación Flexibles */
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: flex-start;
+  flex: 1;
+}
+
+.banner-center {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: center;
+  flex: 1;
+}
+
+.banner-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.header-img {
+  max-height: 65px;
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  transition: transform 0.3s ease;
+}
+
+.header-img:hover {
+  transform: scale(1.05);
+}
+
+/* --- Navegación Flotante --- */
+.navegacion {
+  width: 100%;
+  background: #2D3447;
+}
+
+.navegacion nav {
+  width: 100%;
+  background: #2D3447;
+  margin: 0 auto;
+}
+
+.navegacion nav > ul {
+  list-style: none;
+  /*position: relative;*/
+  display: flex;
+  padding-left: 20px;
+}
+
+.navegacion nav > ul > li {
+  display: inline-block;
+  position: relative;
+}
+
+.navegacion nav > ul > li > a {
+  color: #ffffff;
+  text-decoration: none;
+  display: block;
+  padding: 18px 25px;
+  position: relative;
+  font-weight: 600;
+}
+
+/* --- Indicador de Flecha --- */
+.navegacion nav > ul > li > a span {
+  font-size: 16px;
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+}
+
+.navegacion nav > ul > li:hover > a span {
+  display: block;
+}
+
+/* --- Submenú Desplegable Multi-Columna --- */
+.navegacion .sub-menu {
+  background: #ffffff;
+  padding: 20px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: none;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  border-radius: 0 0 8px 8px;
+}
+
+.navegacion nav > ul > li:hover .sub-menu {
+  display: flex;
+}
+
+.sub-menu .sub-menu-items {
+  margin: 0 10px;
+}
+
+.sub-menu .sub-menu-items p {
+  font-weight: 700;
+  display: block;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #007acc;
+  margin-bottom: 10px;
+  width: 120px;
+  color: #1e293b;
+}
+
+.sub-menu .sub-menu-items ul {
+  list-style: none;
+}
+
+.sub-menu .sub-menu-items ul li {
+  margin: 6px 0;
+}
+
+.sub-menu .sub-menu-items ul li a {
+  color: #475569;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.sub-menu .sub-menu-items ul li a:hover {
+  color: #007acc;
+  font-weight: 600;
+}
+
+/* --- Estilos para el Mega Menú de Capítulos --- */
+.navegacion .sub-menu.mega-menu {
+  display: none; /* Se mantiene oculto por defecto */
+  grid-template-columns: repeat(4, 1fr); /* Crea 4 columnas de igual ancho */
+  gap: 15px 25px; /* Espaciado entre elementos: 15px vertical, 25px horizontal */
+  width: max-content; /* Se ajusta al ancho del contenido */
+  min-width: 560px; /* Asegura espacio suficiente para los 4 bloques */
+}
+
+/* Al hacer hover, se despliega como Grid en lugar de Flex */
+.navegacion nav > ul > li:hover .sub-menu.mega-menu {
+  display: grid;
+}
+
+/* Asegura que los títulos de los capítulos aprovechen bien el espacio */
+.sub-menu.mega-menu .sub-menu-items p {
+  width: 100%;
+}
