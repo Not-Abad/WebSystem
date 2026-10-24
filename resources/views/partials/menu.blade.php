@@ -17,15 +17,14 @@
     <nav>
         <ul>
             <li><a href="{{ url('/') }}">Inicio</a></li>
-            <li><a href="https://www.youtube.com/" target="_blank">Login</a></li>
+            <li><a href="" target="_blank">Login</a></li>
             <li>
                 <a href="#">Educación <span class="icon icon-up-dir"></span></a>
                 <div class="sub-menu">
                     <div class="sub-menu-items">
                         <ul>
                             <li><a href="https://www.gob.mx/sep" target="_blank">SEP</a></li>
-                            <li><a href="https://www.itsx.edu.mx/" target="_blank">ITSX</a></li>
-                            <li><a href="https://gaatx.itsx.edu.mx/auth/login" target="_blank">Gaatx</a></li>
+                            <li><a href="https://dgb.sep.gob.mx/" target="_blank">DGB</a></li>
                         </ul>
                     </div>
                 </div>
@@ -35,8 +34,9 @@
                 <div class="sub-menu">
                     <div class="sub-menu-items">
                         <ul>
-                            <li><a href="https://github.com/Not-Abad" target="_blank">Perfil</a></li>
-                            <li><a href="https://github.com/Not-Abad/Programaci-n-Web" target="_blank">Repositorio</a></li>
+                            <li><a href="https://github.com/Not-Abad" target="_blank">JAR</a></li>
+                            <li><a href="https://github.com/SopaDePixel-dev" target="_blank">IZTM</a></li>
+                            <li><a href="https://github.com/Not-Abad/WebSystem" target="_blank">Repositorio</a></li>
                         </ul>
                     </div>
                 </div>
