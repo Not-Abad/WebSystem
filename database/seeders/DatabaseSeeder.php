@@ -10,11 +10,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         DB::table('roles')->insertOrIgnore([
-            ['id_rol' => 1, 'nombre' => 'SuperUsuario', 'descripcion' => 'Control total, suspensión de personal y consulta exclusiva de bitácora'],
-            ['id_rol' => 2, 'nombre' => 'Administrador', 'descripcion' => 'Gestión académica, grupos, horarios, alumnos, tutores y portal CMS'],
-            ['id_rol' => 3, 'nombre' => 'Docente', 'descripcion' => 'Definición de criterios de evaluación y captura de calificaciones'],
-            ['id_rol' => 4, 'nombre' => 'Alumno', 'descripcion' => 'Consulta de horario, criterios, calificaciones y descarga de boletas'],
-            ['id_rol' => 5, 'nombre' => 'Tutor', 'descripcion' => 'Seguimiento académico y consulta de boletas del estudiante tutorado'],
+            ['id_rol' => 1, 'nombre' => 'SuperUsuario'],
+            ['id_rol' => 2, 'nombre' => 'Administrador'],
+            ['id_rol' => 3, 'nombre' => 'Docente'],
+            ['id_rol' => 4, 'nombre' => 'Alumno'],
+            ['id_rol' => 5, 'nombre' => 'Tutor'],
         ]);
 
         DB::table('puestos_administrativos')->insertOrIgnore([
@@ -47,5 +47,8 @@ class DatabaseSeeder extends Seeder
             ['id_capacitacion' => 3, 'nombre' => 'Emprendimiento', 'is_active' => 1],
             ['id_capacitacion' => 4, 'nombre' => 'Contabilidad', 'is_active' => 1],
         ]);
+
+        // Carga los 5 usuarios de prueba con sus perfiles
+        $this->call(UsuariosPruebaSeeder::class);
     }
 }

@@ -15,7 +15,6 @@ return new class extends Migration
 
             $table->bigIncrements('id_rol');
             $table->string('nombre', 40)->unique('uk_roles_nombre');
-            $table->string('descripcion', 180)->nullable();
         });
     }
 
