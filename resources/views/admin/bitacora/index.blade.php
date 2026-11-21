@@ -97,10 +97,11 @@
                             <td>{{ $registro->usuario?->username ?? 'Sistema' }}</td>
                             <td>{{ $registro->tabla_afectada }}</td>
                             <td>
-                                <span class="estado @class([
+                                <span @class([
+                                    'estado',
                                     'estado-activo' => in_array($registro->accion, ['ALTA', 'EDICION', 'INGRESO'], true),
                                     'estado-alerta' => in_array($registro->accion, ['BAJA', 'SUSPENSION', 'INGRESO_FALLIDO'], true),
-                                ])">
+                                ])>
                                     {{ $registro->accion }}
                                 </span>
                             </td>

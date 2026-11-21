@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tutor extends Model
 {
@@ -23,4 +25,14 @@ class Tutor extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function alumnos(): HasMany
+    {
+        return $this->hasMany(Alumno::class, 'id_tutor', 'id_tutor');
+    }
 }

@@ -114,6 +114,24 @@ class User extends Authenticatable
         return $this->username;
     }
 
+    public function estaBloqueado(): bool
+    {
+        return (bool) $this->bloqueado_hasta?->isFuture();
+    }
+
+    public function estatusAcceso(): string
+    {
+        if (! $this->is_active) {
+            return 'inactivo';
+        }
+
+        if ($this->estaBloqueado()) {
+            return 'bloqueado';
+        }
+
+        return 'activo';
+    }
+
     public function esRol(int|string $rol): bool
     {
         if (is_int($rol)) {

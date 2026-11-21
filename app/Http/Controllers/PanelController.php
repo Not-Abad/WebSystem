@@ -26,15 +26,17 @@ class PanelController extends Controller
         'SuperUsuario' => [
             ['icono' => 'fa-user-shield', 'titulo' => 'Control de personal', 'descripcion' => 'Alta, baja y suspensión de cuentas de administradores y docentes.', 'ruta' => 'admin.personal.index'],
             ['icono' => 'fa-file-circle-check', 'titulo' => 'Bitácora de auditoría', 'descripcion' => 'Consulta, filtrado y exportación de la bitácora inalterable.', 'ruta' => 'admin.bitacora.index'],
-            ['icono' => 'fa-key', 'titulo' => 'Seguridad de accesos', 'descripcion' => 'Revisión de intentos fallidos y bloqueos temporales.'],
+            ['icono' => 'fa-key', 'titulo' => 'Seguridad de accesos', 'descripcion' => 'Revisión de intentos fallidos y bloqueos temporales.', 'ruta' => 'admin.seguridad.index'],
+            ['icono' => 'fa-folder-open', 'titulo' => 'Gestor de archivos', 'descripcion' => 'Carpetas, boletas, certificados y documentos institucionales.', 'ruta' => 'admin.archivos.index'],
         ],
         'Administrador' => [
-            ['icono' => 'fa-user-graduate', 'titulo' => 'Alumnos', 'descripcion' => 'Expedientes, matrículas y estatus escolar.'],
-            ['icono' => 'fa-users', 'titulo' => 'Tutores', 'descripcion' => 'Vinculación de tutores con estudiantes.'],
+            ['icono' => 'fa-user-graduate', 'titulo' => 'Alumnos', 'descripcion' => 'Expedientes, grupos y estatus escolar.', 'ruta' => 'admin.alumnos.index'],
+            ['icono' => 'fa-users', 'titulo' => 'Tutores', 'descripcion' => 'Vinculación de tutores con estudiantes.', 'ruta' => 'admin.tutores.index'],
+            ['icono' => 'fa-folder-open', 'titulo' => 'Gestor de archivos', 'descripcion' => 'Carpetas, boletas, certificados y documentos institucionales.', 'ruta' => 'admin.archivos.index'],
             ['icono' => 'fa-layer-group', 'titulo' => 'Grupos y clases', 'descripcion' => 'Confección de grupos y cargas de materias.'],
             ['icono' => 'fa-calendar-day', 'titulo' => 'Horarios', 'descripcion' => 'Asignación de horarios sin solapamientos.'],
             ['icono' => 'fa-book', 'titulo' => 'Catálogos', 'descripcion' => 'Planes de estudio, materias y semestres.'],
-            ['icono' => 'fa-newspaper', 'titulo' => 'Portal web', 'descripcion' => 'Noticias, documentos, reportes y galería.'],
+            ['icono' => 'fa-newspaper', 'titulo' => 'Portal web', 'descripcion' => 'Noticias, documentos, reportes y galería.', 'ruta' => 'admin.portal.noticias'],
         ],
         'Docente' => [
             ['icono' => 'fa-list-check', 'titulo' => 'Criterios de evaluación', 'descripcion' => 'Rubros por parcial con ponderación al 100 %.'],
@@ -48,7 +50,7 @@ class PanelController extends Controller
             ['icono' => 'fa-file-pdf', 'titulo' => 'Boletas', 'descripcion' => 'Descarga de boletas oficiales del semestre.'],
         ],
         'Tutor' => [
-            ['icono' => 'fa-chart-line', 'titulo' => 'Seguimiento académico', 'descripcion' => 'Desempeño y estatus de los estudiantes bajo tu tutela.'],
+            ['icono' => 'fa-chart-line', 'titulo' => 'Seguimiento académico', 'descripcion' => 'Desempeño y estatus de los estudiantes bajo tu tutela.', 'ruta' => 'tutor.alumnos.index'],
             ['icono' => 'fa-file-pdf', 'titulo' => 'Boletas', 'descripcion' => 'Consulta y descarga de boletas de evaluación.'],
         ],
     ];

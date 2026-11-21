@@ -22,8 +22,9 @@ class ModulosPersonalTest extends TestCase
             ->assertOk()
             ->assertSee(route('admin.personal.index'))
             ->assertSee(route('admin.bitacora.index'))
+            ->assertSee(route('admin.seguridad.index'))
             ->assertSee('Acceder al módulo')
-            ->assertSee('Próximamente');
+            ->assertDontSee('Próximamente');
     }
 
     public function test_los_modulos_de_superusuario_no_muestran_el_pie_de_pagina(): void
@@ -37,6 +38,11 @@ class ModulosPersonalTest extends TestCase
             ->assertDontSee('Ubicación');
 
         $this->get(route('admin.bitacora.index'))
+            ->assertOk()
+            ->assertDontSee('site-footer')
+            ->assertDontSee('Ubicación');
+
+        $this->get(route('admin.seguridad.index'))
             ->assertOk()
             ->assertDontSee('site-footer')
             ->assertDontSee('Ubicación');
@@ -142,6 +148,9 @@ class ModulosPersonalTest extends TestCase
 
         $this->get(route('admin.bitacora.index'))
             ->assertForbidden();
+
+        $this->get(route('admin.seguridad.index'))
+            ->assertForbidden();
     }
 
     public function test_bitacora_se_puede_filtrar_y_exportar(): void
@@ -179,5 +188,115 @@ class ModulosPersonalTest extends TestCase
             ->assertSessionHasErrors('username');
 
         $this->assertDatabaseMissing('usuarios', ['username' => $usuarioMalicioso]);
+    }
+
+    public function test_seguridad_puede_desbloquear_y_reiniciar_intentos(): void
+    {
+        $super = User::where('username', 'superadmin')->firstOrFail();
+        $usuario = User::where('username', 'docente.prueba')->firstOrFail();
+
+        $usuario->forceFill([
+            'intentos_fallidos' => 5,
+            'bloqueado_hasta' => now()->addMinutes(10),
+        ])->save();
+
+        $this->actingAs($super)
+            ->get(route('admin.seguridad.show', $usuario))
+            ->assertOk()
+            ->assertSee('docente.prueba')
+            ->assertSee('Bloqueado');
+
+        $this->post(route('admin.seguridad.desbloquear', $usuario))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('usuarios', [
+            'id_usuario' => $usuario->id_usuario,
+            'intentos_fallidos' => 0,
+            'bloqueado_hasta' => null,
+        ]);
+
+        $this->assertDatabaseHas('bitacora_auditoria', [
+            'accion' => 'DESBLOQUEO',
+            'id_registro_afectado' => $usuario->id_usuario,
+            'descripcion' => 'Desbloqueo de cuenta: docente.prueba.',
+        ]);
+
+        $usuario->refresh();
+        $usuario->forceFill(['intentos_fallidos' => 3])->save();
+
+        $this->post(route('admin.seguridad.reiniciar', $usuario))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('usuarios', [
+            'id_usuario' => $usuario->id_usuario,
+            'intentos_fallidos' => 0,
+        ]);
+
+        $this->assertDatabaseHas('bitacora_auditoria', [
+            'accion' => 'REINICIO_INTENTOS',
+            'id_registro_afectado' => $usuario->id_usuario,
+        ]);
+    }
+
+    public function test_seguridad_puede_suspender_y_activar_cuenta(): void
+    {
+        $super = User::where('username', 'superadmin')->firstOrFail();
+        $usuario = User::where('username', 'tutor.prueba')->firstOrFail();
+
+        $this->actingAs($super)
+            ->post(route('admin.seguridad.estatus', $usuario), ['is_active' => 0])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('usuarios', [
+            'id_usuario' => $usuario->id_usuario,
+            'is_active' => 0,
+        ]);
+
+        $this->assertDatabaseHas('tutores', [
+            'id_usuario' => $usuario->id_usuario,
+            'is_active' => 0,
+        ]);
+
+        $this->assertDatabaseHas('bitacora_auditoria', [
+            'accion' => 'SUSPENSION',
+            'id_registro_afectado' => $usuario->id_usuario,
+        ]);
+
+        $this->post(route('admin.seguridad.estatus', $usuario), ['is_active' => 1])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('usuarios', [
+            'id_usuario' => $usuario->id_usuario,
+            'is_active' => 1,
+        ]);
+
+        $this->assertDatabaseHas('tutores', [
+            'id_usuario' => $usuario->id_usuario,
+            'is_active' => 1,
+        ]);
+
+        $this->assertDatabaseHas('bitacora_auditoria', [
+            'accion' => 'ACTIVACION',
+            'id_registro_afectado' => $usuario->id_usuario,
+        ]);
+    }
+
+    public function test_seguridad_no_permite_modificar_la_propia_cuenta(): void
+    {
+        $super = User::where('username', 'superadmin')->firstOrFail();
+
+        $super->forceFill([
+            'intentos_fallidos' => 3,
+            'bloqueado_hasta' => now()->addMinutes(10),
+        ])->save();
+
+        $this->actingAs($super)
+            ->post(route('admin.seguridad.desbloquear', $super))
+            ->assertSessionHasErrors('seguridad');
+
+        $super->refresh();
+
+        $this->assertEquals(3, $super->intentos_fallidos);
+        $this->assertNotNull($super->bloqueado_hasta);
     }
 }

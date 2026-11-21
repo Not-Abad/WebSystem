@@ -90,7 +90,7 @@
 
                 <div class="form-campo">
                     <label for="username">Usuario</label>
-                    <input type="text" id="username" name="username" value="{{ old('username') }}" required maxlength="60" pattern="[A-Za-z0-9._-]+" autocomplete="off">
+                    <input type="text" id="username" name="username" value="{{ old('username') }}" required maxlength="60" pattern="[A-Za-z0-9._\-]+" autocomplete="off">
                 </div>
 
                 <div class="form-campo">

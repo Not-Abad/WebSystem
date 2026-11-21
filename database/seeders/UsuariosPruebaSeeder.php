@@ -30,6 +30,22 @@ class UsuariosPruebaSeeder extends Seeder
             'is_active' => 1,
         ]);
 
+        // Grupos mínimos del periodo vigente. El módulo de horarios los ampliará después.
+        DB::table('grupos')->insertOrIgnore([
+            ['id_grupo' => 1, 'id_periodo' => 1, 'id_semestre' => 1, 'nombre' => '1-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 2, 'id_periodo' => 1, 'id_semestre' => 2, 'nombre' => '2-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 3, 'id_periodo' => 1, 'id_semestre' => 3, 'nombre' => '3-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 4, 'id_periodo' => 1, 'id_semestre' => 4, 'nombre' => '4-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 5, 'id_periodo' => 1, 'id_semestre' => 5, 'nombre' => '5-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 6, 'id_periodo' => 1, 'id_semestre' => 6, 'nombre' => '6-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 7, 'id_periodo' => 1, 'id_semestre' => 1, 'nombre' => '1-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 8, 'id_periodo' => 1, 'id_semestre' => 2, 'nombre' => '2-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 9, 'id_periodo' => 1, 'id_semestre' => 3, 'nombre' => '3-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 10, 'id_periodo' => 1, 'id_semestre' => 4, 'nombre' => '4-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 11, 'id_periodo' => 1, 'id_semestre' => 5, 'nombre' => '5-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 12, 'id_periodo' => 1, 'id_semestre' => 6, 'nombre' => '6-B', 'cupo_maximo' => 45],
+        ]);
+
         // 2. Cuentas de usuario (1 por cada rol)
         DB::table('usuarios')->insertOrIgnore([
             [
@@ -123,7 +139,7 @@ class UsuariosPruebaSeeder extends Seeder
             'apellido_materno' => 'Chiu',
             'telefono' => '2281234567',
             'correo' => 'tutor@ejemplo.com',
-            'ine_ruta' => 'private/tutores/ine_prueba.pdf',
+            'ine_ruta' => 'tutores/ine_prueba.pdf',
             'is_active' => 1,
             'created_at' => $ahora,
             'updated_at' => $ahora,
@@ -135,16 +151,17 @@ class UsuariosPruebaSeeder extends Seeder
             'id_tutor' => 1,
             'id_estado_alumno' => 2, // activo
             'id_plan' => 1, // DGB-2023
-            'id_semestre' => 4, // 4to semestre (permite capacitación, sin área propedéutica)
+            'id_semestre' => 4, // 4to semestre (APA en lugar de área propedéutica)
             'id_capacitacion' => 1, // Informática
             'id_area_propedeutica' => null,
-            'matricula' => '2026AMR001',
+            'actividad_escolar_apa' => 'Deportes',
+            'id_grupo' => 4,
             'nombre' => 'Manuel Eduardo',
             'apellido_paterno' => 'Morales',
             'apellido_materno' => 'Morales',
             'curp' => 'PEGD080515HVZRRN01',
-            'acta_nacimiento_ruta' => 'private/alumnos/acta_prueba.pdf',
-            'boleta_secundaria_ruta' => 'private/alumnos/boleta_prueba.pdf',
+            'acta_nacimiento_ruta' => 'alumnos/acta_prueba.pdf',
+            'boleta_secundaria_ruta' => 'alumnos/boleta_prueba.pdf',
             'correo' => 'alumno@eba-amr.edu.mx',
             'promedio_general' => 8.90,
             'created_at' => $ahora,

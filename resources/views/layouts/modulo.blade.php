@@ -93,5 +93,55 @@
         })();
     </script>
 
+    <div id="archivos-modal" class="archivos-modal" hidden>
+        <div class="archivos-modal-panel" role="dialog" aria-modal="true" aria-label="Gestor de archivos">
+            <div class="archivos-modal-head">
+                <strong><i class="fas fa-folder-open"></i> Gestor de archivos</strong>
+                <button type="button" onclick="window.cerrarGestorArchivos()" aria-label="Cerrar gestor de archivos">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+            <iframe id="archivos-modal-frame" title="Gestor de archivos"></iframe>
+        </div>
+    </div>
+
+    <script>
+        window.abrirGestorArchivos = function (campoId) {
+            const campo = document.getElementById(campoId);
+            const valor = campo ? campo.value.trim() : '';
+            const indice = valor.lastIndexOf('/');
+            const carpetaInicial = indice >= 0 ? valor.substring(0, indice) : '';
+            const parametros = new URLSearchParams({ campo: campoId });
+
+            if (carpetaInicial !== '') {
+                parametros.set('ruta', carpetaInicial);
+            }
+
+            const marco = document.getElementById('archivos-modal-frame');
+            marco.src = "{{ route('admin.archivos.picker') }}?" + parametros.toString();
+            document.getElementById('archivos-modal').hidden = false;
+        };
+
+        window.cerrarGestorArchivos = function () {
+            document.getElementById('archivos-modal').hidden = true;
+            document.getElementById('archivos-modal-frame').src = 'about:blank';
+        };
+
+        window.seleccionarArchivo = function (campoId, ruta) {
+            const campo = document.getElementById(campoId);
+            if (campo) {
+                campo.value = ruta;
+                campo.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            window.cerrarGestorArchivos();
+        };
+
+        document.addEventListener('keydown', function (evento) {
+            if (evento.key === 'Escape' && ! document.getElementById('archivos-modal').hidden) {
+                window.cerrarGestorArchivos();
+            }
+        });
+    </script>
+
 </body>
 </html>

@@ -1,0 +1,337 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class AdminModulosSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $ahora = now();
+        $password = Hash::make('Prueba123!');
+
+        // Tutores adicionales (el tutor principal ya existe en UsuariosPruebaSeeder).
+        $tutoresUsuarios = [
+            ['id_usuario' => 20, 'id_rol' => 5, 'username' => 'tutor.ramirez'],
+            ['id_usuario' => 21, 'id_rol' => 5, 'username' => 'tutor.mendoza'],
+            ['id_usuario' => 22, 'id_rol' => 5, 'username' => 'tutor.vargas'],
+        ];
+
+        foreach ($tutoresUsuarios as $datos) {
+            DB::table('usuarios')->insertOrIgnore([
+                'id_usuario' => $datos['id_usuario'],
+                'id_rol' => $datos['id_rol'],
+                'username' => $datos['username'],
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ]);
+        }
+
+        DB::table('tutores')->insertOrIgnore([
+            [
+                'id_tutor' => 2,
+                'id_usuario' => 20,
+                'nombre' => 'Rosalba',
+                'apellido_paterno' => 'Ramírez',
+                'apellido_materno' => 'Torres',
+                'telefono' => '2281234568',
+                'correo' => 'rosalba.ramirez@ejemplo.com',
+                'ine_ruta' => 'tutores/ine_ramirez.pdf',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_tutor' => 3,
+                'id_usuario' => 21,
+                'nombre' => 'Gabriel',
+                'apellido_paterno' => 'Mendoza',
+                'apellido_materno' => 'López',
+                'telefono' => '2281234569',
+                'correo' => 'gabriel.mendoza@ejemplo.com',
+                'ine_ruta' => 'tutores/ine_mendoza.pdf',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_tutor' => 4,
+                'id_usuario' => 22,
+                'nombre' => 'Lorena',
+                'apellido_paterno' => 'Vargas',
+                'apellido_materno' => 'Pérez',
+                'telefono' => '2281234570',
+                'correo' => 'lorena.vargas@ejemplo.com',
+                'ine_ruta' => 'tutores/ine_vargas.pdf',
+                'is_active' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        // Alumnos adicionales con cuentas de acceso.
+        $alumnosUsuarios = [
+            ['id_usuario' => 30, 'id_rol' => 4, 'username' => 'alumno.hernandez'],
+            ['id_usuario' => 31, 'id_rol' => 4, 'username' => 'alumno.ruiz'],
+            ['id_usuario' => 32, 'id_rol' => 4, 'username' => 'alumno.castillo'],
+            ['id_usuario' => 33, 'id_rol' => 4, 'username' => 'alumno.ortiz'],
+        ];
+
+        foreach ($alumnosUsuarios as $datos) {
+            DB::table('usuarios')->insertOrIgnore([
+                'id_usuario' => $datos['id_usuario'],
+                'id_rol' => $datos['id_rol'],
+                'username' => $datos['username'],
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ]);
+        }
+
+        DB::table('alumnos')->insertOrIgnore([
+            [
+                'id_alumno' => 2,
+                'id_usuario' => 30,
+                'id_tutor' => 2,
+                'id_estado_alumno' => 2,
+                'id_plan' => 1,
+                'id_semestre' => 2,
+                'id_capacitacion' => null,
+                'id_area_propedeutica' => null,
+                'actividad_escolar_apa' => 'Arte y cultura',
+                'id_grupo' => 2,
+                'nombre' => 'Ana Sofía',
+                'apellido_paterno' => 'Hernández',
+                'apellido_materno' => 'Luna',
+                'curp' => 'HELA060912MDFRNS08',
+                'acta_nacimiento_ruta' => 'alumnos/acta_hernandez.pdf',
+                'boleta_secundaria_ruta' => 'alumnos/boleta_hernandez.pdf',
+                'correo' => 'ana.hernandez@eba-amr.edu.mx',
+                'promedio_general' => 9.15,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_alumno' => 3,
+                'id_usuario' => 31,
+                'id_tutor' => 2,
+                'id_estado_alumno' => 2,
+                'id_plan' => 1,
+                'id_semestre' => 3,
+                'id_capacitacion' => null,
+                'id_area_propedeutica' => null,
+                'actividad_escolar_apa' => 'Tecnología',
+                'id_grupo' => 3,
+                'nombre' => 'Diego Armando',
+                'apellido_paterno' => 'Ruiz',
+                'apellido_materno' => 'Cano',
+                'curp' => 'RUCD070321HDFRNM04',
+                'acta_nacimiento_ruta' => 'alumnos/acta_ruiz.pdf',
+                'boleta_secundaria_ruta' => 'alumnos/boleta_ruiz.pdf',
+                'correo' => 'diego.ruiz@eba-amr.edu.mx',
+                'promedio_general' => 8.42,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_alumno' => 4,
+                'id_usuario' => 32,
+                'id_tutor' => 3,
+                'id_estado_alumno' => 1,
+                'id_plan' => 1,
+                'id_semestre' => 1,
+                'id_capacitacion' => null,
+                'id_area_propedeutica' => null,
+                'actividad_escolar_apa' => 'Deportes',
+                'id_grupo' => 1,
+                'nombre' => 'Camila',
+                'apellido_paterno' => 'Castillo',
+                'apellido_materno' => 'Vega',
+                'curp' => 'CASC080705MDFRNG02',
+                'acta_nacimiento_ruta' => 'alumnos/acta_castillo.pdf',
+                'boleta_secundaria_ruta' => 'alumnos/boleta_castillo.pdf',
+                'correo' => 'camila.castillo@eba-amr.edu.mx',
+                'promedio_general' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_alumno' => 5,
+                'id_usuario' => 33,
+                'id_tutor' => 3,
+                'id_estado_alumno' => 3,
+                'id_plan' => 1,
+                'id_semestre' => 5,
+                'id_capacitacion' => 2,
+                'id_area_propedeutica' => 1,
+                'actividad_escolar_apa' => null,
+                'id_grupo' => 5,
+                'nombre' => 'Emilio',
+                'apellido_paterno' => 'Ortiz',
+                'apellido_materno' => 'Santos',
+                'curp' => 'ORSE050118HDFRTM09',
+                'acta_nacimiento_ruta' => 'alumnos/acta_ortiz.pdf',
+                'boleta_secundaria_ruta' => 'alumnos/boleta_ortiz.pdf',
+                'correo' => 'emilio.ortiz@eba-amr.edu.mx',
+                'promedio_general' => 7.80,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        // Contenido del portal web.
+        DB::table('noticias')->insertOrIgnore([
+            [
+                'id_noticia' => 1,
+                'id_administrador' => 1,
+                'titulo' => 'Inscripciones abiertas para el ciclo escolar 2027',
+                'contenido' => "La Escuela Bachilleres Antonio MaRD invita a los aspirantes a realizar su preinscripción en línea. El proceso incluye carga de documentos, entrevista con tutor y confirmación de matrícula. Consulta la convocatoria completa en la sección de documentos del portal.",
+                'imagen_portada_ruta' => 'imagenes/noticias/inscripciones-2027.jpg',
+                'fecha_publicacion' => '2026-11-10 09:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_noticia' => 2,
+                'id_administrador' => 1,
+                'titulo' => 'Semana cultural propedéutica',
+                'contenido' => "Del 24 al 28 de noviembre se llevarán a cabo Talleres de Expresión Artística, Lectura Crítica y Razonamiento Matemático. Las actividades son obligatorias para los estudiantes de primer y segundo semestre.",
+                'imagen_portada_ruta' => 'imagenes/noticias/semana-cultural.jpg',
+                'fecha_publicacion' => '2026-11-15 12:30:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_noticia' => 3,
+                'id_administrador' => 1,
+                'titulo' => 'Actualización del calendario de exámenes parciales',
+                'contenido' => "Se publicó el calendario definitivo de evaluaciones del bimestre. Los estudiantes pueden consultar las fechas por semestre en la sección de documentos. Se recomienda revisar el calendario con su tutor académico.",
+                'imagen_portada_ruta' => null,
+                'fecha_publicacion' => '2026-11-18 16:00:00',
+                'is_active' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        DB::table('documentos')->insertOrIgnore([
+            [
+                'id_documento' => 1,
+                'id_administrador' => 1,
+                'titulo' => 'Convocatoria de inscripción 2027',
+                'categoria' => 'Convocatorias',
+                'archivo_ruta' => 'documentos/convocatorias/convocatoria-2027.pdf',
+                'fecha_subida' => '2026-11-10 09:15:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_documento' => 2,
+                'id_administrador' => 1,
+                'titulo' => 'Formato de solicitud de baja temporal',
+                'categoria' => 'Formatos',
+                'archivo_ruta' => 'documentos/formatos/baja-temporal.docx',
+                'fecha_subida' => '2026-10-28 11:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_documento' => 3,
+                'id_administrador' => 1,
+                'titulo' => 'Reglamento interno del estudiantado',
+                'categoria' => 'Normatividad',
+                'archivo_ruta' => 'documentos/normatividad/reglamento-interno.pdf',
+                'fecha_subida' => '2026-09-05 10:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_documento' => 4,
+                'id_administrador' => 1,
+                'titulo' => 'Guía de uso de la plataforma educativa',
+                'categoria' => 'Manuales',
+                'archivo_ruta' => 'documentos/manuales/plataforma-educativa.pdf',
+                'fecha_subida' => '2026-11-02 13:20:00',
+                'is_active' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        DB::table('reportes_financieros')->insertOrIgnore([
+            [
+                'id_reporte' => 1,
+                'id_administrador' => 1,
+                'titulo' => 'Reporte financiero',
+                'mes' => 9,
+                'anio' => 2026,
+                'archivo_pdf_ruta' => 'documentos/reportes/reporte-2026-09.pdf',
+                'fecha_publicacion' => '2026-10-05 10:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_reporte' => 2,
+                'id_administrador' => 1,
+                'titulo' => 'Reporte financiero',
+                'mes' => 10,
+                'anio' => 2026,
+                'archivo_pdf_ruta' => 'documentos/reportes/reporte-2026-10.pdf',
+                'fecha_publicacion' => '2026-11-05 10:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        DB::table('imagenes_galeria')->insertOrIgnore([
+            [
+                'id_imagen' => 1,
+                'id_administrador' => 1,
+                'titulo' => 'Inauguración del ciclo escolar',
+                'descripcion' => 'Acto de bienvenida a los estudiantes de nuevo ingreso.',
+                'imagen_ruta' => 'imagenes/galeria/inauguracion-2026.jpg',
+                'fecha_subida' => '2026-08-17 10:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_imagen' => 2,
+                'id_administrador' => 1,
+                'titulo' => 'Taller de lectura crítica',
+                'descripcion' => 'Actividad propedéutica del semestre.',
+                'imagen_ruta' => 'imagenes/galeria/taller-lectura.jpg',
+                'fecha_subida' => '2026-09-12 11:30:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_imagen' => 3,
+                'id_administrador' => 1,
+                'titulo' => 'Visita guiada al museo',
+                'descripcion' => 'Recorrido cultural con estudiantes de quinto semestre.',
+                'imagen_ruta' => 'imagenes/galeria/museo-octubre.jpg',
+                'fecha_subida' => '2026-10-20 09:45:00',
+                'is_active' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+    }
+}

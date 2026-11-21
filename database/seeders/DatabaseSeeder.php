@@ -53,5 +53,11 @@ class DatabaseSeeder extends Seeder
 
         // Personal adicional y eventos de bitácora para los módulos de SuperUsuario
         $this->call(PersonalBitacoraSeeder::class);
+
+        // Alumnos, tutores y contenido del portal para los módulos de Administrador
+        $this->call(AdminModulosSeeder::class);
+
+        // Estructura de carpetas del gestor de archivos
+        $this->call(ArchivosSeeder::class);
     }
 }

@@ -8,6 +8,7 @@ class Capacitacion extends Model
 {
     protected $table = 'capacitaciones';
     protected $primaryKey = 'id_capacitacion';
+    public $timestamps = false;
 
     protected $fillable = ['nombre', 'is_active'];
 

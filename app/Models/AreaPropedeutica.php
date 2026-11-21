@@ -8,6 +8,7 @@ class AreaPropedeutica extends Model
 {
     protected $table = 'areas_propedeuticas';
     protected $primaryKey = 'id_area_propedeutica';
+    public $timestamps = false;
 
     protected $fillable = ['nombre', 'is_active'];
 
