@@ -39,7 +39,7 @@
         <section style="background: #161b22; padding: 35px; border-radius: 10px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 12px;">
                 <i class="fas fa-bullseye" style="color: #0066ff; font-size: 1.5rem;"></i>
-                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">Misión: El Compromiso del Presente</h2>
+                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">El Compromiso del Presente</h2>
             </div>
             <p style="color: #c9d1d9; line-height: 1.7; font-size: 1rem; margin-bottom: 15px;">
                 La misión de "La Antonio" se centra en brindar una educación media superior de excelencia, equitativa e integral. No se trata únicamente de impartir conocimientos en un aula, sino de formar individuos capaces de enfrentar los retos del mundo contemporáneo. Sus ejes principales son:
@@ -56,7 +56,7 @@
         <section style="background: #161b22; padding: 35px; border-radius: 10px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 12px;">
                 <i class="fas fa-eye" style="color: #0066ff; font-size: 1.5rem;"></i>
-                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">Visión: La Proyección hacia el Futuro</h2>
+                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">La Proyección hacia el Futuro</h2>
             </div>
             <p style="color: #c9d1d9; line-height: 1.7; font-size: 1rem; margin-bottom: 15px;">
                 La visión de la institución es el escenario ideal al que aspira llegar a mediano y largo plazo, consolidándose no solo como una escuela de tradición, sino como un referente de vanguardia educativa en el Estado de Veracruz.

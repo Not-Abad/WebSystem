@@ -18,7 +18,9 @@ return new class extends Migration
             $table->unsignedTinyInteger('numero_semestre')->unique('uk_semestres_numero');
             $table->string('nombre', 30)->unique('uk_semestres_nombre');
         });
-        DB::statement('ALTER TABLE `semestres` ADD CONSTRAINT `chk_semestres_rango` CHECK (`numero_semestre` BETWEEN 1 AND 6)');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `semestres` ADD CONSTRAINT `chk_semestres_rango` CHECK (`numero_semestre` BETWEEN 1 AND 6)');
+        }
     }
 
     public function down(): void

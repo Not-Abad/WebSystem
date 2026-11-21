@@ -1,0 +1,273 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class PersonalBitacoraSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $password = Hash::make('Prueba123!');
+        $ahora = now();
+
+        DB::table('areas_propedeuticas')->insertOrIgnore([
+            ['id_area_propedeutica' => 1, 'nombre' => 'Físico-Matemáticas', 'is_active' => 1],
+            ['id_area_propedeutica' => 2, 'nombre' => 'Humanidades', 'is_active' => 1],
+            ['id_area_propedeutica' => 3, 'nombre' => 'Ciencias Sociales', 'is_active' => 1],
+        ]);
+
+        // Cuentas adicionales de personal para probar el CRUD.
+        DB::table('usuarios')->insertOrIgnore([
+            [
+                'id_usuario' => 6,
+                'id_rol' => 2,
+                'username' => 'admin.recursos',
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_usuario' => 7,
+                'id_rol' => 2,
+                'username' => 'admin.contabilidad',
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_usuario' => 8,
+                'id_rol' => 3,
+                'username' => 'docente.matematicas',
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_usuario' => 9,
+                'id_rol' => 3,
+                'username' => 'docente.espanol',
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_usuario' => 10,
+                'id_rol' => 3,
+                'username' => 'docente.historia',
+                'password_hash' => $password,
+                'is_active' => 1,
+                'intentos_fallidos' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        DB::table('administradores')->insertOrIgnore([
+            [
+                'id_administrador' => 2,
+                'id_usuario' => 6,
+                'id_puesto' => 2,
+                'nombre' => 'María',
+                'apellido_paterno' => 'López',
+                'apellido_materno' => 'Hernández',
+                'matricula_rfc' => 'ADM-RRHH-002',
+                'correo_institucional' => 'recursos@eba-amr.edu.mx',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_administrador' => 3,
+                'id_usuario' => 7,
+                'id_puesto' => 4,
+                'nombre' => 'Roberto',
+                'apellido_paterno' => 'García',
+                'apellido_materno' => 'Pérez',
+                'matricula_rfc' => 'ADM-DIR-003',
+                'correo_institucional' => 'direccion@eba-amr.edu.mx',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        DB::table('docentes')->insertOrIgnore([
+            [
+                'id_docente' => 2,
+                'id_usuario' => 8,
+                'id_capacitacion' => null,
+                'id_area_propedeutica' => 1,
+                'nombre' => 'Ana',
+                'apellido_paterno' => 'Torres',
+                'apellido_materno' => 'Vargas',
+                'matricula_rfc' => 'DOC-MAT-002',
+                'correo_institucional' => 'matematicas@eba-amr.edu.mx',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_docente' => 3,
+                'id_usuario' => 9,
+                'id_capacitacion' => 2,
+                'id_area_propedeutica' => 2,
+                'nombre' => 'Luis',
+                'apellido_paterno' => 'Ramírez',
+                'apellido_materno' => 'Cruz',
+                'matricula_rfc' => 'DOC-ESP-003',
+                'correo_institucional' => 'espanol@eba-amr.edu.mx',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_docente' => 4,
+                'id_usuario' => 10,
+                'id_capacitacion' => null,
+                'id_area_propedeutica' => 3,
+                'nombre' => 'Carla',
+                'apellido_paterno' => 'Mendoza',
+                'apellido_materno' => 'Ruiz',
+                'matricula_rfc' => 'DOC-HIS-004',
+                'correo_institucional' => 'historia@eba-amr.edu.mx',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+        ]);
+
+        DB::table('bitacora_auditoria')->insertOrIgnore([
+            [
+                'id_bitacora' => 1,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 2,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Administrador: Jesús Abad (admin.escolar).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(6)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 2,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 3,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Docente: Felipe Sánchez (docente.prueba).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(5)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 3,
+                'id_usuario' => 2,
+                'tabla_afectada' => 'bitacora_auditoria',
+                'id_registro_afectado' => null,
+                'accion' => 'INGRESO',
+                'descripcion' => 'Inicio de sesión de admin.escolar.',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(4)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 4,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 6,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Administrador: María López (admin.recursos).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(3)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 5,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 7,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Administrador: Roberto García (admin.contabilidad).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(3)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 6,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 8,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Docente: Ana Torres (docente.matematicas).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(2)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 7,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 9,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Docente: Luis Ramírez (docente.espanol).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(2)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 8,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 10,
+                'accion' => 'ALTA',
+                'descripcion' => 'Alta de Docente: Carla Mendoza (docente.historia).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subDays(1)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 9,
+                'id_usuario' => 4,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 4,
+                'accion' => 'INGRESO_FALLIDO',
+                'descripcion' => 'Intento fallido de inicio de sesión para alumno.prueba.',
+                'ip_origen' => '192.168.1.24',
+                'created_at' => $ahora->copy()->subHours(20)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 10,
+                'id_usuario' => 3,
+                'tabla_afectada' => 'calificaciones',
+                'id_registro_afectado' => null,
+                'accion' => 'EDICION',
+                'descripcion' => 'Actualización de rubros de evaluación del docente Felipe Sánchez.',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subHours(12)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 11,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'usuarios',
+                'id_registro_afectado' => 5,
+                'accion' => 'SUSPENSION',
+                'descripcion' => 'Actualización de Tutor: Natalia Cruz (tutor.prueba). Cuenta suspendida temporalmente.',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subHours(6)->format('Y-m-d H:i:s'),
+            ],
+            [
+                'id_bitacora' => 12,
+                'id_usuario' => 1,
+                'tabla_afectada' => 'bitacora_auditoria',
+                'id_registro_afectado' => null,
+                'accion' => 'EXPORTACION',
+                'descripcion' => 'Exportación CSV de bitácora (11 registros).',
+                'ip_origen' => '127.0.0.1',
+                'created_at' => $ahora->copy()->subHours(2)->format('Y-m-d H:i:s'),
+            ],
+        ]);
+    }
+}

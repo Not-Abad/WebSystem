@@ -22,9 +22,9 @@
         <canvas id="hero-particles"></canvas>
         <div class="hero-container">
             <div class="hero-text">
-                <span class="badge-tag">Escuela de Bachilleres Antonio María Rivera Diurna</span>
+                <span class="badge-tag">Escuela de Bachilleres Antonio María Rivera Vespertina</span>
                 <h1>Es tu momento</h1>
-                <h2>¡Bienvenido a la AMRD!</h2>
+                <h2>¡Bienvenido a la AMRV!</h2>
                 <p>Aquí, cada mañana es una oportunidad para aprender, participar y construir un futuro brillante.
                     Somos una comunidad educativa que fomenta la creatividad, el pensamiento crítico y la colaboración.</p>
             </div>

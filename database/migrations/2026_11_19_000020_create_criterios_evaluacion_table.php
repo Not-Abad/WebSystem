@@ -25,8 +25,10 @@ return new class extends Migration
                 ->references('id_clase')->on('clases')
                 ->onUpdate('cascade')->onDelete('restrict');
         });
-        DB::statement('ALTER TABLE `criterios_evaluacion` ADD CONSTRAINT `chk_criterios_parcial` CHECK (`parcial` IN (1, 2, 3))');
-        DB::statement('ALTER TABLE `criterios_evaluacion` ADD CONSTRAINT `chk_criterios_porcentaje` CHECK (`porcentaje` > 0.00 AND `porcentaje` <= 100.00)');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `criterios_evaluacion` ADD CONSTRAINT `chk_criterios_parcial` CHECK (`parcial` IN (1, 2, 3))');
+            DB::statement('ALTER TABLE `criterios_evaluacion` ADD CONSTRAINT `chk_criterios_porcentaje` CHECK (`porcentaje` > 0.00 AND `porcentaje` <= 100.00)');
+        }
     }
 
     public function down(): void

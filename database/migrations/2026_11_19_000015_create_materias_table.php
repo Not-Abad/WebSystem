@@ -46,7 +46,9 @@ return new class extends Migration
                 ->references('id_area_propedeutica')->on('areas_propedeuticas')
                 ->onUpdate('cascade')->onDelete('restrict');
         });
-        DB::statement("ALTER TABLE `materias` ADD CONSTRAINT `chk_materias_tipo` CHECK (`tipo_materia` IN ('Basica', 'Paraescolar', 'Capacitacion', 'Propedeutica'))");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE `materias` ADD CONSTRAINT `chk_materias_tipo` CHECK (`tipo_materia` IN ('Basica', 'Paraescolar', 'Capacitacion', 'Propedeutica'))");
+        }
     }
 
     public function down(): void

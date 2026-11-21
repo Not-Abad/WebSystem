@@ -20,7 +20,9 @@ return new class extends Migration
             $table->date('fecha_fin');
             $table->boolean('is_active')->default(true);
         });
-        DB::statement('ALTER TABLE `periodos_academicos` ADD CONSTRAINT `chk_periodos_fechas` CHECK (`fecha_fin` > `fecha_inicio`)');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `periodos_academicos` ADD CONSTRAINT `chk_periodos_fechas` CHECK (`fecha_fin` > `fecha_inicio`)');
+        }
     }
 
     public function down(): void

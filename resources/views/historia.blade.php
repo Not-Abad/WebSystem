@@ -32,38 +32,36 @@
         <section style="background: #161b22; padding: 35px; border-radius: 10px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 12px;">
                 <i class="fas fa-landmark" style="color: #0066ff; font-size: 1.5rem;"></i>
-                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">Historia y Fundación: El Origen de una Tradición Xalapeña</h2>
+                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">El Origen de una Tradición Xalapeña</h2>
             </div>
             <p style="color: #c9d1d9; line-height: 1.7; font-size: 1rem; margin-bottom: 15px;">
                 La Escuela de Bachilleres Lic. Antonio María de Rivera, conocida con mucho cariño por los xalapeños simplemente como "La Antonio", es uno de los pilares que sostienen el prestigio de Xalapa como la "Atenas Veracruzana". Su historia arranca oficialmente en 1956, una época de gran expansión educativa y cultural en la ciudad.
             </p>
             <ul style="color: #8b949e; line-height: 1.7; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; margin: 0;">
-                <li><strong style="color: #e6edf3;">Ubicación estratégica:</strong> Se estableció en el corazón de la Zona Universitaria, sobre el Circuito Gonzalo Aguirre Beltrán. Esta cercanía geográfica con las facultades de la Universidad Veracruzana (UV) no es casualidad; desde sus inicios, la escuela ha respirado un ambiente académico y universitario que inspira a sus estudiantes.</li>
-                <li><strong style="color: #e6edf3;">Orígenes como Secundaria:</strong> Es un dato poco conocido que "La Antonio" no nació siendo una preparatoria. Durante sus primeras décadas de existencia, funcionó exclusivamente como una escuela secundaria, formando a generaciones de adolescentes xalapeños en su educación básica.</li>
-                <li><strong style="color: #e6edf3;">Identidad y orgullo:</strong> Desde aquellos años se forjó su identidad visual y deportiva. La adopción del venado como mascota oficial se convirtió en un símbolo de agilidad, nobleza y orgullo, figura que sigue dominando su escudo, sus uniformes y el espíritu de sus equipos deportivos (los "Venados de la Antonio").</li>
+                <li><strong style="color: #e6edf3;"></strong> Se estableció en el corazón de la Zona Universitaria, sobre el Circuito Gonzalo Aguirre Beltrán. Esta cercanía geográfica con las facultades de la Universidad Veracruzana (UV) no es casualidad; desde sus inicios, la escuela ha respirado un ambiente académico y universitario que inspira a sus estudiantes.</li>
+                <li><strong style="color: #e6edf3;"></strong> En un dato poco conocido que "La Antonio" no nació siendo una preparatoria. Durante sus primeras décadas de existencia, funcionó exclusivamente como una escuela secundaria, formando a generaciones de adolescentes xalapeños en su educación básica.</li>
+                <li><strong style="color: #e6edf3;"></strong> Desde aquellos años se forjó su identidad visual y deportiva. La adopción del venado como mascota oficial se convirtió en un símbolo de agilidad, nobleza y orgullo, figura que sigue dominando su escudo, sus uniformes y el espíritu de sus equipos deportivos (los "Venados de la Antonio").</li>
             </ul>
         </section>
 
-        <!-- Transición a Bachillerato -->
         <section style="background: #161b22; padding: 35px; border-radius: 10px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 12px;">
                 <i class="fas fa-graduation-cap" style="color: #0066ff; font-size: 1.5rem;"></i>
-                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">Transición a Bachillerato: El Gran Salto</h2>
+                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">El Gran Salto</h2>
             </div>
             <p style="color: #c9d1d9; line-height: 1.7; font-size: 1rem; margin-bottom: 15px;">
                 El parteaguas en la historia de la institución llegó en la década de los años 80. Para ese entonces, la ciudad de Xalapa experimentaba un crecimiento demográfico importante y una demanda cada vez mayor de educación media superior que sirviera como puente hacia la universidad.
             </p>
             <ul style="color: #8b949e; line-height: 1.7; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; margin: 0;">
-                <li><strong style="color: #e6edf3;">Evolución académica:</strong> "La Antonio" dejó atrás el modelo de educación básica para transformarse oficialmente en una Escuela de Bachilleres. Este cambio implicó una reestructuración total de su plan de estudios, adoptando el rigor científico y humanístico necesario para preparar a los jóvenes para la educación superior.</li>
-                <li><strong style="color: #e6edf3;">Consolidación de prestigio:</strong> Esta transición le permitió posicionarse rápidamente al nivel de otras instituciones históricas de la ciudad (como la Prepa Juárez o la Artículo 3ro). Hoy en día, es una de las escuelas públicas con mayor matrícula, operando bajo los subsistemas de la Dirección General de Bachillerato (DGB) y siendo una de las opciones más solicitadas en los exámenes de ingreso a nivel medio superior.</li>
+                <li><strong style="color: #e6edf3;"></strong> "La Antonio" dejó atrás el modelo de educación básica para transformarse oficialmente en una Escuela de Bachilleres. Este cambio implicó una reestructuración total de su plan de estudios, adoptando el rigor científico y humanístico necesario para preparar a los jóvenes para la educación superior.</li>
+                <li><strong style="color: #e6edf3;"></strong> Esta transición le permitió posicionarse rápidamente al nivel de otras instituciones históricas de la ciudad (como la Prepa Juárez o la Artículo 3ro). Hoy en día, es una de las escuelas públicas con mayor matrícula, operando bajo los subsistemas de la Dirección General de Bachillerato (DGB) y siendo una de las opciones más solicitadas en los exámenes de ingreso a nivel medio superior.</li>
             </ul>
         </section>
 
-        <!-- El Personaje -->
         <section style="background: #161b22; padding: 35px; border-radius: 10px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 12px;">
                 <i class="fas fa-user-tie" style="color: #0066ff; font-size: 1.5rem;"></i>
-                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">El Personaje: ¿Quién fue el Lic. Antonio María de Rivera?</h2>
+                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">¿Quién fue el Lic. Antonio María de Rivera?</h2>
             </div>
             <p style="color: #c9d1d9; line-height: 1.7; font-size: 1rem; margin-bottom: 15px;">
                 Llevar el nombre de Antonio María de Rivera (1801-1874) no es un adorno; es cargar con el legado del padre de la educación preparatoria en Veracruz. Fue un ilustre abogado, político, filántropo y un auténtico visionario nacido en Xalapa.
@@ -79,7 +77,7 @@
         <section style="background: #161b22; padding: 35px; border-radius: 10px; border: 1px solid #30363d; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px; border-bottom: 2px solid #30363d; padding-bottom: 12px;">
                 <i class="fas fa-moon" style="color: #0066ff; font-size: 1.5rem;"></i>
-                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">Turno Vespertino: Proactividad y Comunidad</h2>
+                <h2 style="color: #0066ff; font-size: 1.5rem; margin: 0;">Proactividad y Comunidad</h2>
             </div>
             <p style="color: #c9d1d9; line-height: 1.7; font-size: 1rem; margin-bottom: 15px;">
                 Dentro de "La Antonio", el Turno Vespertino ha cultivado una identidad propia, caracterizada por la resiliencia, la camaradería y un nivel de dinamismo impresionante por parte de su comunidad estudiantil.

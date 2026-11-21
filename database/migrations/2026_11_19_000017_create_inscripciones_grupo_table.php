@@ -30,7 +30,9 @@ return new class extends Migration
                 ->references('id_grupo')->on('grupos')
                 ->onUpdate('cascade')->onDelete('restrict');
         });
-        DB::statement("ALTER TABLE `inscripciones_grupo` ADD CONSTRAINT `chk_inscripciones_estatus` CHECK (`estatus` IN ('Inscrito', 'Baja'))");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE `inscripciones_grupo` ADD CONSTRAINT `chk_inscripciones_estatus` CHECK (`estatus` IN ('Inscrito', 'Baja'))");
+        }
     }
 
     public function down(): void

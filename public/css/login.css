@@ -1,0 +1,242 @@
+/* ==========================================================================
+   PORTAL — Pantalla de acceso
+   Paleta: dark #161b22 / azul #0066ff / Raleway
+   ========================================================================== */
+
+body.login-body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    font-family: 'Raleway', sans-serif;
+    color: #24292e;
+}
+
+.login-shell {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    min-height: 660px;
+}
+
+/* --- Panel izquierdo: lluvia de puntos + acceso institucional --- */
+.login-visual {
+    position: relative;
+    overflow: hidden;
+    background-color: #161b22;
+    border-right: 2px solid #0066ff;
+    padding: 60px 55px;
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+}
+
+#login-particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.login-visual-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.login-badge {
+    display: inline-block;
+    background: rgba(0, 102, 255, .18);
+    color: #0066ff;
+    border: 1px solid rgba(0, 102, 255, .45);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .4px;
+    margin-bottom: 22px;
+}
+
+.login-visual h1 {
+    font-size: 2.9rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.15;
+}
+
+.login-visual h1 span {
+    color: #0066ff;
+}
+
+/* --- Panel derecho: formulario --- */
+.login-form-side {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 45px 40px;
+    background-color: #f4f4f4;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-top: 4px solid #0066ff;
+    border-radius: 10px;
+    padding: 38px 40px 34px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .10);
+}
+
+.login-card-header {
+    margin-bottom: 26px;
+}
+
+.login-card-header h2 {
+    color: #1a1a1a;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+}
+
+.login-card-header p {
+    color: #57606a;
+    font-size: .92rem;
+    margin: 0;
+}
+
+.alerta {
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: .87rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.alerta-error {
+    background: #fff1f0;
+    border: 1px solid #ffccc7;
+    border-left: 4px solid #dc3545;
+    color: #a8071a;
+}
+
+.alerta-error ul {
+    margin: 6px 0 0 18px;
+    padding: 0;
+}
+
+.alerta-ok {
+    background: #eef5fc;
+    border: 1px solid #b6d4ff;
+    border-left: 4px solid #0066ff;
+    color: #0047b3;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #24292e;
+    margin-bottom: 7px;
+}
+
+.input-icon {
+    position: relative;
+}
+
+.input-icon > i:first-child {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8b949e;
+    font-size: .95rem;
+    pointer-events: none;
+}
+
+.input-icon input {
+    width: 100%;
+    padding: 13px 46px 13px 42px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    font-family: 'Raleway', sans-serif;
+    font-size: .95rem;
+    color: #1f2328;
+    background: #ffffff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+    box-sizing: border-box;
+}
+
+.input-icon input:focus {
+    outline: none;
+    border-color: #0066ff;
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, .14);
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #8b949e;
+    cursor: pointer;
+    font-size: .95rem;
+    padding: 4px;
+}
+
+.toggle-password:hover {
+    color: #0066ff;
+}
+
+.btn-login {
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    padding: 14px 18px;
+    background: linear-gradient(90deg, #0066ff, #0047b3);
+    color: #ffffff;
+    font-family: 'Raleway', sans-serif;
+    font-size: .98rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+    margin-top: 6px;
+}
+
+.btn-login i {
+    margin-left: 8px;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 102, 255, .35);
+}
+
+@media (max-width: 980px) {
+    .login-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .login-visual {
+        border-right: none;
+        border-bottom: 2px solid #0066ff;
+        padding: 45px 30px;
+    }
+
+    .login-visual h1 {
+        font-size: 2.2rem;
+    }
+
+    .login-form-side {
+        padding: 40px 20px;
+    }
+}

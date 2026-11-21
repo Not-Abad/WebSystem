@@ -1,0 +1,203 @@
+/* ==========================================================================
+   PANEL — Portal por rol
+   ========================================================================== */
+
+body.panel-body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    font-family: 'Raleway', sans-serif;
+    color: #24292e;
+}
+
+.panel-hero {
+    position: relative;
+    overflow: hidden;
+    background-color: #161b22;
+    border-bottom: 2px solid #0066ff;
+    padding: 46px 20px 42px;
+    text-align: center;
+    color: #ffffff;
+}
+
+#panel-particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.panel-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.panel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: color-mix(in srgb, var(--role-color, #0066ff) 18%, transparent);
+    color: var(--role-color, #0066ff);
+    border: 1px solid color-mix(in srgb, var(--role-color, #0066ff) 45%, transparent);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .4px;
+    margin-bottom: 18px;
+}
+
+.panel-avatar {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    border: 2px solid var(--role-color, #0066ff);
+    background: #0d1117;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e6edf3;
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, .03);
+}
+
+.panel-hero h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.panel-hero p.panel-sub {
+    color: #8b949e;
+    font-size: 1rem;
+    margin: 0 0 22px 0;
+}
+
+.panel-usuario {
+    color: #e6edf3;
+    font-weight: 700;
+}
+
+.btn-cerrar {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-family: 'Raleway', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.btn-cerrar:hover {
+    color: #0066ff;
+    border-color: #0066ff;
+    transform: translateY(-2px);
+}
+
+.panel-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 44px 20px 60px;
+}
+
+.panel-section-title {
+    color: #1a1a1a;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    text-align: center;
+}
+
+.panel-section-desc {
+    color: #57606a;
+    text-align: center;
+    font-size: .95rem;
+    margin: 0 0 32px 0;
+}
+
+.panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.panel-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 28px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.panel-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--role-color, #0066ff);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .25);
+}
+
+.panel-card i {
+    color: var(--role-color, #0066ff);
+    font-size: 1.7rem;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.panel-card h3 {
+    color: #e6edf3;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.panel-card p {
+    color: #8b949e;
+    font-size: .9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.panel-card .panel-card-link {
+    display: inline-block;
+    margin-top: 18px;
+    color: var(--role-color, #0066ff);
+    font-size: .82rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.panel-card .panel-card-link:hover {
+    text-decoration: underline;
+}
+
+.panel-nota {
+    margin-top: 38px;
+    text-align: center;
+    color: #8b949e;
+    font-size: .82rem;
+}
+
+.panel-nota strong {
+    color: #0066ff;
+}
+
+@media (max-width: 640px) {
+    .panel-hero h1 {
+        font-size: 1.7rem;
+    }
+
+    .panel-main {
+        padding: 34px 16px 46px;
+    }
+}

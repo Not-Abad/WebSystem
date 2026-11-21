@@ -18,7 +18,25 @@
                     </ul>
                 </li>
                 <li><a href="#">Avisos</a></li>
-                <li><a href="#">Portal</a></li>
+                @auth
+                    <li><a href="{{ route('panel') }}">Mi panel</a></li>
+                    <li class="dropdown">
+                        <a href="#"><i class="fas fa-circle-user"></i> {{ Auth::user()->username }} <span>▾</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ route('panel') }}"><i class="fas fa-gauge-high"></i> Mi panel</a></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}" id="logout-form-menu">
+                                    @csrf
+                                </form>
+                                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-menu').submit();">
+                                    <i class="fas fa-right-from-bracket"></i> Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                @else
+                    <li><a href="{{ route('login') }}"><i class="fas fa-right-to-bracket"></i> Portal</a></li>
+                @endauth
                 <li class="dropdown">
                     <a href="#">Documentos</a>
                     <ul class="dropdown-menu">

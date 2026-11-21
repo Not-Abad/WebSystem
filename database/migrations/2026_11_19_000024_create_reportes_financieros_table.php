@@ -30,7 +30,9 @@ return new class extends Migration
                 ->references('id_administrador')->on('administradores')
                 ->onUpdate('cascade')->onDelete('restrict');
         });
-        DB::statement('ALTER TABLE `reportes_financieros` ADD CONSTRAINT `chk_reportes_mes` CHECK (`mes` BETWEEN 1 AND 12)');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `reportes_financieros` ADD CONSTRAINT `chk_reportes_mes` CHECK (`mes` BETWEEN 1 AND 12)');
+        }
     }
 
     public function down(): void

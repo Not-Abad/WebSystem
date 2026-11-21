@@ -30,7 +30,9 @@ return new class extends Migration
                 ->references('id_alumno')->on('alumnos')
                 ->onUpdate('cascade')->onDelete('restrict');
         });
-        DB::statement('ALTER TABLE `calificaciones` ADD CONSTRAINT `chk_calificaciones_puntaje` CHECK (`puntaje_obtenido` >= 0.00 AND `puntaje_obtenido` <= 10.00)');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `calificaciones` ADD CONSTRAINT `chk_calificaciones_puntaje` CHECK (`puntaje_obtenido` >= 0.00 AND `puntaje_obtenido` <= 10.00)');
+        }
     }
 
     public function down(): void

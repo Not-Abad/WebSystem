@@ -52,10 +52,10 @@ li {
 }
 
 .respuesta {
-    color: #0b6623;
+    color: #0066ff;
     font-weight: bold;
     text-decoration: underline;
-    background-color: #eafaf1;
+    background-color: #eef5fc;
     padding: 2px 6px;
     border-radius: 4px;
 }
@@ -78,7 +78,7 @@ li {
 }
 
 .verdadero {
-    background-color: #28a745;
+    background-color: #0066ff;
 }
 
 .falso {
@@ -147,7 +147,7 @@ li {
 
 .caja-2 {
     border-radius: 50px;
-    background-color: #99ff99;
+    background-color: #99b3ff;
 }
 
 .caja-3 {
@@ -189,7 +189,7 @@ li {
 }
 
 .caja3 {
-    background-color: #81ecec;
+    background-color: #b7c9e2;
     box-shadow: 15px 15px 10px dimgrey;
 }
 
@@ -201,7 +201,7 @@ li {
     border: 2px solid #333;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    background: linear-gradient(to bottom right, red, orange, yellow, green, blue, indigo, violet);
+    background: linear-gradient(to bottom right, red, orange, yellow, #0066ff, #0047b3, indigo, violet);
 }
 
 .radial-box {

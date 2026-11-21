@@ -71,8 +71,8 @@
                     p.y = 0;
                     p.x = Math.random() * footerCanvas.width;
                 }
-                // Partículas verdes cyberpunk (0, 255, 102) de 2x2 px
-                fCtx.fillStyle = `rgba(0, 255, 102, ${p.opacidad})`;
+                // Partículas azules (0, 102, 255) de 2x2 px
+                fCtx.fillStyle = `rgba(0, 102, 255, ${p.opacidad})`;
                 fCtx.fillRect(p.x, p.y, 2, 2);
             });
 

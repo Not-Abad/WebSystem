@@ -4,7 +4,7 @@ footer.site-footer {
     color: #e6edf3;
     padding: 40px 20px 20px 20px;
     font-family: 'Raleway', sans-serif;
-    border-top: 2px solid #00FF66;
+    border-top: 2px solid #0066ff;
     overflow: hidden;
 }
 
@@ -41,7 +41,7 @@ footer.site-footer {
 }
 
 .footer-col h3, .footer-col h4 {
-    color: #00FF66;
+    color: #0066ff;
     font-size: 1.1rem;
     margin: 0;
 }
@@ -78,14 +78,14 @@ footer.site-footer {
 }
 
 .footer-col ul.contact-links li a i {
-    color: #00FF66;
+    color: #0066ff;
     font-size: 1.1rem;
     width: 22px;
     text-align: center;
 }
 
 .footer-col ul.contact-links li a:hover {
-    color: #00FF66;
+    color: #0066ff;
     transform: translateX(4px);
 }
 

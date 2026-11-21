@@ -50,5 +50,8 @@ class DatabaseSeeder extends Seeder
 
         // Carga los 5 usuarios de prueba con sus perfiles
         $this->call(UsuariosPruebaSeeder::class);
+
+        // Personal adicional y eventos de bitácora para los módulos de SuperUsuario
+        $this->call(PersonalBitacoraSeeder::class);
     }
 }

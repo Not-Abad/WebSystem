@@ -28,8 +28,10 @@ return new class extends Migration
                 ->references('id_clase')->on('clases')
                 ->onUpdate('cascade')->onDelete('cascade');
         });
-        DB::statement("ALTER TABLE `horarios` ADD CONSTRAINT `chk_horarios_dia` CHECK (`dia_semana` IN ('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'))");
-        DB::statement('ALTER TABLE `horarios` ADD CONSTRAINT `chk_horarios_horas` CHECK (`hora_fin` > `hora_inicio`)');
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE `horarios` ADD CONSTRAINT `chk_horarios_dia` CHECK (`dia_semana` IN ('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'))");
+            DB::statement('ALTER TABLE `horarios` ADD CONSTRAINT `chk_horarios_horas` CHECK (`hora_fin` > `hora_inicio`)');
+        }
     }
 
     public function down(): void
