@@ -2,331 +2,431 @@
 
 namespace App\Services;
 
-use App\Models\Asistencia;
+use App\Data\Reinco\ReincoExportData;
 use App\Models\Clase;
 use App\Models\Evaluacion;
-use Illuminate\Support\Collection;
 
 /**
- * Genera el concentrado REINCO usado por el plantel:
- *  - REINCO 205: lista de asistencia.
- *  - REINCO 206-A: lista de evidencias y porcentajes asignados.
- *  - REINCO 206-B: asistencia, evidencias y calificación integrada.
+ * Genera el concentrado REINCO usado por el plantel a partir de una entrada
+ * estructurada (ReincoExportData), separando los datos de evaluación de la
+ * presentación del Excel.
+ *
+ * Hojas: Datos generales, REINCO 205, REINCO 206-A, 206-A reverso y REINCO 206-B.
  */
 class ReincoService
 {
-    private const TIPO_EVIDENCIA = [
-        'examen' => 'Examen',
-        'proyecto' => 'Proyecto',
-        'ambos' => 'Examen y proyecto',
+    private const FILAS_CABECERA = 8;
+
+    /** @var array<int, string> */
+    private const TITULO_HOJAS = [
+        'DATOS GENERALES',
+        'REINCO 205 · LISTA DE ASISTENCIA',
+        'REINCO 206-A · EVIDENCIAS Y PORCENTAJES',
+        'REINCO 206-A (REVERSO) · DEFINICIÓN DE EVIDENCIAS',
+        'REINCO 206-B · REGISTRO DE EVALUACIÓN Y ASISTENCIA',
     ];
 
-    public function generar(Clase $clase, Evaluacion $evaluacion, string $rutaAbsoluta): int
-    {
-        $clase->loadMissing([
-            'materia',
-            'grupo.semestre',
-            'grupo.plan',
-            'docente',
-            'evaluaciones' => fn ($q) => $q->orderBy('parcial'),
-        ]);
-        $evaluacion->loadMissing('criterios');
-
-        $alumnos = $clase->alumnosActivos();
-        $asistencias = $clase->asistencias()->get()->groupBy('id_alumno');
-        $criterios = $evaluacion->criterios()->orderBy('id_criterio')->get();
-        $calificaciones = $criterios->isEmpty()
-            ? collect()
-            : \App\Models\Calificacion::whereIn('id_criterio', $criterios->pluck('id_criterio'))
-                ->get()
-                ->keyBy(fn ($calificacion) => $calificacion->id_criterio.'-'.$calificacion->id_alumno);
+    /**
+     * @param  array<string, mixed>  $opciones
+     */
+    public function generar(
+        Clase $clase,
+        Evaluacion $evaluacion,
+        string $rutaAbsoluta,
+        array $opciones = []
+    ): int {
+        $datos = ReincoExportData::desdeClase($clase, $evaluacion, $opciones, count(self::TITULO_HOJAS));
 
         $writer = new XlsxWriter();
-        $writer->agregarHoja('Datos generales', $this->datosGenerales($clase, $evaluacion), [], [28, 52, 28, 40]);
-        $writer->agregarHoja('REINCO 205', $this->hoja205($clase, $evaluacion, $alumnos, $asistencias), [], $this->anchos205(count($criterios)));
-        $writer->agregarHoja('REINCO 206-A', $this->hoja206A($clase, $evaluacion, $alumnos, $criterios, $calificaciones), [], $this->anchos206A(count($criterios)));
-        $writer->agregarHoja('206-A reverso', $this->reverso206A($evaluacion, $criterios), [], [10, 30, 28, 16, 18]);
-        $writer->agregarHoja('REINCO 206-B', $this->hoja206B($clase, $evaluacion, $alumnos, $asistencias, $criterios, $calificaciones), [], $this->anchos206B(count($criterios)));
+        $writer->usarPlantilla($datos->presentacion->plantillaBase !== ''
+            ? $datos->presentacion->plantillaBase
+            : null);
+
+        $writer->agregarHoja(
+            'Datos generales',
+            $this->hojaDatosGenerales($datos),
+            $this->combinacionesCabecera(4),
+            [26, 52, 24, 22],
+            $this->opcionesHoja($datos)
+        );
+        $writer->agregarHoja(
+            'REINCO 205',
+            $this->hoja205($datos),
+            $this->combinacionesCabecera(16),
+            [7, 20, 34, 12, 10, 11, 12, 10, 11, 12, 10, 11, 13, 10, 11, 30],
+            $this->opcionesHoja($datos)
+        );
+        $writer->agregarHoja(
+            'REINCO 206-A',
+            $this->hoja206A($datos),
+            $this->combinacionesCabecera(3 + $datos->evidencias->count() + 3),
+            array_merge([7, 20, 34], array_fill(0, $datos->evidencias->count(), 24), [13, 15, 16]),
+            $this->opcionesHoja($datos)
+        );
+        $writer->agregarHoja(
+            '206-A reverso',
+            $this->reverso206A($datos),
+            $this->combinacionesCabecera(6),
+            [8, 30, 22, 12, 16, 16],
+            $this->opcionesHoja($datos)
+        );
+        $writer->agregarHoja(
+            'REINCO 206-B',
+            $this->hoja206B($datos),
+            $this->combinacionesCabecera(6 + $datos->evidencias->count() + 5),
+            array_merge([7, 20, 34, 13, 10, 12], array_fill(0, $datos->evidencias->count(), 18), [16, 16, 12, 14]),
+            $this->opcionesHoja($datos)
+        );
 
         return $writer->guardar($rutaAbsoluta);
     }
 
-    private function datosGenerales(Clase $clase, Evaluacion $evaluacion): array
+    /** @return array<string, mixed> */
+    private function opcionesHoja(ReincoExportData $datos): array
     {
-        $docente = $clase->docente;
+        $presentacion = $datos->presentacion;
 
         return [
-            [XlsxWriter::texto('FORMATOS DE CONTROL ESCOLAR · REINCO', 2)],
-            [XlsxWriter::texto('Bachilleres Antonio María de Rivera Vespertina (AMRV)')],
-            [XlsxWriter::texto('Generado', 1), XlsxWriter::texto(now()->format('d/m/Y H:i'))],
-            [],
-            [XlsxWriter::texto('Materia', 1), XlsxWriter::texto($clase->materia->clave.' · '.$clase->materia->nombre)],
-            [XlsxWriter::texto('Plan de estudio', 1), XlsxWriter::texto($clase->grupo->plan?->etiqueta() ?? 'Plan vigente')],
-            [XlsxWriter::texto('Semestre', 1), XlsxWriter::texto((string) $clase->grupo->semestre?->numero_semestre)],
-            [XlsxWriter::texto('Grupo', 1), XlsxWriter::texto($clase->grupo->etiqueta())],
-            [XlsxWriter::texto('Docente', 1), XlsxWriter::texto($docente->nombreCompleto())],
-            [XlsxWriter::texto('Personal SEP', 1), XlsxWriter::texto((string) $docente->numero_personal_sep)],
-            [XlsxWriter::texto('RFC', 1), XlsxWriter::texto($docente->rfc)],
-            [XlsxWriter::texto('Nombramiento', 1), XlsxWriter::texto((string) $docente->nombramiento)],
-            [XlsxWriter::texto('Categoría / plaza', 1), XlsxWriter::texto(trim(($docente->categoria ?? '').' · '.($docente->plaza ?? ''), ' ·'))],
-            [XlsxWriter::texto('Sindicato', 1), XlsxWriter::texto((string) $docente->sindicato)],
-            [XlsxWriter::texto('Título / cédula', 1), XlsxWriter::texto(trim(($docente->titulo ?? '').' · '.($docente->cedula_profesional ?? ''), ' ·'))],
-            [],
-            [XlsxWriter::texto('Evaluación', 1), XlsxWriter::texto($evaluacion->etiqueta())],
-            [XlsxWriter::texto('Tipo', 1), XlsxWriter::texto(self::TIPO_EVIDENCIA[$evaluacion->tipo] ?? (string) $evaluacion->tipo)],
-            [XlsxWriter::texto('Fecha de examen', 1), XlsxWriter::texto($evaluacion->fecha_examen?->format('d/m/Y') ?? '')],
-            [XlsxWriter::texto('Fecha de entrega de proyecto', 1), XlsxWriter::texto($evaluacion->fecha_entrega_proyecto?->format('d/m/Y') ?? '')],
-            [],
-            [XlsxWriter::texto('Nota: los porcentajes de las evidencias pueden sumar hasta 100. La calificación integrada se calcula de 0.00 a 10.00.', 4)],
-        ];
-    }
-
-    /**
-     * @param Collection<int, \App\Models\Alumno> $alumnos
-     * @param Collection<int, Collection<int, Asistencia>> $asistencias
-     */
-    private function hoja205(Clase $clase, Evaluacion $evaluacion, Collection $alumnos, Collection $asistencias): array
-    {
-        $filas = [
-            [XlsxWriter::texto('REINCO 205 · LISTA DE ASISTENCIA', 2)],
-            [XlsxWriter::texto('Materia: '.$clase->materia->nombre)],
-            [XlsxWriter::texto('Grupo: '.$clase->grupo->etiqueta().' · Semestre: '.$clase->grupo->semestre?->numero.' · Evaluación: '.$evaluacion->etiqueta())],
-            [XlsxWriter::texto('Docente: '.$clase->docente->nombreCompleto())],
-            [],
-            [
-                XlsxWriter::texto('Núm.', 1),
-                XlsxWriter::texto('Primer apellido, segundo apellido y nombre(s)', 1),
-                XlsxWriter::texto('Asistencias', 1),
-                XlsxWriter::texto('Faltas', 1),
-                XlsxWriter::texto('Retardos', 1),
-                XlsxWriter::texto('Justificadas', 1),
-                XlsxWriter::texto('% de asistencia', 1),
-                XlsxWriter::texto('Observaciones', 1),
+            'impresion' => [
+                'orientacion' => $presentacion->orientacion,
+                'papel' => $presentacion->papel,
+                'ajustar_ancho' => $presentacion->ajustarAncho,
+                'ajustar_alto' => $presentacion->ajustarAlto,
+                'margenes' => $presentacion->margenes,
+                'centrar_horizontal' => $presentacion->centrarHorizontal,
             ],
+            'pie' => 'REINCO · CCT '.$datos->institucional['cct'].' · Hoja &P de &N',
         ];
-
-        $totales = ['presente' => 0, 'falta' => 0, 'retardo' => 0, 'justificada' => 0];
-        foreach ($alumnos as $indice => $alumno) {
-            $registros = $asistencias->get($alumno->id_alumno, collect());
-            $conteo = [
-                'presente' => $registros->where('estatus', Asistencia::PRESENTE)->count(),
-                'falta' => $registros->where('estatus', Asistencia::FALTA)->count(),
-                'retardo' => $registros->where('estatus', Asistencia::RETARDO)->count(),
-                'justificada' => $registros->where('estatus', Asistencia::JUSTIFICADA)->count(),
-            ];
-            foreach ($conteo as $clave => $valor) {
-                $totales[$clave] += $valor;
-            }
-            $registradas = array_sum($conteo);
-            $porcentaje = $registradas > 0
-                ? round(($conteo['presente'] + $conteo['retardo'] + $conteo['justificada']) / $registradas * 100, 2)
-                : 0;
-
-            $filas[] = [
-                XlsxWriter::numero($indice + 1),
-                XlsxWriter::texto($alumno->apellido_paterno.' '.$alumno->apellido_materno.' '.$alumno->nombre),
-                XlsxWriter::numero($conteo['presente']),
-                XlsxWriter::numero($conteo['falta']),
-                XlsxWriter::numero($conteo['retardo']),
-                XlsxWriter::numero($conteo['justificada']),
-                XlsxWriter::numero($porcentaje),
-                XlsxWriter::texto($registros->pluck('observaciones')->filter()->implode('; ')),
-            ];
-        }
-
-        $filas[] = [XlsxWriter::texto('SUMAS', 1), XlsxWriter::texto(''), ...array_map(fn ($valor) => XlsxWriter::numero($valor), array_values($totales)), XlsxWriter::numero(0), XlsxWriter::texto('')];
-        $filas[] = [];
-        $filas[] = [XlsxWriter::texto('Fecha: '.now()->format('d/m/Y'))];
-        $filas[] = [XlsxWriter::texto('Firma del docente: ______________________________')];
-        $filas[] = [XlsxWriter::texto('Nombre y firma de quien recibe en el plantel: ______________________________')];
-
-        return $filas;
     }
 
     /**
-     * @param Collection<int, \App\Models\Alumno> $alumnos
-     * @param Collection<int, \App\Models\CriterioEvaluacion> $criterios
-     * @param Collection<string, \App\Models\Calificacion> $calificaciones
+     * @return array<int, string>
      */
-    private function hoja206A(Clase $clase, Evaluacion $evaluacion, Collection $alumnos, Collection $criterios, Collection $calificaciones): array
+    private function combinacionesCabecera(int $columnas): array
     {
-        $cabecera = [
-            XlsxWriter::texto('Núm.', 1),
-            XlsxWriter::texto('Nombre de los educandos', 1),
-        ];
-        foreach ($criterios as $indice => $criterio) {
-            $cabecera[] = XlsxWriter::texto('Evidencia '.($indice + 1).': '.$criterio->tipo_evidencia.' ('.$criterio->porcentaje.'%)', 1);
-        }
-        $cabecera[] = XlsxWriter::texto('Total de evidencias', 1);
-        $cabecera[] = XlsxWriter::texto('Porcentaje total', 1);
-        $cabecera[] = XlsxWriter::texto('Fecha de entrega', 1);
-
-        $filas = [
-            [XlsxWriter::texto('REINCO 206-A · LISTA DE EVIDENCIAS Y PORCENTAJES ASIGNADOS', 2)],
-            [XlsxWriter::texto('Materia: '.$clase->materia->nombre.' · Grupo: '.$clase->grupo->etiqueta().' · '.$evaluacion->etiqueta())],
-            [XlsxWriter::texto('Porcentajes asignados: '.number_format((float) $criterios->sum('porcentaje'), 2).'% · Fecha de examen: '.($evaluacion->fecha_examen?->format('d/m/Y') ?? 'No registrada'))],
-            [],
-            $cabecera,
-        ];
-
-        foreach ($alumnos as $indice => $alumno) {
-            $fila = [
-                XlsxWriter::numero($indice + 1),
-                XlsxWriter::texto($alumno->apellido_paterno.' '.$alumno->apellido_materno.' '.$alumno->nombre),
-            ];
-            $total = 0.0;
-            foreach ($criterios as $criterio) {
-                $calificacion = $calificaciones->get($criterio->id_criterio.'-'.$alumno->id_alumno);
-                $obtenido = $calificacion ? (float) $calificacion->porcentaje_obtenido : 0.0;
-                $total += $obtenido;
-                $fila[] = XlsxWriter::numero($obtenido);
-            }
-            $fila[] = XlsxWriter::numero($criterios->count());
-            $fila[] = XlsxWriter::numero(round($total, 2));
-            $fila[] = XlsxWriter::texto($criterios->first()?->fecha_entrega?->format('d/m/Y') ?? '');
-            $filas[] = $fila;
+        $ultima = $this->letraColumna($columnas);
+        $combinaciones = [];
+        foreach ([1, 2, 3, 4, 5, 7] as $fila) {
+            $combinaciones[] = 'A'.$fila.':'.$ultima.$fila;
         }
 
-        $filas[] = [];
-        $filas[] = [XlsxWriter::texto('Reverso: consulta la hoja «206-A reverso» para el detalle de cada evidencia.', 4)];
-
-        return $filas;
+        return $combinaciones;
     }
 
     /**
-     * @param Collection<int, \App\Models\CriterioEvaluacion> $criterios
+     * @return array<int, array<int, mixed>>
      */
-    private function reverso206A(Evaluacion $evaluacion, Collection $criterios): array
+    private function encabezado(ReincoExportData $datos, int $numeroHoja): array
     {
-        $filas = [
-            [XlsxWriter::texto('REINCO 206-A (REVERSO) · DEFINICIÓN DE EVIDENCIAS', 2)],
-            [XlsxWriter::texto($evaluacion->etiqueta())],
+        $institucional = $datos->institucional;
+        $grupo = $datos->grupo;
+        $materia = $datos->materia;
+        $evaluacion = $datos->evaluacion;
+
+        return [
+            [XlsxWriter::texto($institucional['plantel'], 2)],
+            [XlsxWriter::texto('CCT: '.$institucional['cct'].' · Nivel: '.$institucional['nivel'].' · Turno: '.$institucional['turno'], 1)],
+            [XlsxWriter::texto('Semestre: '.$grupo['semestre'].' · Grupo: '.$grupo['grupo'].' · Plan/retícula: '.$grupo['plan_retricula'].' · Área/componente: '.$grupo['area_componente'])],
+            [XlsxWriter::texto('Materia: '.$materia['clave'].' · '.$materia['nombre'].' · Docente: '.$materia['docente'].' · Periodo escolar: '.$institucional['periodo_escolar'])],
+            [XlsxWriter::texto(
+                'Hoja '.$numeroHoja.' de '.$datos->presentacion->hojas
+                .' · '.$evaluacion['etiqueta'].' · Estatus: '.$evaluacion['estatus']
+                .' · Emitido: '.$institucional['generado'],
+                1
+            )],
             [],
-            [
-                XlsxWriter::texto('Núm.', 1),
-                XlsxWriter::texto('Rubro', 1),
-                XlsxWriter::texto('Tipo de evidencia', 1),
-                XlsxWriter::texto('Valor (%)', 1),
-                XlsxWriter::texto('Fecha de entrega', 1),
-            ],
+            [XlsxWriter::texto(self::TITULO_HOJAS[$numeroHoja - 1], 2)],
+            [],
         ];
-
-        foreach ($criterios as $indice => $criterio) {
-            $filas[] = [
-                XlsxWriter::numero($indice + 1),
-                XlsxWriter::texto($criterio->nombre_rubro),
-                XlsxWriter::texto($criterio->tipo_evidencia),
-                XlsxWriter::numero((float) $criterio->porcentaje),
-                XlsxWriter::texto($criterio->fecha_entrega?->format('d/m/Y') ?? ''),
-            ];
-        }
-
-        return $filas;
     }
 
     /**
-     * @param Collection<int, \App\Models\Alumno> $alumnos
-     * @param Collection<int, Collection<int, Asistencia>> $asistencias
-     * @param Collection<int, \App\Models\CriterioEvaluacion> $criterios
-     * @param Collection<string, \App\Models\Calificacion> $calificaciones
+     * @return array<int, array<int, mixed>>
      */
-    private function hoja206B(Clase $clase, Evaluacion $evaluacion, Collection $alumnos, Collection $asistencias, Collection $criterios, Collection $calificaciones): array
+    private function firmas(ReincoExportData $datos): array
     {
         $filas = [
-            [XlsxWriter::texto('REINCO 206-B · REGISTRO DE EVALUACIÓN Y ASISTENCIA', 2)],
-            [XlsxWriter::texto('Materia: '.$clase->materia->nombre.' · Grupo: '.$clase->grupo->etiqueta().' · '.$evaluacion->etiqueta())],
             [],
-            [
-                XlsxWriter::texto('Núm.', 1),
-                XlsxWriter::texto('Primer apellido, segundo apellido y nombre(s)', 1),
-                XlsxWriter::texto('Asistencias (205)', 1),
-                XlsxWriter::texto('Faltas (205)', 1),
-                XlsxWriter::texto('% asistencia', 1),
-                XlsxWriter::texto('Total evidencias (206-A)', 1),
-                XlsxWriter::texto('Total porcentaje obtenido', 1),
-                XlsxWriter::texto('Calificación con decimal', 1),
-                XlsxWriter::texto('Calificación con letra', 1),
-            ],
+            [XlsxWriter::texto('Día, mes y año: '.now()->format('d/m/Y'))],
+            [],
+            [XlsxWriter::texto('Firmas para archivo y cotejo DGB', 1)],
         ];
 
-        $aprobados = 0;
-        $examinados = 0;
-        foreach ($alumnos as $indice => $alumno) {
-            $registros = $asistencias->get($alumno->id_alumno, collect());
-            $asistenciasCount = $registros->where('estatus', Asistencia::PRESENTE)->count()
-                + $registros->where('estatus', Asistencia::RETARDO)->count()
-                + $registros->where('estatus', Asistencia::JUSTIFICADA)->count();
-            $faltas = $registros->where('estatus', Asistencia::FALTA)->count();
-            $registradas = $asistenciasCount + $faltas;
-            $porcentajeAsistencia = $registradas > 0 ? round($asistenciasCount / $registradas * 100, 2) : 0.0;
-
-            $totalPorcentaje = 0.0;
-            foreach ($criterios as $criterio) {
-                $calificacion = $calificaciones->get($criterio->id_criterio.'-'.$alumno->id_alumno);
-                $totalPorcentaje += $calificacion ? (float) $calificacion->puntaje_obtenido : 0.0;
-            }
-            $calificacion = round($totalPorcentaje, 2);
-            if ($criterios->isNotEmpty() && $this->tieneCalificaciones($calificaciones, $criterios, $alumno)) {
-                $examinados++;
-                if ($calificacion >= 6) {
-                    $aprobados++;
-                }
-            }
-
-            $filas[] = [
-                XlsxWriter::numero($indice + 1),
-                XlsxWriter::texto($alumno->apellido_paterno.' '.$alumno->apellido_materno.' '.$alumno->nombre),
-                XlsxWriter::numero($asistenciasCount),
-                XlsxWriter::numero($faltas),
-                XlsxWriter::numero($porcentajeAsistencia),
-                XlsxWriter::numero($criterios->count()),
-                XlsxWriter::numero(round($totalPorcentaje, 2)),
-                XlsxWriter::numero($calificacion),
-                XlsxWriter::texto($criterios->isEmpty() ? '' : ($calificacion >= 6 ? 'A' : 'NA')),
-            ];
+        foreach ($datos->presentacion->firmas as $firma) {
+            $filas[] = [XlsxWriter::texto($firma.': ______________________________')];
         }
-
-        $filas[] = [];
-        $filas[] = [XlsxWriter::texto('DATOS ESTADÍSTICOS', 1)];
-        $filas[] = [XlsxWriter::texto('Total de educandos al inicio', 1), XlsxWriter::numero($alumnos->count())];
-        $filas[] = [XlsxWriter::texto('Total de educandos examinados', 1), XlsxWriter::numero($examinados)];
-        $filas[] = [XlsxWriter::texto('Total de educandos aprobados', 1), XlsxWriter::numero($aprobados)];
-        $filas[] = [XlsxWriter::texto('Total de educandos reprobados', 1), XlsxWriter::numero(max(0, $examinados - $aprobados))];
-        $filas[] = [XlsxWriter::texto('Total de educandos desafiliados', 1), XlsxWriter::numero(0)];
-        $filas[] = [XlsxWriter::texto('Número de clases en el parcial', 1), XlsxWriter::numero($clase->asistencias()->count())];
-        $filas[] = [];
-        $filas[] = [XlsxWriter::texto('Día, mes y año: '.now()->format('d/m/Y'))];
-        $filas[] = [XlsxWriter::texto('Firma del docente: ______________________________')];
-        $filas[] = [XlsxWriter::texto('Nombre y firma de quien recibe en el plantel: ______________________________')];
         $filas[] = [XlsxWriter::texto('Fecha de recepción: ______________________________')];
 
         return $filas;
     }
 
-    /**
-     * @param Collection<string, \App\Models\Calificacion> $calificaciones
-     * @param Collection<int, \App\Models\CriterioEvaluacion> $criterios
-     */
-    private function tieneCalificaciones(Collection $calificaciones, Collection $criterios, \App\Models\Alumno $alumno): bool
+    /** @return array<int, array<int, mixed>> */
+    private function hojaDatosGenerales(ReincoExportData $datos): array
     {
-        return $criterios->every(fn ($criterio) => $calificaciones->has($criterio->id_criterio.'-'.$alumno->id_alumno));
+        $filas = $this->encabezado($datos, 1);
+        $filas[] = [XlsxWriter::texto('Dato', 8), XlsxWriter::texto('Valor', 8)];
+
+        $campos = [
+            'Plantel' => $datos->institucional['plantel'],
+            'CCT' => $datos->institucional['cct'],
+            'Nivel' => $datos->institucional['nivel'],
+            'Turno' => $datos->institucional['turno'],
+            'Periodo escolar' => $datos->institucional['periodo_escolar'],
+            'Semestre' => $datos->grupo['semestre'],
+            'Grupo' => $datos->grupo['grupo'],
+            'Plan / retícula' => $datos->grupo['plan_retricula'],
+            'Área / componente' => $datos->grupo['area_componente'],
+            'Materia' => $datos->materia['clave'].' · '.$datos->materia['nombre'],
+            'Docente' => $datos->materia['docente'],
+            'Personal SEP' => $datos->materia['sep'],
+            'RFC' => $datos->materia['rfc'],
+            'Evaluación' => $datos->evaluacion['etiqueta'],
+            'Tipo de evidencia' => $datos->evaluacion['tipo'],
+            'Fecha de examen' => $datos->evaluacion['fecha_examen'],
+            'Fecha de entrega de proyecto' => $datos->evaluacion['fecha_entrega'],
+            'Estatus' => $datos->evaluacion['estatus'],
+            'Formato de calificación' => $datos->evaluacion['formato_calificacion'],
+        ];
+
+        foreach ($campos as $etiqueta => $valor) {
+            $filas[] = [XlsxWriter::texto($etiqueta, 1), XlsxWriter::texto((string) $valor, 9)];
+        }
+
+        $filas[] = [];
+        $filas[] = [XlsxWriter::texto('Evidencias configuradas del parcial', 1)];
+        $filas[] = [
+            XlsxWriter::texto('Núm.', 8),
+            XlsxWriter::texto('Rubro', 8),
+            XlsxWriter::texto('Tipo', 8),
+            XlsxWriter::texto('Valor (%)', 8),
+        ];
+        foreach ($datos->evidencias as $evidencia) {
+            $filas[] = [
+                XlsxWriter::numero($evidencia->numero),
+                XlsxWriter::texto($evidencia->rubro, 9),
+                XlsxWriter::texto($evidencia->tipo, 9),
+                XlsxWriter::numero($evidencia->porcentaje, 5),
+            ];
+        }
+        $filas[] = [XlsxWriter::texto('Total', 1), XlsxWriter::texto(''), XlsxWriter::texto(''), XlsxWriter::numero((float) $datos->evidencias->sum('porcentaje'), 10)];
+        $filas[] = [];
+        $filas[] = [XlsxWriter::texto('Nota: los porcentajes de las evidencias suman hasta 100. La calificación final se reporta de 0 a 10.', 4)];
+
+        return array_merge($filas, $this->firmas($datos));
     }
 
-    /** @return array<int, int> */
-    private function anchos205(int $numeroCriterios): array
+    /** @return array<int, array<int, mixed>> */
+    private function hoja205(ReincoExportData $datos): array
     {
-        return array_merge([8, 42, 14, 10, 12, 14, 16, 34], array_fill(0, max(0, $numeroCriterios - 6), 12));
+        $filas = $this->encabezado($datos, 2);
+        $cabecera = [
+            XlsxWriter::texto('Núm.', 8),
+            XlsxWriter::texto('CURP (clave de control)', 8),
+            XlsxWriter::texto('Nombre completo', 8),
+        ];
+        foreach ([1, 2, 3] as $parcial) {
+            $cabecera[] = XlsxWriter::texto('Asist. P'.$parcial, 8);
+            $cabecera[] = XlsxWriter::texto('Faltas P'.$parcial, 8);
+            $cabecera[] = XlsxWriter::texto('% P'.$parcial, 8);
+        }
+        $cabecera = array_merge($cabecera, [
+            XlsxWriter::texto('Asist. totales', 8),
+            XlsxWriter::texto('Faltas totales', 8),
+            XlsxWriter::texto('% asistencia', 8),
+            XlsxWriter::texto('Observaciones', 8),
+        ]);
+        $filas[] = $cabecera;
+
+        $totales = ['presente' => 0, 'falta' => 0, 'retardo' => 0, 'justificada' => 0];
+        foreach ($datos->alumnos as $alumno) {
+            $fila = [
+                XlsxWriter::numero($alumno->numero, 7),
+                XlsxWriter::texto($alumno->curp, 9),
+                XlsxWriter::texto($alumno->nombreCompleto, 9),
+            ];
+            foreach ([1, 2, 3] as $parcial) {
+                $datosParcial = $alumno->asistenciasPorParcial[$parcial];
+                $fila[] = XlsxWriter::numero($datosParcial['presente'] + $datosParcial['retardo'] + $datosParcial['justificada'], 6);
+                $fila[] = XlsxWriter::numero($datosParcial['falta'], 6);
+                $fila[] = XlsxWriter::numero($datosParcial['porcentaje'], 5);
+            }
+            $general = $alumno->asistenciasPorParcial['general'];
+            foreach (['presente', 'falta', 'retardo', 'justificada'] as $clave) {
+                $totales[$clave] += $general[$clave];
+            }
+            $fila[] = XlsxWriter::numero($general['presente'] + $general['retardo'] + $general['justificada'], 6);
+            $fila[] = XlsxWriter::numero($general['falta'], 6);
+            $fila[] = XlsxWriter::numero($general['porcentaje'], 5);
+            $fila[] = XlsxWriter::texto($alumno->observaciones, 9);
+            $filas[] = $fila;
+        }
+
+        $registradas = array_sum($totales);
+        $porcentajeGeneral = $registradas > 0
+            ? round(($totales['presente'] + $totales['retardo'] + $totales['justificada']) / $registradas * 100, 2)
+            : 0.0;
+        $filas[] = array_merge(
+            [XlsxWriter::texto('SUMAS', 1), XlsxWriter::texto(''), XlsxWriter::texto('')],
+            array_fill(0, 9, XlsxWriter::texto('')),
+            [
+                XlsxWriter::numero($totales['presente'] + $totales['retardo'] + $totales['justificada'], 10),
+                XlsxWriter::numero($totales['falta'], 10),
+                XlsxWriter::numero($porcentajeGeneral, 10),
+                XlsxWriter::texto(''),
+            ]
+        );
+
+        return array_merge($filas, $this->firmas($datos));
     }
 
-    /** @return array<int, int> */
-    private function anchos206A(int $numeroCriterios): array
+    /** @return array<int, array<int, mixed>> */
+    private function hoja206A(ReincoExportData $datos): array
     {
-        return array_merge([8, 42], array_fill(0, $numeroCriterios, 22), [18, 18, 18]);
+        $filas = $this->encabezado($datos, 3);
+        $cabecera = [
+            XlsxWriter::texto('Núm.', 8),
+            XlsxWriter::texto('CURP (clave de control)', 8),
+            XlsxWriter::texto('Nombre completo', 8),
+        ];
+        foreach ($datos->evidencias as $evidencia) {
+            $cabecera[] = XlsxWriter::texto(
+                'Evidencia '.$evidencia->numero.': '.$evidencia->rubro.' ('.$evidencia->tipo.') '.$evidencia->porcentaje.'%',
+                8
+            );
+        }
+        $cabecera = array_merge($cabecera, [
+            XlsxWriter::texto('Total evidencias', 8),
+            XlsxWriter::texto('Porcentaje total', 8),
+            XlsxWriter::texto('Fecha de entrega', 8),
+        ]);
+        $filas[] = $cabecera;
+
+        foreach ($datos->alumnos as $alumno) {
+            $fila = [
+                XlsxWriter::numero($alumno->numero, 7),
+                XlsxWriter::texto($alumno->curp, 9),
+                XlsxWriter::texto($alumno->nombreCompleto, 9),
+            ];
+            $total = 0.0;
+            foreach ($datos->evidencias as $evidencia) {
+                $valor = $alumno->evidencias[$evidencia->id]['porcentaje'] ?? 0.0;
+                $total += $valor;
+                $fila[] = XlsxWriter::numero($valor, 5);
+            }
+            $fila[] = XlsxWriter::numero($datos->evidencias->count(), 6);
+            $fila[] = XlsxWriter::numero(round($total, 2), 5);
+            $fila[] = XlsxWriter::texto($datos->evidencias->first()?->fechaEntrega ?? $datos->evaluacion['fecha_entrega'], 9);
+            $filas[] = $fila;
+        }
+
+        $filas[] = [];
+        $filas[] = [XlsxWriter::texto('Porcentajes asignados: '.$datos->evidencias->sum('porcentaje').'% · Fecha de examen: '.$datos->evaluacion['fecha_examen'], 4)];
+        $filas[] = [XlsxWriter::texto('Reverso: consulta la hoja «206-A reverso» para el detalle de cada evidencia.', 4)];
+
+        return array_merge($filas, $this->firmas($datos));
     }
 
-    /** @return array<int, int> */
-    private function anchos206B(int $numeroCriterios): array
+    /** @return array<int, array<int, mixed>> */
+    private function reverso206A(ReincoExportData $datos): array
     {
-        return array_merge([8, 42, 16, 12, 14, 20, 22, 22, 20], array_fill(0, max(0, $numeroCriterios - 8), 12));
+        $filas = $this->encabezado($datos, 4);
+        $filas[] = [
+            XlsxWriter::texto('Núm.', 8),
+            XlsxWriter::texto('Rubro', 8),
+            XlsxWriter::texto('Tipo de evidencia', 8),
+            XlsxWriter::texto('Valor (%)', 8),
+            XlsxWriter::texto('Fecha de entrega', 8),
+            XlsxWriter::texto('Fecha de examen', 8),
+        ];
+
+        foreach ($datos->evidencias as $evidencia) {
+            $filas[] = [
+                XlsxWriter::numero($evidencia->numero),
+                XlsxWriter::texto($evidencia->rubro, 9),
+                XlsxWriter::texto($evidencia->tipo, 9),
+                XlsxWriter::numero($evidencia->porcentaje, 5),
+                XlsxWriter::texto($evidencia->fechaEntrega ?: $datos->evaluacion['fecha_entrega'], 9),
+                XlsxWriter::texto($datos->evaluacion['fecha_examen'], 9),
+            ];
+        }
+
+        $filas[] = [XlsxWriter::texto('Total asignado', 1), XlsxWriter::texto(''), XlsxWriter::texto(''), XlsxWriter::numero((float) $datos->evidencias->sum('porcentaje'), 10)];
+        $filas[] = [];
+
+        return array_merge($filas, $this->firmas($datos));
+    }
+
+    /** @return array<int, array<int, mixed>> */
+    private function hoja206B(ReincoExportData $datos): array
+    {
+        $filas = $this->encabezado($datos, 5);
+        $cabecera = [
+            XlsxWriter::texto('Núm.', 8),
+            XlsxWriter::texto('CURP (clave de control)', 8),
+            XlsxWriter::texto('Nombre completo', 8),
+            XlsxWriter::texto('Asistencias', 8),
+            XlsxWriter::texto('Faltas', 8),
+            XlsxWriter::texto('% asistencia', 8),
+        ];
+        foreach ($datos->evidencias as $evidencia) {
+            $cabecera[] = XlsxWriter::texto('E'.$evidencia->numero.' · '.$evidencia->rubro, 8);
+        }
+        $cabecera = array_merge($cabecera, [
+            XlsxWriter::texto('Total porcentaje', 8),
+            XlsxWriter::texto('Calificación final', 8),
+            XlsxWriter::texto('Literal', 8),
+            XlsxWriter::texto('Estatus', 8),
+        ]);
+        $filas[] = $cabecera;
+
+        foreach ($datos->alumnos as $alumno) {
+            $fila = [
+                XlsxWriter::numero($alumno->numero, 7),
+                XlsxWriter::texto($alumno->curp, 9),
+                XlsxWriter::texto($alumno->nombreCompleto, 9),
+            ];
+            $general = $alumno->asistenciasPorParcial['general'];
+            $fila[] = XlsxWriter::numero($general['presente'] + $general['retardo'] + $general['justificada'], 6);
+            $fila[] = XlsxWriter::numero($general['falta'], 6);
+            $fila[] = XlsxWriter::numero($general['porcentaje'], 5);
+
+            $totalPorcentaje = 0.0;
+            foreach ($datos->evidencias as $evidencia) {
+                $nota = $alumno->evidencias[$evidencia->id] ?? ['puntaje' => 0.0, 'porcentaje' => 0.0];
+                $totalPorcentaje += $nota['porcentaje'];
+                $fila[] = XlsxWriter::numero($nota['puntaje'], 5);
+            }
+            $fila[] = XlsxWriter::numero(round($totalPorcentaje, 2), 5);
+            $fila[] = XlsxWriter::numero($alumno->calificacionFinal, $datos->presentacion->estiloNumero(true));
+            $fila[] = XlsxWriter::texto($alumno->examinado ? ($alumno->calificacionFinal >= 6 ? 'A' : 'NA') : '', 7);
+            $fila[] = XlsxWriter::texto($datos->evaluacion['estatus'], 7);
+            $filas[] = $fila;
+        }
+
+        $filas[] = [];
+        $filas[] = [XlsxWriter::texto('DATOS ESTADÍSTICOS', 1)];
+        foreach ([
+            'Total de educandos al inicio' => 'inicio',
+            'Total de educandos examinados' => 'examinados',
+            'Total de educandos aprobados' => 'aprobados',
+            'Total de educandos reprobados' => 'reprobados',
+            'Número de clases en el parcial' => 'clases',
+        ] as $etiqueta => $clave) {
+            $filas[] = [XlsxWriter::texto($etiqueta, 1), XlsxWriter::numero($datos->estadisticas[$clave], 6)];
+        }
+
+        return array_merge($filas, $this->firmas($datos));
+    }
+
+    private function letraColumna(int $numero): string
+    {
+        $columna = '';
+        while ($numero > 0) {
+            $numero--;
+            $columna = chr(65 + ($numero % 26)).$columna;
+            $numero = intdiv($numero, 26);
+        }
+
+        return $columna === '' ? 'A' : $columna;
     }
 }

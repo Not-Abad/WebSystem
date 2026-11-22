@@ -19,12 +19,14 @@ class Asistencia extends Model
         'id_clase',
         'id_alumno',
         'fecha',
+        'parcial',
         'estatus',
         'observaciones',
     ];
 
     protected $casts = [
         'fecha' => 'date:Y-m-d',
+        'parcial' => 'integer',
     ];
 
     public function clase(): BelongsTo

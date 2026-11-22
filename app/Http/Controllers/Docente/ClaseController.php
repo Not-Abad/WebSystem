@@ -42,6 +42,12 @@ class ClaseController extends Controller
     public const PORCENTAJE_MAXIMO_EVALUACION = 100.0;
 
     /** @var array<int, string> */
+    public const ESTATUS_REINCO = ['ordinaria', 'final', 'R1', 'R2', 'R3'];
+
+    /** @var array<int, string> */
+    public const FORMATO_CALIFICACION = ['entero', 'decimal'];
+
+    /** @var array<int, string> */
     public const ESTATUS_ASISTENCIA = [
         Asistencia::PRESENTE,
         Asistencia::FALTA,
@@ -140,7 +146,9 @@ class ClaseController extends Controller
             abort_unless($alumnos->has((int) ($registro['id_alumno'] ?? 0)), 422, 'El alumno no pertenece al grupo de esta clase.');
         }
 
-        DB::transaction(function () use ($registros, $clase, $request) {
+        $parcial = $this->parcialParaFecha($clase, (string) $request->input('fecha'));
+
+        DB::transaction(function () use ($registros, $clase, $request, $parcial) {
             foreach ($registros as $registro) {
                 Asistencia::updateOrCreate(
                     [
@@ -149,6 +157,7 @@ class ClaseController extends Controller
                         'fecha' => $request->input('fecha'),
                     ],
                     [
+                        'parcial' => $parcial,
                         'estatus' => $registro['estatus'],
                         'observaciones' => trim((string) ($registro['observaciones'] ?? '')) ?: null,
                     ]
@@ -419,9 +428,22 @@ class ClaseController extends Controller
 
         Validator::make($request->all(), [
             'destino' => ['required', Rule::in(['descargar', 'guardar'])],
+            'estatus' => ['sometimes', 'required', Rule::in(self::ESTATUS_REINCO)],
+            'formato_calificacion' => ['sometimes', 'required', Rule::in(self::FORMATO_CALIFICACION)],
+            'turno' => ['sometimes', 'nullable', 'string', 'max:20'],
+            'periodo_escolar' => ['sometimes', 'nullable', 'string', 'max:16'],
+            'cct' => ['sometimes', 'nullable', 'string', 'max:16'],
+            'plantel' => ['sometimes', 'nullable', 'string', 'max:150'],
         ], [
             'destino.in' => 'Selecciona un destino válido para el formato REINCO.',
+            'estatus.in' => 'Selecciona un estatus válido para el formato REINCO.',
+            'formato_calificacion.in' => 'Selecciona un formato de calificación válido.',
         ])->validate();
+
+        $opciones = array_filter(
+            $request->only(['estatus', 'formato_calificacion', 'turno', 'periodo_escolar', 'cct', 'plantel']),
+            fn ($valor) => $valor !== null && $valor !== ''
+        );
 
         $nombre = $this->nombreArchivo($clase, $evaluacion);
         $temporal = tempnam(sys_get_temp_dir(), 'reinco_');
@@ -429,18 +451,26 @@ class ClaseController extends Controller
         $contenido = null;
 
         try {
-            app(\App\Services\ReincoService::class)->generar($clase, $evaluacion, $temporal);
+            app(\App\Services\ReincoService::class)->generar($clase, $evaluacion, $temporal, $opciones);
             $contenido = (string) file_get_contents($temporal);
 
             if ($request->input('destino') !== 'descargar') {
                 $ruta = 'reinco/'.now()->year.'/'.$nombre;
                 Storage::disk('local')->put($ruta, $contenido, 'private');
 
+                $configuracion = config('reinco');
                 ReincoExportacion::create([
                     'id_docente' => $docente->id_docente,
                     'id_clase' => $clase->id_clase,
                     'id_evaluacion' => $evaluacion->id_evaluacion,
                     'parcial' => $evaluacion->parcial,
+                    'estatus' => $opciones['estatus'] ?? ($evaluacion->estatus ?: $configuracion['estatus']),
+                    'formato_calificacion' => $opciones['formato_calificacion'] ?? ($evaluacion->formato_calificacion ?: $configuracion['formato_calificacion']),
+                    'turno' => $opciones['turno'] ?? $configuracion['turno'],
+                    'periodo_escolar' => $opciones['periodo_escolar'] ?? null,
+                    'cct' => $opciones['cct'] ?? $configuracion['cct'],
+                    'plantel' => $opciones['plantel'] ?? $configuracion['plantel'],
+                    'hojas' => 5,
                     'titulo' => 'REINCO '.$evaluacion->parcial.' · '.$clase->materia->nombre.' · '.$clase->grupo->etiqueta(),
                     'archivo_ruta' => $ruta,
                     'tamano_bytes' => strlen($contenido),
@@ -480,6 +510,24 @@ class ClaseController extends Controller
             $exportacion->archivo_ruta,
             basename($exportacion->archivo_ruta)
         );
+    }
+
+    /**
+     * Asocia una fecha de asistencia al parcial cuya evaluación ya ocurrió o
+     * ocurre en esa fecha. Si aún no hay fechas capturadas, queda sin parcial
+     * y se reporta en el concentrado general.
+     */
+    private function parcialParaFecha(Clase $clase, string $fecha): ?int
+    {
+        $evaluaciones = $clase->evaluaciones()->orderBy('parcial')->get();
+        foreach ($evaluaciones as $evaluacion) {
+            $limite = $evaluacion->fecha_examen ?? $evaluacion->fecha_entrega_proyecto;
+            if ($limite && $fecha <= $limite->toDateString()) {
+                return (int) $evaluacion->parcial;
+            }
+        }
+
+        return null;
     }
 
     private function nombreArchivo(Clase $clase, Evaluacion $evaluacion): string

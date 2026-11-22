@@ -1507,6 +1507,32 @@ body.modulo-body {
     margin-top: 12px;
 }
 
+.docente-opciones-reinco {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.docente-opciones-reinco label {
+    color: #8b949e;
+    display: flex;
+    flex-direction: column;
+    font-size: .72rem;
+    gap: 4px;
+}
+
+.docente-opciones-reinco select {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 5px;
+    color: #e6edf3;
+    font-family: inherit;
+    font-size: .78rem;
+    padding: 7px 8px;
+}
+
 .criterios-total {
     color: #8b949e;
     font-size: .82rem;

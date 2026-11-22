@@ -326,18 +326,45 @@ class PortalDocenteTest extends TestCase
             ->assertOk()
             ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
-        $this->post(route('docente.clases.reinco', [$clase, $evaluacion]), ['destino' => 'guardar'])
-            ->assertRedirect()
-            ->assertSessionHas('status');
+        $this->post(route('docente.clases.reinco', [$clase, $evaluacion]), [
+            'destino' => 'guardar',
+            'estatus' => 'R1',
+            'formato_calificacion' => 'entero',
+            'turno' => 'Vespertino',
+            'periodo_escolar' => '2026-2027',
+        ])->assertRedirect()->assertSessionHas('status');
 
         $exportacion = ReincoExportacion::firstOrFail();
+        $this->assertSame('R1', $exportacion->estatus);
+        $this->assertSame('entero', $exportacion->formato_calificacion);
+        $this->assertSame('Vespertino', $exportacion->turno);
+        $this->assertSame('2026-2027', $exportacion->periodo_escolar);
+        $this->assertSame(5, $exportacion->hojas);
         Storage::disk('local')->assertExists($exportacion->archivo_ruta);
 
         $zip = new ZipArchive();
         $this->assertTrue($zip->open(Storage::disk('local')->path($exportacion->archivo_ruta)) === true);
-        $this->assertNotFalse($zip->locateName('xl/workbook.xml'));
-        $this->assertNotFalse($zip->locateName('xl/worksheets/sheet3.xml'));
+        $workbook = (string) $zip->getFromName('xl/workbook.xml');
+        $styles = (string) $zip->getFromName('xl/styles.xml');
+        $sheet205 = (string) $zip->getFromName('xl/worksheets/sheet2.xml');
+        $sheet206b = (string) $zip->getFromName('xl/worksheets/sheet5.xml');
         $zip->close();
+
+        foreach (['Datos generales', 'REINCO 205', 'REINCO 206-A', '206-A reverso', 'REINCO 206-B'] as $hoja) {
+            $this->assertStringContainsString('name="'.$hoja.'"', $workbook);
+        }
+        $this->assertStringContainsString('CCT: 30EBH0389X', $sheet205);
+        $this->assertStringContainsString('Hoja 2 de 5', $sheet205);
+        $this->assertStringContainsString('CURP (clave de control)', $sheet205);
+        $this->assertStringContainsString('Firmas para archivo y cotejo DGB', $sheet205);
+        $this->assertStringContainsString('Control escolar / Subdirección', $sheet205);
+        $this->assertStringContainsString('Estatus', $sheet206b);
+        $this->assertStringContainsString('R1', $sheet206b);
+        $this->assertMatchesRegularExpression('/<pageSetup[^>]*orientation="landscape"[^>]*fitToWidth="1"/', $sheet206b);
+        $this->assertStringContainsString('<pageMargins', $sheet206b);
+        $this->assertStringContainsString('Hoja &amp;P de &amp;N', $sheet206b);
+        $this->assertStringContainsString('formatCode="0.00"', $styles);
+        $this->assertMatchesRegularExpression('/s="11"><v>\d+<\/v>/', $sheet206b);
 
         $this->get(route('docente.reinco.index'))
             ->assertOk()
@@ -345,6 +372,66 @@ class PortalDocenteTest extends TestCase
             ->assertDontSee('site-footer');
 
         $this->get(route('docente.reinco.descargar', $exportacion))->assertOk();
+    }
+
+    public function test_dto_reinco_separa_evaluacion_de_presentacion(): void
+    {
+        $docente = $this->usuario('docente.historia');
+        $clase = $this->configurarEvaluaciones($docente);
+        $evaluacion = $clase->evaluaciones()->where('parcial', 1)->firstOrFail();
+
+        $datos = \App\Data\Reinco\ReincoExportData::desdeClase($clase, $evaluacion, [
+            'formato_calificacion' => 'decimal',
+        ]);
+        $arreglo = $datos->toArray();
+
+        $this->assertSame('30EBH0389X', $arreglo['institucional']['cct']);
+        $this->assertSame('Bachillerato', $arreglo['institucional']['nivel']);
+        $this->assertArrayHasKey('area_componente', $arreglo['grupo']);
+        $this->assertArrayHasKey('evidencias', $arreglo);
+        $this->assertSame(2, $arreglo['presentacion']['decimales']);
+        $this->assertSame(5, $arreglo['presentacion']['hojas']);
+        $this->assertCount($datos->alumnos->count(), $arreglo['alumnos']);
+
+        $esperados = $clase->alumnosActivos()
+            ->map(fn ($alumno) => mb_strtoupper(trim($alumno->apellido_paterno.' '.$alumno->apellido_materno.' '.$alumno->nombre)))
+            ->all();
+        $this->assertSame(
+            $esperados,
+            $datos->alumnos->map(fn ($alumno) => mb_strtoupper($alumno->nombreCompleto))->all()
+        );
+
+        $curps = $datos->alumnos->map(fn ($alumno) => $alumno->curp)->all();
+        $this->assertNotEmpty($curps);
+        $this->assertSame(strtoupper($curps[0]), $curps[0]);
+        $this->assertArrayHasKey('general', $datos->alumnos->first()->asistenciasPorParcial);
+    }
+
+    public function test_las_opciones_reinco_aparecen_una_sola_vez_por_evaluacion(): void
+    {
+        $docente = $this->usuario('docente.historia');
+        $clase = $this->configurarEvaluaciones($docente);
+
+        foreach ($clase->evaluaciones()->orderBy('parcial')->get() as $evaluacion) {
+            $this->actingAs($docente)
+                ->post(route('docente.clases.criterios', [$clase, $evaluacion]), [
+                    'criterios' => [[
+                        'seleccionado' => 1,
+                        'nombre_rubro' => 'Examen',
+                        'tipo_evidencia' => 'Examen',
+                        'porcentaje' => 100,
+                        'fecha_entrega' => '2026-12-05',
+                    ]],
+                ])->assertRedirect();
+        }
+
+        $html = (string) $this->get(route('docente.clases.show', $clase))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(3, substr_count($html, 'name="estatus"'));
+        $this->assertSame(3, substr_count($html, 'name="formato_calificacion"'));
+        $this->assertSame(6, substr_count($html, 'name="destino"'));
     }
 
     public function test_roles_ajenos_no_pueden_entrar_al_portal_docente(): void

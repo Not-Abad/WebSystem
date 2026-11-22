@@ -15,6 +15,13 @@ class ReincoExportacion extends Model
         'id_clase',
         'id_evaluacion',
         'parcial',
+        'estatus',
+        'formato_calificacion',
+        'turno',
+        'periodo_escolar',
+        'cct',
+        'plantel',
+        'hojas',
         'titulo',
         'archivo_ruta',
         'tamano_bytes',
@@ -22,6 +29,7 @@ class ReincoExportacion extends Model
 
     protected $casts = [
         'parcial' => 'integer',
+        'hojas' => 'integer',
         'tamano_bytes' => 'integer',
     ];
 
@@ -38,5 +46,10 @@ class ReincoExportacion extends Model
     public function evaluacion(): BelongsTo
     {
         return $this->belongsTo(Evaluacion::class, 'id_evaluacion', 'id_evaluacion');
+    }
+
+    public function etiqueta(): string
+    {
+        return $this->evaluacion?->etiqueta() ?? 'Evaluación '.$this->parcial;
     }
 }

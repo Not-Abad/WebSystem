@@ -392,7 +392,8 @@ class DemoContenidoSeeder extends Seeder
         $fechas = collect(range(6, 1))->map(fn ($dias) => now()->subDays($dias)->toDateString());
         $filas = [];
 
-        foreach ($fechas as $fecha) {
+        foreach ($fechas as $indice => $fecha) {
+            $parcial = ($indice % 3) + 1;
             foreach ($alumnos as $idAlumno) {
                 $estatus = 'presente';
                 $observaciones = null;
@@ -410,6 +411,7 @@ class DemoContenidoSeeder extends Seeder
                     'id_clase' => $idClase,
                     'id_alumno' => $idAlumno,
                     'fecha' => $fecha,
+                    'parcial' => $parcial,
                     'estatus' => $estatus,
                     'observaciones' => $observaciones,
                     'created_at' => $ahora,

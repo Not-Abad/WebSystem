@@ -15,6 +15,8 @@ class Evaluacion extends Model
         'id_clase',
         'parcial',
         'tipo',
+        'estatus',
+        'formato_calificacion',
         'fecha_examen',
         'fecha_entrega_proyecto',
     ];

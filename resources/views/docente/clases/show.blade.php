@@ -301,8 +301,9 @@
                 de exámenes en el formato REINCO.
             </p>
             <p class="docente-ayuda">
-                Genera el Excel con REINCO 205 (asistencia), 206-A (evidencias y porcentajes), su reverso y 206-B
-                (calificación integrada). Puedes descargarlo o guardarlo en el gestor de archivos.
+                Genera el Excel con REINCO 205 (asistencia por parcial), 206-A (evidencias y porcentajes), su reverso
+                y 206-B (calificación integrada y estatus). Incluye CURP, firmas para cotejo DGB y configuración de
+                impresión. Puedes descargarlo o guardarlo en el gestor de archivos.
             </p>
         </div>
         <a href="{{ route('docente.reinco.index') }}" class="btn-modulo btn-secundario">
@@ -319,22 +320,18 @@
             @if (! $evaluacion || $evaluacion->criterios->isEmpty())
                 <p class="docente-ayuda">Guarda las fechas y los criterios de esta evaluación para generar el formato.</p>
             @else
-                <div class="docente-acciones">
-                    <form method="POST" action="{{ route('docente.clases.reinco', [$clase, $evaluacion]) }}">
-                        @csrf
-                        <input type="hidden" name="destino" value="descargar">
-                        <button type="submit" class="btn-modulo btn-primario">
+                <form method="POST" action="{{ route('docente.clases.reinco', [$clase, $evaluacion]) }}">
+                    @csrf
+                    @include('docente.clases._opciones-reinco')
+                    <div class="docente-acciones">
+                        <button type="submit" name="destino" value="descargar" class="btn-modulo btn-primario">
                             <i class="fas fa-download"></i> Descargar Excel
                         </button>
-                    </form>
-                    <form method="POST" action="{{ route('docente.clases.reinco', [$clase, $evaluacion]) }}">
-                        @csrf
-                        <input type="hidden" name="destino" value="guardar">
-                        <button type="submit" class="btn-modulo btn-secundario">
+                        <button type="submit" name="destino" value="guardar" class="btn-modulo btn-secundario">
                             <i class="fas fa-folder-plus"></i> Guardar en el gestor
                         </button>
-                    </form>
-                </div>
+                    </div>
+                </form>
             @endif
         </div>
     @endforeach
