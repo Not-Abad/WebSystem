@@ -22,28 +22,30 @@ class UsuariosPruebaSeeder extends Seeder
             'is_active' => 1,
         ]);
 
-        DB::table('periodos_academicos')->insertOrIgnore([
-            'id_periodo' => 1,
-            'clave' => '2026-B',
-            'fecha_inicio' => '2026-08-17',
-            'fecha_fin' => '2026-12-18',
-            'is_active' => 1,
-        ]);
-
-        // Grupos mínimos del periodo vigente. El módulo de horarios los ampliará después.
+        // Grupos por semestre. Desde 5º se organizan por área propedéutica.
         DB::table('grupos')->insertOrIgnore([
-            ['id_grupo' => 1, 'id_periodo' => 1, 'id_semestre' => 1, 'nombre' => '1-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 2, 'id_periodo' => 1, 'id_semestre' => 2, 'nombre' => '2-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 3, 'id_periodo' => 1, 'id_semestre' => 3, 'nombre' => '3-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 4, 'id_periodo' => 1, 'id_semestre' => 4, 'nombre' => '4-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 5, 'id_periodo' => 1, 'id_semestre' => 5, 'nombre' => '5-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 6, 'id_periodo' => 1, 'id_semestre' => 6, 'nombre' => '6-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 7, 'id_periodo' => 1, 'id_semestre' => 1, 'nombre' => '1-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 8, 'id_periodo' => 1, 'id_semestre' => 2, 'nombre' => '2-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 9, 'id_periodo' => 1, 'id_semestre' => 3, 'nombre' => '3-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 10, 'id_periodo' => 1, 'id_semestre' => 4, 'nombre' => '4-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 11, 'id_periodo' => 1, 'id_semestre' => 5, 'nombre' => '5-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 12, 'id_periodo' => 1, 'id_semestre' => 6, 'nombre' => '6-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 1, 'id_semestre' => 1, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '1-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 2, 'id_semestre' => 2, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '2-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 3, 'id_semestre' => 3, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '3-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 4, 'id_semestre' => 4, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '4-A', 'cupo_maximo' => 45],
+            ['id_grupo' => 5, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 6, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 7, 'id_semestre' => 1, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '1-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 8, 'id_semestre' => 2, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '2-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 9, 'id_semestre' => 3, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '3-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 10, 'id_semestre' => 4, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '4-B', 'cupo_maximo' => 45],
+            ['id_grupo' => 11, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'B', 'cupo_maximo' => 45],
+            ['id_grupo' => 12, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'B', 'cupo_maximo' => 45],
+            ['id_grupo' => 13, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'B', 'cupo_maximo' => 45],
+            ['id_grupo' => 14, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'B', 'cupo_maximo' => 45],
+            ['id_grupo' => 15, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 16, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 17, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 3, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 18, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 3, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 19, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 4, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 20, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 4, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 21, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 5, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 22, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 5, 'nombre' => 'A', 'cupo_maximo' => 45],
         ]);
 
         // 2. Cuentas de usuario (1 por cada rol)
@@ -123,8 +125,15 @@ class UsuariosPruebaSeeder extends Seeder
             'nombre' => 'Felipe Martin',
             'apellido_paterno' => 'Sánchez',
             'apellido_materno' => 'Cortés',
+            'curp' => 'SACF800920HDFRML08',
+            'rfc' => 'HEVC800920MV4',
             'matricula_rfc' => 'HEVC800920MV4',
             'correo_institucional' => 'docente@eba-amr.edu.mx',
+            'horas_semanales' => 35,
+            'licenciatura' => 'Licenciatura en Matemáticas',
+            'especialidad' => 'Especialidad en Enseñanza de las Matemáticas',
+            'maestria' => 'Maestría en Educación Media Superior',
+            'doctorado' => null,
             'is_active' => 1,
             'created_at' => $ahora,
             'updated_at' => $ahora,

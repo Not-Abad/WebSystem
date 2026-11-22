@@ -3,8 +3,13 @@
 use App\Http\Controllers\Admin\AlumnosController;
 use App\Http\Controllers\Admin\ArchivosController;
 use App\Http\Controllers\Admin\BitacoraController;
+use App\Http\Controllers\Admin\CatalogosController;
+use App\Http\Controllers\Admin\DocentesController;
+use App\Http\Controllers\Admin\GruposController;
+use App\Http\Controllers\Admin\HorariosController;
 use App\Http\Controllers\Admin\PersonalController;
 use App\Http\Controllers\Admin\PortalController;
+use App\Http\Controllers\Admin\SalonesController;
 use App\Http\Controllers\Admin\SeguridadController;
 use App\Http\Controllers\Admin\TutoresController;
 use App\Http\Controllers\Auth\LoginController;
@@ -58,6 +63,13 @@ Route::middleware(['auth', 'role:SuperUsuario,Administrador'])
         Route::put('/alumnos/{alumno}', [AlumnosController::class, 'update'])->name('alumnos.update');
         Route::delete('/alumnos/{alumno}', [AlumnosController::class, 'destroy'])->name('alumnos.destroy');
 
+        Route::get('/docentes', [DocentesController::class, 'index'])->name('docentes.index');
+        Route::get('/docentes/crear', [DocentesController::class, 'create'])->name('docentes.create');
+        Route::post('/docentes', [DocentesController::class, 'store'])->name('docentes.store');
+        Route::get('/docentes/{docente}/editar', [DocentesController::class, 'edit'])->name('docentes.edit');
+        Route::put('/docentes/{docente}', [DocentesController::class, 'update'])->name('docentes.update');
+        Route::delete('/docentes/{docente}', [DocentesController::class, 'destroy'])->name('docentes.destroy');
+
         Route::get('/tutores', [TutoresController::class, 'index'])->name('tutores.index');
         Route::get('/tutores/crear', [TutoresController::class, 'create'])->name('tutores.create');
         Route::post('/tutores', [TutoresController::class, 'store'])->name('tutores.store');
@@ -102,6 +114,41 @@ Route::middleware(['auth', 'role:SuperUsuario,Administrador'])
         Route::post('/archivos/subir', [ArchivosController::class, 'subir'])->name('archivos.subir');
         Route::get('/archivos/descargar', [ArchivosController::class, 'descargar'])->name('archivos.descargar');
         Route::delete('/archivos', [ArchivosController::class, 'eliminar'])->name('archivos.eliminar');
+
+        // Catálogos: planes de estudio y materias por semestre
+        Route::get('/catalogos', [CatalogosController::class, 'index'])->name('catalogos.index');
+        Route::get('/catalogos/crear', [CatalogosController::class, 'create'])->name('catalogos.create');
+        Route::post('/catalogos', [CatalogosController::class, 'store'])->name('catalogos.store');
+        Route::get('/catalogos/materias', [CatalogosController::class, 'materias'])->name('catalogos.materias');
+        Route::get('/catalogos/{plan}/materias', [CatalogosController::class, 'materiasDePlan'])->name('catalogos.materias.plan');
+        Route::get('/catalogos/{plan}/materias/crear', [CatalogosController::class, 'createMateria'])->name('catalogos.materias.crear');
+        Route::post('/catalogos/{plan}/materias', [CatalogosController::class, 'storeMateria'])->name('catalogos.materias.guardar');
+        Route::get('/catalogos/materias/{materia}/editar', [CatalogosController::class, 'editMateria'])->name('catalogos.materias.editar');
+        Route::put('/catalogos/materias/{materia}', [CatalogosController::class, 'updateMateria'])->name('catalogos.materias.actualizar');
+        Route::delete('/catalogos/materias/{materia}', [CatalogosController::class, 'destroyMateria'])->name('catalogos.materias.eliminar');
+        Route::get('/catalogos/{plan}/editar', [CatalogosController::class, 'edit'])->name('catalogos.edit');
+        Route::put('/catalogos/{plan}', [CatalogosController::class, 'update'])->name('catalogos.update');
+        Route::delete('/catalogos/{plan}', [CatalogosController::class, 'destroy'])->name('catalogos.destroy');
+
+        // Grupos y clases
+        Route::get('/grupos', [GruposController::class, 'index'])->name('grupos.index');
+        Route::get('/grupos/crear', [GruposController::class, 'create'])->name('grupos.create');
+        Route::post('/grupos', [GruposController::class, 'store'])->name('grupos.store');
+        Route::get('/grupos/{grupo}/editar', [GruposController::class, 'edit'])->name('grupos.edit');
+        Route::put('/grupos/{grupo}', [GruposController::class, 'update'])->name('grupos.update');
+        Route::delete('/grupos/{grupo}', [GruposController::class, 'destroy'])->name('grupos.destroy');
+
+        // Salones
+        Route::get('/salones', [SalonesController::class, 'index'])->name('salones.index');
+        Route::get('/salones/crear', [SalonesController::class, 'create'])->name('salones.create');
+        Route::post('/salones', [SalonesController::class, 'store'])->name('salones.store');
+        Route::get('/salones/{salon}/editar', [SalonesController::class, 'edit'])->name('salones.edit');
+        Route::put('/salones/{salon}', [SalonesController::class, 'update'])->name('salones.update');
+        Route::delete('/salones/{salon}', [SalonesController::class, 'destroy'])->name('salones.destroy');
+
+        // Horarios
+        Route::get('/horarios', [HorariosController::class, 'index'])->name('horarios.index');
+        Route::post('/horarios/guardar', [HorariosController::class, 'guardar'])->name('horarios.guardar');
     });
 
 Route::middleware(['auth', 'role:Tutor'])

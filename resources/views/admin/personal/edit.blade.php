@@ -43,10 +43,48 @@
                     <input type="text" id="apellido_materno" name="apellido_materno" value="{{ old('apellido_materno', $perfil->apellido_materno) }}" maxlength="60">
                 </div>
 
-                <div class="form-campo">
-                    <label for="matricula_rfc">Matrícula o RFC</label>
-                    <input type="text" id="matricula_rfc" name="matricula_rfc" value="{{ old('matricula_rfc', $perfil->matricula_rfc) }}" required maxlength="20">
-                </div>
+                @if ($tipo === 'Administrador')
+                    <div class="form-campo">
+                        <label for="matricula_rfc">Matrícula o RFC</label>
+                        <input type="text" id="matricula_rfc" name="matricula_rfc" value="{{ old('matricula_rfc', $perfil->matricula_rfc) }}" required maxlength="20">
+                    </div>
+                @else
+                    <div class="form-campo">
+                        <label for="curp">CURP</label>
+                        <input type="text" id="curp" name="curp" value="{{ old('curp', $perfil->curp) }}" required minlength="18" maxlength="18" pattern="[A-Za-z0-9]{18}" style="text-transform:uppercase;" autocomplete="off">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="rfc">RFC</label>
+                        <input type="text" id="rfc" name="rfc" value="{{ old('rfc', $perfil->rfc) }}" required maxlength="20" style="text-transform:uppercase;" autocomplete="off">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="horas_semanales">Horas semanales</label>
+                        <input type="number" id="horas_semanales" name="horas_semanales" value="{{ old('horas_semanales', $perfil->horas_semanales) }}" required min="1" max="35">
+                        <small>Tope máximo de bloques asignables por semana.</small>
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="licenciatura">Licenciatura</label>
+                        <input type="text" id="licenciatura" name="licenciatura" value="{{ old('licenciatura', $perfil->licenciatura) }}" required maxlength="120">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="especialidad">Especialidad (opcional)</label>
+                        <input type="text" id="especialidad" name="especialidad" value="{{ old('especialidad', $perfil->especialidad) }}" maxlength="120">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="maestria">Maestría (opcional)</label>
+                        <input type="text" id="maestria" name="maestria" value="{{ old('maestria', $perfil->maestria) }}" maxlength="120">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="doctorado">Doctorado (opcional)</label>
+                        <input type="text" id="doctorado" name="doctorado" value="{{ old('doctorado', $perfil->doctorado) }}" maxlength="120">
+                    </div>
+                @endif
 
                 <div class="form-campo">
                     <label for="correo_institucional">Correo institucional</label>

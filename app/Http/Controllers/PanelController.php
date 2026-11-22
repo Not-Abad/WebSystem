@@ -31,12 +31,14 @@ class PanelController extends Controller
         ],
         'Administrador' => [
             ['icono' => 'fa-user-graduate', 'titulo' => 'Alumnos', 'descripcion' => 'Expedientes, grupos y estatus escolar.', 'ruta' => 'admin.alumnos.index'],
+            ['icono' => 'fa-chalkboard-user', 'titulo' => 'Docentes', 'descripcion' => 'Perfil profesional, carga horaria y formación académica.', 'ruta' => 'admin.docentes.index'],
             ['icono' => 'fa-users', 'titulo' => 'Tutores', 'descripcion' => 'Vinculación de tutores con estudiantes.', 'ruta' => 'admin.tutores.index'],
-            ['icono' => 'fa-folder-open', 'titulo' => 'Gestor de archivos', 'descripcion' => 'Carpetas, boletas, certificados y documentos institucionales.', 'ruta' => 'admin.archivos.index'],
-            ['icono' => 'fa-layer-group', 'titulo' => 'Grupos y clases', 'descripcion' => 'Confección de grupos y cargas de materias.'],
-            ['icono' => 'fa-calendar-day', 'titulo' => 'Horarios', 'descripcion' => 'Asignación de horarios sin solapamientos.'],
-            ['icono' => 'fa-book', 'titulo' => 'Catálogos', 'descripcion' => 'Planes de estudio, materias y semestres.'],
+            ['icono' => 'fa-book', 'titulo' => 'Catálogos', 'descripcion' => 'Planes de estudio, materias y semestres.', 'ruta' => 'admin.catalogos.index'],
+            ['icono' => 'fa-door-open', 'titulo' => 'Salones', 'descripcion' => 'Espacios disponibles para asignar cada clase.', 'ruta' => 'admin.salones.index'],
+            ['icono' => 'fa-layer-group', 'titulo' => 'Grupos y clases', 'descripcion' => 'Confección de grupos y cargas de materias.', 'ruta' => 'admin.grupos.index'],
+            ['icono' => 'fa-calendar-day', 'titulo' => 'Horarios', 'descripcion' => 'Asignación de horarios sin solapamientos.', 'ruta' => 'admin.horarios.index'],
             ['icono' => 'fa-newspaper', 'titulo' => 'Portal web', 'descripcion' => 'Noticias, documentos, reportes y galería.', 'ruta' => 'admin.portal.noticias'],
+            ['icono' => 'fa-folder-open', 'titulo' => 'Gestor de archivos', 'descripcion' => 'Carpetas, boletas, certificados y documentos institucionales.', 'ruta' => 'admin.archivos.index'],
         ],
         'Docente' => [
             ['icono' => 'fa-list-check', 'titulo' => 'Criterios de evaluación', 'descripcion' => 'Rubros por parcial con ponderación al 100 %.'],

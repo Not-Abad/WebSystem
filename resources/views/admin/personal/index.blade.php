@@ -113,7 +113,8 @@
                         <th>Nombre</th>
                         <th>Usuario</th>
                         <th>Capacitación / Área</th>
-                        <th>Matrícula / RFC</th>
+                        <th>RFC</th>
+                        <th>Carga</th>
                         <th>Correo</th>
                         <th>Estatus</th>
                         <th>Acciones</th>
@@ -129,7 +130,8 @@
                             <td>
                                 {{ $docente->capacitacion?->nombre ?? $docente->area?->nombre ?? '—' }}
                             </td>
-                            <td>{{ $docente->matricula_rfc }}</td>
+                            <td>{{ $docente->rfc ?: $docente->matricula_rfc }}</td>
+                            <td><span class="carga-docente">{{ $docente->horas_semanales }} h</span></td>
                             <td class="texto-sutil">{{ $docente->correo_institucional }}</td>
                             <td>
                                 @if ($docente->is_active)
@@ -156,7 +158,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="vacio">No hay docentes que coincidan con la búsqueda.</td>
+                            <td colspan="8" class="vacio">No hay docentes que coincidan con la búsqueda.</td>
                         </tr>
                     @endforelse
                 </tbody>

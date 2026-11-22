@@ -15,11 +15,11 @@
         <select id="id_grupo" name="id_grupo" required>
             <option value="">Selecciona el grupo</option>
             @foreach ($grupos as $grupo)
-                <option value="{{ $grupo['id'] }}" data-semestre="{{ $grupo['id_semestre'] }}"
+                <option value="{{ $grupo['id'] }}" data-semestre="{{ $grupo['id_semestre'] }}" data-area="{{ $grupo['id_area'] ?? '' }}"
                         @selected(old('id_grupo', $alumno->id_grupo ?? '') == $grupo['id'])>{{ $grupo['etiqueta'] }}</option>
             @endforeach
         </select>
-        <small>Los grupos se filtran según el semestre seleccionado.</small>
+        <small>Los grupos se filtran según el semestre y, desde 5º, el área propedéutica.</small>
     </div>
 
     <div class="form-campo">
@@ -162,14 +162,19 @@
         const opcionesGrupo = Array.from(grupo.options).filter(opcion => opcion.value !== '');
         const campoArea = document.getElementById('campo-area-propedeutica');
         const campoApa = document.getElementById('campo-apa');
+        const selectArea = campoArea.querySelector('select');
         const semestresArea = @json($semestresArea);
         const semestresApa = @json($semestresApa);
 
         function filtrarGrupos() {
             const idSemestre = Number(semestre.value);
+            const conArea = semestresArea.includes(idSemestre);
+            const idArea = Number(selectArea.value);
 
             opcionesGrupo.forEach(opcion => {
-                const coincide = Number(opcion.dataset.semestre) === idSemestre;
+                const coincideSemestre = Number(opcion.dataset.semestre) === idSemestre;
+                const coincideArea = !conArea || Number(opcion.dataset.area || 0) === idArea;
+                const coincide = coincideSemestre && coincideArea;
                 opcion.hidden = !coincide;
                 opcion.disabled = !coincide;
             });
@@ -189,7 +194,6 @@
             campoArea.style.display = conArea ? '' : 'none';
             campoApa.style.display = conApa ? '' : 'none';
 
-            const selectArea = campoArea.querySelector('select');
             const inputApa = campoApa.querySelector('input');
 
             selectArea.disabled = !conArea;
@@ -214,6 +218,7 @@
         }
 
         semestre.addEventListener('change', alCambiarSemestre);
+        selectArea.addEventListener('change', filtrarGrupos);
         alCambiarSemestre();
     })();
 </script>

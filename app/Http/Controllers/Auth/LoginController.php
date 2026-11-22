@@ -79,7 +79,8 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('panel'))
+        // El acceso siempre abre "Mi panel", aunque exista una URL intentada en la sesión.
+        return redirect()->route('panel')
             ->with('status', 'Bienvenido al portal institucional.');
     }
 

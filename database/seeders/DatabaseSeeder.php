@@ -48,11 +48,22 @@ class DatabaseSeeder extends Seeder
             ['id_capacitacion' => 4, 'nombre' => 'Contabilidad', 'is_active' => 1],
         ]);
 
+        DB::table('areas_propedeuticas')->insertOrIgnore([
+            ['id_area_propedeutica' => 1, 'nombre' => 'Físico-Matemático', 'is_active' => 1],
+            ['id_area_propedeutica' => 2, 'nombre' => 'Humanidades', 'is_active' => 1],
+            ['id_area_propedeutica' => 3, 'nombre' => 'Ciencias Sociales', 'is_active' => 1],
+            ['id_area_propedeutica' => 4, 'nombre' => 'Químico-Biológico', 'is_active' => 1],
+            ['id_area_propedeutica' => 5, 'nombre' => 'Económico-Administrativo', 'is_active' => 1],
+        ]);
+
         // Carga los 5 usuarios de prueba con sus perfiles
         $this->call(UsuariosPruebaSeeder::class);
 
         // Personal adicional y eventos de bitácora para los módulos de SuperUsuario
         $this->call(PersonalBitacoraSeeder::class);
+
+        // Planes, materias por semestre y catálogos académicos
+        $this->call(DatosAcademicosSeeder::class);
 
         // Alumnos, tutores y contenido del portal para los módulos de Administrador
         $this->call(AdminModulosSeeder::class);

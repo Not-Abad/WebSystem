@@ -95,22 +95,13 @@ class PersonalController extends Controller
                 'is_active' => true,
             ]);
 
-            $datosPerfil = [
-                'id_usuario' => $usuario->id_usuario,
-                'nombre' => $request->input('nombre'),
-                'apellido_paterno' => $request->input('apellido_paterno'),
-                'apellido_materno' => $request->input('apellido_materno'),
-                'matricula_rfc' => $request->input('matricula_rfc'),
-                'correo_institucional' => $request->input('correo_institucional'),
-                'is_active' => true,
-            ];
+            $datosPerfil = $this->datosPerfil($request, $tipo, true);
+            $datosPerfil['id_usuario'] = $usuario->id_usuario;
 
             if ($tipo === 'Administrador') {
                 $datosPerfil['id_puesto'] = $request->input('id_puesto');
                 $perfil = Administrador::create($datosPerfil);
             } else {
-                $datosPerfil['id_capacitacion'] = $request->input('id_capacitacion') ?: null;
-                $datosPerfil['id_area_propedeutica'] = $request->input('id_area_propedeutica') ?: null;
                 $perfil = Docente::create($datosPerfil);
             }
 
@@ -171,20 +162,10 @@ class PersonalController extends Controller
 
             $usuario->update($datosUsuario);
 
-            $datosPerfil = [
-                'nombre' => $request->input('nombre'),
-                'apellido_paterno' => $request->input('apellido_paterno'),
-                'apellido_materno' => $request->input('apellido_materno'),
-                'matricula_rfc' => $request->input('matricula_rfc'),
-                'correo_institucional' => $request->input('correo_institucional'),
-                'is_active' => $request->boolean('is_active'),
-            ];
+            $datosPerfil = $this->datosPerfil($request, $tipo, $request->boolean('is_active'));
 
             if ($tipo === 'Administrador') {
                 $datosPerfil['id_puesto'] = $request->input('id_puesto');
-            } else {
-                $datosPerfil['id_capacitacion'] = $request->input('id_capacitacion') ?: null;
-                $datosPerfil['id_area_propedeutica'] = $request->input('id_area_propedeutica') ?: null;
             }
 
             $perfil->update($datosPerfil);
@@ -262,6 +243,41 @@ class PersonalController extends Controller
     /**
      * @return array<string, mixed>
      */
+    private function datosPerfil(Request $request, string $tipo, bool $activo): array
+    {
+        $datos = [
+            'nombre' => trim((string) $request->input('nombre')),
+            'apellido_paterno' => trim((string) $request->input('apellido_paterno')),
+            'apellido_materno' => trim((string) $request->input('apellido_materno')) ?: null,
+            'correo_institucional' => mb_strtolower(trim((string) $request->input('correo_institucional'))),
+            'is_active' => $activo,
+        ];
+
+        if ($tipo === 'Administrador') {
+            $datos['matricula_rfc'] = $request->input('matricula_rfc');
+
+            return $datos;
+        }
+
+        $rfc = mb_strtoupper(trim((string) $request->input('rfc')));
+
+        return array_merge($datos, [
+            'curp' => mb_strtoupper(trim((string) $request->input('curp'))),
+            'rfc' => $rfc,
+            'matricula_rfc' => $rfc,
+            'horas_semanales' => (int) $request->input('horas_semanales'),
+            'licenciatura' => trim((string) $request->input('licenciatura')),
+            'especialidad' => trim((string) $request->input('especialidad')) ?: null,
+            'maestria' => trim((string) $request->input('maestria')) ?: null,
+            'doctorado' => trim((string) $request->input('doctorado')) ?: null,
+            'id_capacitacion' => $request->input('id_capacitacion') ?: null,
+            'id_area_propedeutica' => $request->input('id_area_propedeutica') ?: null,
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     private function rules(string $tipo, ?User $usuario = null, ?object $perfil = null): array
     {
         $usernameRule = Rule::unique('usuarios', 'username');
@@ -273,9 +289,13 @@ class PersonalController extends Controller
         $clavePerfil = $tipo === 'Administrador' ? 'id_administrador' : 'id_docente';
 
         $matriculaRule = Rule::unique($tabla, 'matricula_rfc');
+        $curpRule = Rule::unique($tabla, 'curp');
+        $rfcRule = Rule::unique($tabla, 'rfc');
         $correoRule = Rule::unique($tabla, 'correo_institucional');
         if ($perfil) {
             $matriculaRule->ignore($perfil->getKey(), $clavePerfil);
+            $curpRule->ignore($perfil->getKey(), $clavePerfil);
+            $rfcRule->ignore($perfil->getKey(), $clavePerfil);
             $correoRule->ignore($perfil->getKey(), $clavePerfil);
         }
 
@@ -283,7 +303,6 @@ class PersonalController extends Controller
             'nombre' => ['required', 'string', 'max:60'],
             'apellido_paterno' => ['required', 'string', 'max:60'],
             'apellido_materno' => ['nullable', 'string', 'max:60'],
-            'matricula_rfc' => ['required', 'string', 'max:20', $matriculaRule],
             'correo_institucional' => ['required', 'email', 'max:120', $correoRule],
             'username' => ['required', 'string', 'max:60', 'regex:/^[A-Za-z0-9._-]+$/', $usernameRule],
             'password' => $usuario
@@ -293,8 +312,16 @@ class PersonalController extends Controller
         ];
 
         if ($tipo === 'Administrador') {
+            $rules['matricula_rfc'] = ['required', 'string', 'max:20', $matriculaRule];
             $rules['id_puesto'] = ['required', 'exists:puestos_administrativos,id_puesto'];
         } else {
+            $rules['curp'] = ['required', 'string', 'size:18', 'regex:/^[A-Z0-9]{18}$/i', $curpRule];
+            $rules['rfc'] = ['required', 'string', 'max:20', 'regex:/^[A-Z0-9&.\-\s]{12,20}$/i', $rfcRule];
+            $rules['horas_semanales'] = ['required', 'integer', 'min:1', 'max:35'];
+            $rules['licenciatura'] = ['required', 'string', 'max:120'];
+            $rules['especialidad'] = ['nullable', 'string', 'max:120'];
+            $rules['maestria'] = ['nullable', 'string', 'max:120'];
+            $rules['doctorado'] = ['nullable', 'string', 'max:120'];
             $rules['id_capacitacion'] = ['nullable', 'exists:capacitaciones,id_capacitacion'];
             $rules['id_area_propedeutica'] = ['nullable', 'exists:areas_propedeuticas,id_area_propedeutica'];
         }
@@ -312,6 +339,14 @@ class PersonalController extends Controller
             'apellido_paterno.required' => 'Ingresa el apellido paterno.',
             'matricula_rfc.required' => 'Ingresa la matrícula o RFC.',
             'matricula_rfc.unique' => 'Esa matrícula o RFC ya está registrada.',
+            'curp.required' => 'Ingresa la CURP del docente.',
+            'curp.size' => 'La CURP debe tener 18 caracteres.',
+            'curp.unique' => 'Esa CURP ya está registrada.',
+            'rfc.required' => 'Ingresa el RFC del docente.',
+            'rfc.unique' => 'Ese RFC ya está registrado.',
+            'horas_semanales.required' => 'Ingresa el tope de horas semanales.',
+            'horas_semanales.max' => 'El horario permite hasta 35 bloques por semana.',
+            'licenciatura.required' => 'Ingresa la licenciatura del docente.',
             'correo_institucional.required' => 'Ingresa el correo institucional.',
             'correo_institucional.email' => 'Ingresa un correo válido.',
             'correo_institucional.unique' => 'Ese correo ya está registrado.',

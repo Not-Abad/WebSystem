@@ -48,6 +48,25 @@ class ModulosPersonalTest extends TestCase
             ->assertDontSee('Ubicación');
     }
 
+    public function test_formularios_de_personal_incluyen_el_perfil_docente(): void
+    {
+        $super = User::where('username', 'superadmin')->firstOrFail();
+        $docente = User::where('username', 'docente.prueba')->firstOrFail();
+
+        $this->actingAs($super)
+            ->get(route('admin.personal.create'))
+            ->assertOk()
+            ->assertSee('curp')
+            ->assertSee('horas_semanales')
+            ->assertSee('licenciatura');
+
+        $this->get(route('admin.personal.edit', $docente))
+            ->assertOk()
+            ->assertSee('Maestría')
+            ->assertSee('Doctorado')
+            ->assertSee('35');
+    }
+
     public function test_superusuario_puede_crear_administrador_y_queda_en_bitacora(): void
     {
         $super = User::where('username', 'superadmin')->firstOrFail();

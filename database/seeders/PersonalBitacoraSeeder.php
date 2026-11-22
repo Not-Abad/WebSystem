@@ -13,12 +13,6 @@ class PersonalBitacoraSeeder extends Seeder
         $password = Hash::make('Prueba123!');
         $ahora = now();
 
-        DB::table('areas_propedeuticas')->insertOrIgnore([
-            ['id_area_propedeutica' => 1, 'nombre' => 'Físico-Matemáticas', 'is_active' => 1],
-            ['id_area_propedeutica' => 2, 'nombre' => 'Humanidades', 'is_active' => 1],
-            ['id_area_propedeutica' => 3, 'nombre' => 'Ciencias Sociales', 'is_active' => 1],
-        ]);
-
         // Cuentas adicionales de personal para probar el CRUD.
         DB::table('usuarios')->insertOrIgnore([
             [
@@ -111,8 +105,15 @@ class PersonalBitacoraSeeder extends Seeder
                 'nombre' => 'Ana',
                 'apellido_paterno' => 'Torres',
                 'apellido_materno' => 'Vargas',
+                'curp' => 'TOVA850314MDFRRT09',
+                'rfc' => 'TOMV850314AB1',
                 'matricula_rfc' => 'DOC-MAT-002',
                 'correo_institucional' => 'matematicas@eba-amr.edu.mx',
+                'horas_semanales' => 30,
+                'licenciatura' => 'Licenciatura en Matemáticas Aplicadas',
+                'especialidad' => 'Especialidad en Didáctica de las Matemáticas',
+                'maestria' => null,
+                'doctorado' => null,
                 'is_active' => 1,
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
@@ -125,8 +126,15 @@ class PersonalBitacoraSeeder extends Seeder
                 'nombre' => 'Luis',
                 'apellido_paterno' => 'Ramírez',
                 'apellido_materno' => 'Cruz',
+                'curp' => 'RACR790521HDFLMN05',
+                'rfc' => 'RACR790521CD2',
                 'matricula_rfc' => 'DOC-ESP-003',
                 'correo_institucional' => 'espanol@eba-amr.edu.mx',
+                'horas_semanales' => 28,
+                'licenciatura' => 'Licenciatura en Lengua y Literatura Hispánica',
+                'especialidad' => null,
+                'maestria' => 'Maestría en Lingüística Aplicada',
+                'doctorado' => null,
                 'is_active' => 1,
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
@@ -139,8 +147,15 @@ class PersonalBitacoraSeeder extends Seeder
                 'nombre' => 'Carla',
                 'apellido_paterno' => 'Mendoza',
                 'apellido_materno' => 'Ruiz',
+                'curp' => 'MERU820110MDFCLN03',
+                'rfc' => 'MERU820110EF3',
                 'matricula_rfc' => 'DOC-HIS-004',
                 'correo_institucional' => 'historia@eba-amr.edu.mx',
+                'horas_semanales' => 24,
+                'licenciatura' => 'Licenciatura en Historia',
+                'especialidad' => 'Especialidad en Historia de México',
+                'maestria' => 'Maestría en Ciencias Sociales',
+                'doctorado' => 'Doctorado en Historia',
                 'is_active' => 1,
                 'created_at' => $ahora,
                 'updated_at' => $ahora,

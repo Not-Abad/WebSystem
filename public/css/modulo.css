@@ -765,6 +765,294 @@ body.modulo-body {
     font-size: .72rem;
 }
 
+/* ==========================================================================
+   CATÁLOGOS, GRUPOS Y HORARIOS
+   ========================================================================== */
+
+.horario-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 26px;
+}
+
+.selector-panel input[type="search"] {
+    width: 100%;
+    box-sizing: border-box;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #e6edf3;
+    font-family: 'Raleway', sans-serif;
+    font-size: .88rem;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+
+.selector-panel input[type="search"]:focus {
+    outline: none;
+    border-color: #0066ff;
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, .14);
+}
+
+.selector-lista {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+.selector-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    width: 100%;
+    text-align: left;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: #c9d1d9;
+    font-family: 'Raleway', sans-serif;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease;
+}
+
+.selector-item:hover:not(:disabled) {
+    border-color: #0066ff;
+    background: rgba(0, 102, 255, .08);
+}
+
+.selector-item[hidden] {
+    display: none !important;
+}
+
+.selector-item strong {
+    color: #e6edf3;
+    font-size: .86rem;
+}
+
+.selector-item small {
+    color: #8b949e;
+    font-size: .74rem;
+}
+
+.selector-item.seleccion-activo {
+    border-color: #0066ff;
+    background: rgba(0, 102, 255, .16);
+    box-shadow: inset 3px 0 0 #0066ff;
+}
+
+.selector-item.materia-agotada {
+    opacity: .55;
+}
+
+.selector-item.materia-agotada .materia-contador {
+    color: #ffb366;
+}
+
+.selector-detalle {
+    color: #8b949e !important;
+    line-height: 1.45;
+}
+
+.selector-carga {
+    color: #0066ff !important;
+    font-weight: 700;
+}
+
+.resumen-formacion {
+    flex-basis: 100%;
+    color: #8b949e;
+    line-height: 1.5;
+}
+
+.tabla-docentes {
+    min-width: 1120px;
+}
+
+.tabla-docentes small {
+    display: block;
+    margin-top: 2px;
+}
+
+.carga-docente {
+    color: #0066ff;
+    font-weight: 700;
+}
+
+.detalle-compacto {
+    display: block;
+    color: #8b949e;
+    font-size: .74rem;
+    line-height: 1.4;
+}
+
+.nota-modulo {
+    color: #8b949e;
+    font-size: .8rem;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.panel-bloqueado {
+    opacity: .55;
+}
+
+.panel-bloqueado .selector-item {
+    cursor: not-allowed;
+}
+
+.horario-resumen {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-left: 3px solid #0066ff;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    color: #c9d1d9;
+    font-size: .84rem;
+}
+
+.horario-resumen strong {
+    color: #e6edf3;
+}
+
+.resumen-alerta {
+    color: #ffb366;
+}
+
+.tabla-horario {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+    font-size: .8rem;
+}
+
+.tabla-horario th {
+    background: #0d1117;
+    color: #8b949e;
+    border: 1px solid #30363d;
+    padding: 11px 10px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    font-size: .7rem;
+}
+
+.tabla-horario td {
+    border: 1px solid #30363d;
+    padding: 10px;
+    color: #c9d1d9;
+    vertical-align: middle;
+}
+
+.hora-bloque {
+    white-space: nowrap;
+    color: #8b949e !important;
+    font-size: .76rem;
+}
+
+.celda-horario {
+    min-width: 140px;
+    height: 64px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.celda-horario:hover {
+    background: rgba(0, 102, 255, .12);
+    border-color: #0066ff;
+}
+
+.celda-horario strong {
+    display: block;
+    color: #e6edf3;
+    font-size: .8rem;
+    line-height: 1.25;
+}
+
+.celda-horario small {
+    display: block;
+    color: #8b949e;
+    font-size: .7rem;
+    margin-top: 3px;
+}
+
+.celda-asignada {
+    background: rgba(0, 102, 255, .1);
+    border-color: rgba(0, 102, 255, .55);
+}
+
+.celda-bloqueada,
+.celda-bloqueada:hover {
+    background: rgba(255, 179, 102, .08);
+    border-color: rgba(255, 179, 102, .45);
+    cursor: not-allowed;
+}
+
+.celda-bloqueo {
+    color: #ffb366;
+    font-size: .74rem;
+    font-weight: 700;
+}
+
+.celda-bloqueo i {
+    margin-right: 4px;
+}
+
+.leyenda-horario {
+    color: #8b949e;
+    font-size: .78rem;
+    line-height: 1.5;
+    margin: 14px 0 0;
+}
+
+.leyenda-horario i {
+    color: #ffb366;
+    margin-right: 4px;
+}
+
+.selector-agotado,
+.selector-agotado:hover:not(:disabled) {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.celda-vacia {
+    color: #484f58;
+}
+
+.celda-quitar {
+    margin-top: 5px;
+    background: transparent;
+    border: 1px solid #484f58;
+    border-radius: 4px;
+    color: #8b949e;
+    font-size: .7rem;
+    line-height: 1;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+
+.celda-quitar:hover {
+    border-color: #ff8b94;
+    color: #ff8b94;
+}
+
+.fila-receso td {
+    background: #0d1117;
+    color: #8b949e !important;
+    text-align: center;
+    font-style: italic;
+    letter-spacing: .4px;
+}
+
 @media (max-width: 640px) {
     .archivos-acciones {
         grid-template-columns: 1fr;

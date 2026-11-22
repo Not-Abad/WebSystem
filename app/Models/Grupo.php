@@ -10,10 +10,12 @@ class Grupo extends Model
 {
     protected $table = 'grupos';
     protected $primaryKey = 'id_grupo';
+    public $timestamps = false;
 
     protected $fillable = [
-        'id_periodo',
         'id_semestre',
+        'id_plan',
+        'id_area_propedeutica',
         'nombre',
         'cupo_maximo',
     ];
@@ -22,14 +24,24 @@ class Grupo extends Model
         'cupo_maximo' => 'integer',
     ];
 
-    public function periodo(): BelongsTo
+    public function area(): BelongsTo
     {
-        return $this->belongsTo(PeriodoAcademico::class, 'id_periodo', 'id_periodo');
+        return $this->belongsTo(AreaPropedeutica::class, 'id_area_propedeutica', 'id_area_propedeutica');
     }
 
     public function semestre(): BelongsTo
     {
         return $this->belongsTo(Semestre::class, 'id_semestre', 'id_semestre');
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(PlanEstudio::class, 'id_plan', 'id_plan');
+    }
+
+    public function clases(): HasMany
+    {
+        return $this->hasMany(Clase::class, 'id_grupo', 'id_grupo');
     }
 
     public function alumnos(): HasMany
@@ -39,6 +51,10 @@ class Grupo extends Model
 
     public function etiqueta(): string
     {
-        return trim($this->nombre.' · '.($this->semestre?->nombre ?? 'Sin semestre'));
+        if ($this->area) {
+            return $this->nombre.' de '.$this->area->nombre;
+        }
+
+        return $this->nombre.' · '.($this->semestre?->numero_semestre ?? 'Sin semestre');
     }
 }

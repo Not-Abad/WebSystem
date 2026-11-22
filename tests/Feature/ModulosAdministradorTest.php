@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Alumno;
+use App\Models\Docente;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -25,10 +26,18 @@ class ModulosAdministradorTest extends TestCase
             ->get(route('panel'))
             ->assertOk()
             ->assertSee(route('admin.alumnos.index'))
+            ->assertSee(route('admin.docentes.index'))
             ->assertSee(route('admin.tutores.index'))
             ->assertSee(route('admin.portal.noticias'))
             ->assertSee(route('admin.archivos.index'))
-            ->assertSee('Acceder al módulo');
+            ->assertSee(route('admin.catalogos.index'))
+            ->assertSee(route('admin.grupos.index'))
+            ->assertSee(route('admin.horarios.index'))
+            ->assertSee(route('admin.salones.index'))
+            ->assertSee('AMRV (Antonio María de Rivera Vespertina)')
+            ->assertDontSee('EBA', false)
+            ->assertSee('Acceder al módulo')
+            ->assertDontSee('Próximamente');
     }
 
     public function test_modulos_de_administrador_no_muestran_el_pie_de_pagina(): void
@@ -37,12 +46,18 @@ class ModulosAdministradorTest extends TestCase
 
         foreach ([
             route('admin.alumnos.index'),
+            route('admin.docentes.index'),
             route('admin.tutores.index'),
             route('admin.portal.noticias'),
             route('admin.portal.documentos'),
             route('admin.portal.reportes'),
             route('admin.portal.galeria'),
             route('admin.archivos.index'),
+            route('admin.catalogos.index'),
+            route('admin.catalogos.materias'),
+            route('admin.grupos.index'),
+            route('admin.horarios.index'),
+            route('admin.salones.index'),
         ] as $url) {
             $this->get($url)
                 ->assertOk()
@@ -59,8 +74,13 @@ class ModulosAdministradorTest extends TestCase
             ->get(route('admin.alumnos.index'))
             ->assertForbidden();
 
+        $this->get(route('admin.docentes.index'))->assertForbidden();
         $this->get(route('admin.tutores.index'))->assertForbidden();
         $this->get(route('admin.portal.noticias'))->assertForbidden();
+        $this->get(route('admin.catalogos.index'))->assertForbidden();
+        $this->get(route('admin.grupos.index'))->assertForbidden();
+        $this->get(route('admin.horarios.index'))->assertForbidden();
+        $this->get(route('admin.salones.index'))->assertForbidden();
     }
 
     public function test_administrador_puede_crear_tutor_y_queda_registrado_en_bitacora(): void
@@ -338,5 +358,131 @@ class ModulosAdministradorTest extends TestCase
             'fecha_publicacion' => '2026-11-20 12:00:00',
             'is_active' => 1,
         ])->assertSessionHasErrors(['mes']);
+    }
+
+    public function test_panel_de_administrador_ordena_los_modulos_segun_el_flujo_academico(): void
+    {
+        $respuesta = $this->actingAs($this->administrador())
+            ->get(route('panel'))
+            ->assertOk()
+            ->getContent();
+
+        $orden = [
+            'Alumnos',
+            'Docentes',
+            'Tutores',
+            'Catálogos',
+            'Salones',
+            'Grupos y clases',
+            'Horarios',
+            'Portal web',
+            'Gestor de archivos',
+        ];
+
+        $posicionAnterior = -1;
+        foreach ($orden as $titulo) {
+            $posicion = mb_strpos($respuesta, '>'.$titulo.'</h3>');
+            $this->assertNotFalse($posicion, "No se encontró el módulo {$titulo}.");
+            $this->assertGreaterThan($posicionAnterior, $posicion, "El módulo {$titulo} está fuera de orden.");
+            $posicionAnterior = $posicion;
+        }
+    }
+
+    public function test_administrador_puede_crear_docente_con_perfil_academico(): void
+    {
+        $this->actingAs($this->administrador())
+            ->post(route('admin.docentes.store'), [
+                'nombre' => 'Rosa',
+                'apellido_paterno' => 'Vázquez',
+                'apellido_materno' => 'López',
+                'curp' => 'VAZL910402MDFRRS05',
+                'rfc' => 'VAZL910402GH5',
+                'correo_institucional' => 'rosa.vazquez@eba-amr.edu.mx',
+                'horas_semanales' => 24,
+                'licenciatura' => 'Licenciatura en Física',
+                'especialidad' => '',
+                'maestria' => 'Maestría en Enseñanza de las Ciencias',
+                'doctorado' => '',
+                'id_capacitacion' => '',
+                'id_area_propedeutica' => 1,
+                'username' => 'docente.rosa',
+                'password' => 'Prueba123!',
+                'password_confirmation' => 'Prueba123!',
+            ])
+            ->assertRedirect(route('admin.docentes.index'));
+
+        $usuario = User::where('username', 'docente.rosa')->firstOrFail();
+
+        $this->assertTrue(Hash::check('Prueba123!', $usuario->password_hash));
+        $this->assertEquals(3, $usuario->id_rol);
+
+        $this->assertDatabaseHas('docentes', [
+            'id_usuario' => $usuario->id_usuario,
+            'curp' => 'VAZL910402MDFRRS05',
+            'rfc' => 'VAZL910402GH5',
+            'matricula_rfc' => 'VAZL910402GH5',
+            'horas_semanales' => 24,
+            'licenciatura' => 'Licenciatura en Física',
+            'especialidad' => null,
+            'maestria' => 'Maestría en Enseñanza de las Ciencias',
+            'doctorado' => null,
+            'is_active' => 1,
+        ]);
+
+        $this->assertDatabaseHas('bitacora_auditoria', [
+            'tabla_afectada' => 'docentes',
+            'accion' => 'ALTA',
+        ]);
+    }
+
+    public function test_docente_requiere_curp_rfc_licenciatura_y_tope_de_horas(): void
+    {
+        $this->actingAs($this->administrador())
+            ->post(route('admin.docentes.store'), [
+                'nombre' => 'Sin datos',
+            ])->assertSessionHasErrors([
+                'curp',
+                'rfc',
+                'horas_semanales',
+                'licenciatura',
+                'username',
+                'password',
+            ]);
+
+        $this->post(route('admin.docentes.store'), [
+            'nombre' => 'Tope',
+            'apellido_paterno' => 'Excedido',
+            'curp' => 'TOPE900101HDFRRS06',
+            'rfc' => 'TOPE900101IJ6',
+            'correo_institucional' => 'tope.excedido@eba-amr.edu.mx',
+            'horas_semanales' => 40,
+            'licenciatura' => 'Licenciatura en Química',
+            'username' => 'docente.tope',
+            'password' => 'Prueba123!',
+            'password_confirmation' => 'Prueba123!',
+        ])->assertSessionHasErrors('horas_semanales');
+    }
+
+    public function test_admin_puede_dar_de_baja_a_un_docente_sin_eliminar_su_perfil(): void
+    {
+        $this->actingAs($this->administrador());
+        $docente = Docente::where('rfc', 'TOMV850314AB1')->firstOrFail();
+
+        $this->delete(route('admin.docentes.destroy', $docente))
+            ->assertRedirect(route('admin.docentes.index'));
+
+        $this->assertDatabaseHas('docentes', [
+            'id_docente' => $docente->id_docente,
+            'is_active' => 0,
+        ]);
+        $this->assertDatabaseHas('usuarios', [
+            'id_usuario' => $docente->id_usuario,
+            'is_active' => 0,
+        ]);
+        $this->assertDatabaseHas('bitacora_auditoria', [
+            'tabla_afectada' => 'docentes',
+            'accion' => 'BAJA',
+            'id_registro_afectado' => $docente->id_docente,
+        ]);
     }
 }

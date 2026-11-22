@@ -40,6 +40,16 @@ class LoginTest extends TestCase
             ->assertSee('Expedientes');
     }
 
+    public function test_login_siempre_abre_mi_panel_aunque_haya_una_url_intendida(): void
+    {
+        $this->get(route('admin.alumnos.index'));
+
+        $this->post('/login', [
+            'username' => 'admin.escolar',
+            'password' => 'Prueba123!',
+        ])->assertRedirect(route('panel'));
+    }
+
     public function test_credenciales_incorrectas_no_autentican(): void
     {
         $this->from('/login')->post('/login', [

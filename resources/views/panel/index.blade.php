@@ -38,7 +38,7 @@
 
             <h1>Hola, <span class="panel-usuario">{{ $nombre }}</span></h1>
             <p class="panel-sub">
-                Este es tu espacio dentro del portal institucional de la EBA “Lic. Antonio María de Rivera”.
+                Este es tu espacio de portal institucional de la AMRV (Antonio María de Rivera Vespertina).
             </p>
 
             <form method="POST" action="{{ route('logout') }}">

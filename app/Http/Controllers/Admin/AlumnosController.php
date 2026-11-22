@@ -217,7 +217,7 @@ class AlumnosController extends Controller
         return Semestre::whereKey((int) $idSemestre)->value('numero_semestre');
     }
 
-    private function grupoPerteneceASemestre(Request $request): bool
+    private function grupoEsValido(Request $request): bool
     {
         $idGrupo = $request->input('id_grupo');
         $idSemestre = $request->input('id_semestre');
@@ -226,9 +226,21 @@ class AlumnosController extends Controller
             return false;
         }
 
-        return Grupo::whereKey((int) $idGrupo)
-            ->where('id_semestre', (int) $idSemestre)
-            ->exists();
+        $numeroSemestre = $this->numeroSemestre($request);
+        $consulta = Grupo::whereKey((int) $idGrupo)
+            ->where('id_semestre', (int) $idSemestre);
+
+        if (in_array($numeroSemestre, [5, 6], true)) {
+            $idArea = $request->input('id_area_propedeutica');
+
+            if (! is_numeric($idArea)) {
+                return false;
+            }
+
+            $consulta->where('id_area_propedeutica', (int) $idArea);
+        }
+
+        return $consulta->exists();
     }
 
     /**
@@ -274,8 +286,8 @@ class AlumnosController extends Controller
                 'required',
                 'exists:grupos,id_grupo',
                 function (string $attribute, mixed $value, Closure $fail) use ($request) {
-                    if (! $this->grupoPerteneceASemestre($request)) {
-                        $fail('El grupo seleccionado no corresponde al semestre elegido.');
+                    if (! $this->grupoEsValido($request)) {
+                        $fail('El grupo seleccionado no corresponde al semestre y área elegidos.');
                     }
                 },
             ],
@@ -364,6 +376,7 @@ class AlumnosController extends Controller
                 ->map(fn (Grupo $grupo) => [
                     'id' => $grupo->id_grupo,
                     'id_semestre' => $grupo->id_semestre,
+                    'id_area' => $grupo->id_area_propedeutica,
                     'etiqueta' => $grupo->etiqueta(),
                 ])
                 ->values(),
