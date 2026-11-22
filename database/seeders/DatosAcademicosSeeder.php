@@ -51,6 +51,12 @@ class DatosAcademicosSeeder extends Seeder
             [30, 6, 'QUIM-306', 'Temas Selectos de Química II', 'Propedeutica', 3, 4, 0],
             [31, 5, 'ADM-305', 'Administración I', 'Propedeutica', 3, 5, 0],
             [32, 6, 'ADM-306', 'Administración II', 'Propedeutica', 3, 5, 0],
+            [33, 1, 'EDU-101', 'Educación y valores I', 'Basica', 3, null, 1],
+            [34, 2, 'EDU-102', 'Educación y valores II', 'Basica', 3, null, 1],
+            [35, 3, 'TEC-203', 'Tecnologías de la información I', 'Basica', 3, null, 1],
+            [36, 4, 'TEC-204', 'Tecnologías de la información II', 'Basica', 3, null, 1],
+            [37, 5, 'HUM-307', 'Temas selectos de humanidades', 'Propedeutica', 3, 2, 0],
+            [38, 6, 'CSO-308', 'Temas selectos de ciencias sociales', 'Propedeutica', 3, 3, 0],
         ];
 
         $filas = array_map(function (array $materia) {

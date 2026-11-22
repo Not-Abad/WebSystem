@@ -47,6 +47,16 @@ class PersonalController extends Controller
                         ->orWhere('apellido_paterno', 'like', $like)
                         ->orWhere('apellido_materno', 'like', $like)
                         ->orWhere('matricula_rfc', 'like', $like)
+                        ->orWhere('curp', 'like', $like)
+                        ->orWhere('rfc', 'like', $like)
+                        ->orWhere('numero_personal_sep', 'like', $like)
+                        ->orWhere('contacto', 'like', $like)
+                        ->orWhere('nombramiento', 'like', $like)
+                        ->orWhere('categoria', 'like', $like)
+                        ->orWhere('plaza', 'like', $like)
+                        ->orWhere('sindicato', 'like', $like)
+                        ->orWhere('titulo', 'like', $like)
+                        ->orWhere('cedula_profesional', 'like', $like)
                         ->orWhere('correo_institucional', 'like', $like)
                         ->orWhereHas('usuario', fn ($q) => $q->where('username', 'like', $like));
                 });
@@ -270,6 +280,14 @@ class PersonalController extends Controller
             'especialidad' => trim((string) $request->input('especialidad')) ?: null,
             'maestria' => trim((string) $request->input('maestria')) ?: null,
             'doctorado' => trim((string) $request->input('doctorado')) ?: null,
+            'numero_personal_sep' => mb_strtoupper(trim((string) $request->input('numero_personal_sep'))) ?: null,
+            'contacto' => trim((string) $request->input('contacto')) ?: null,
+            'nombramiento' => trim((string) $request->input('nombramiento')) ?: null,
+            'categoria' => trim((string) $request->input('categoria')) ?: null,
+            'plaza' => trim((string) $request->input('plaza')) ?: null,
+            'sindicato' => trim((string) $request->input('sindicato')) ?: null,
+            'titulo' => trim((string) $request->input('titulo')) ?: null,
+            'cedula_profesional' => mb_strtoupper(trim((string) $request->input('cedula_profesional'))) ?: null,
             'id_capacitacion' => $request->input('id_capacitacion') ?: null,
             'id_area_propedeutica' => $request->input('id_area_propedeutica') ?: null,
         ]);
@@ -322,6 +340,14 @@ class PersonalController extends Controller
             $rules['especialidad'] = ['nullable', 'string', 'max:120'];
             $rules['maestria'] = ['nullable', 'string', 'max:120'];
             $rules['doctorado'] = ['nullable', 'string', 'max:120'];
+            $rules['numero_personal_sep'] = ['nullable', 'string', 'max:30'];
+            $rules['contacto'] = ['nullable', 'string', 'max:60'];
+            $rules['nombramiento'] = ['nullable', 'string', 'max:100'];
+            $rules['categoria'] = ['nullable', 'string', 'max:100'];
+            $rules['plaza'] = ['nullable', 'string', 'max:60'];
+            $rules['sindicato'] = ['nullable', 'string', 'max:100'];
+            $rules['titulo'] = ['nullable', 'string', 'max:120'];
+            $rules['cedula_profesional'] = ['nullable', 'string', 'max:40'];
             $rules['id_capacitacion'] = ['nullable', 'exists:capacitaciones,id_capacitacion'];
             $rules['id_area_propedeutica'] = ['nullable', 'exists:areas_propedeuticas,id_area_propedeutica'];
         }

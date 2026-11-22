@@ -403,6 +403,14 @@ class ModulosAdministradorTest extends TestCase
                 'especialidad' => '',
                 'maestria' => 'Maestría en Enseñanza de las Ciencias',
                 'doctorado' => '',
+                'numero_personal_sep' => 'sep-2026-0099',
+                'contacto' => '228 123 6789',
+                'nombramiento' => 'Interino',
+                'categoria' => 'Profesor de asignatura',
+                'plaza' => 'PLZ-FIS-009',
+                'sindicato' => 'SNTE',
+                'titulo' => 'Título de Licenciada en Física',
+                'cedula_profesional' => 'ced-9988776',
                 'id_capacitacion' => '',
                 'id_area_propedeutica' => 1,
                 'username' => 'docente.rosa',
@@ -426,6 +434,14 @@ class ModulosAdministradorTest extends TestCase
             'especialidad' => null,
             'maestria' => 'Maestría en Enseñanza de las Ciencias',
             'doctorado' => null,
+            'numero_personal_sep' => 'SEP-2026-0099',
+            'contacto' => '228 123 6789',
+            'nombramiento' => 'Interino',
+            'categoria' => 'Profesor de asignatura',
+            'plaza' => 'PLZ-FIS-009',
+            'sindicato' => 'SNTE',
+            'titulo' => 'Título de Licenciada en Física',
+            'cedula_profesional' => 'CED-9988776',
             'is_active' => 1,
         ]);
 
@@ -433,6 +449,50 @@ class ModulosAdministradorTest extends TestCase
             'tabla_afectada' => 'docentes',
             'accion' => 'ALTA',
         ]);
+    }
+
+    public function test_ficha_institucional_del_docente_se_captura_y_se_muestra(): void
+    {
+        $this->actingAs($this->administrador());
+
+        $this->get(route('admin.docentes.create'))
+            ->assertOk()
+            ->assertSee('Número de personal (SEP)')
+            ->assertSee('Contacto')
+            ->assertSee('Nombramiento')
+            ->assertSee('Categoría')
+            ->assertSee('Plaza')
+            ->assertSee('Sindicato')
+            ->assertSee('Título')
+            ->assertSee('Cédula profesional');
+
+        $docente = Docente::firstOrFail();
+        $docente->update([
+            'numero_personal_sep' => 'SEP-2026-0100',
+            'contacto' => '228 123 0100',
+            'nombramiento' => 'Definitivo',
+            'categoria' => 'Profesor de tiempo completo',
+            'plaza' => 'PLZ-010',
+            'sindicato' => 'SNTE',
+            'titulo' => 'Título de Maestro en Educación',
+            'cedula_profesional' => 'CED-0100200',
+        ]);
+
+        $this->get(route('admin.docentes.index', ['q' => 'SEP-2026-0100']))
+            ->assertOk()
+            ->assertSee('SEP-2026-0100')
+            ->assertSee('228 123 0100')
+            ->assertSee('Definitivo')
+            ->assertSee('Profesor de tiempo completo')
+            ->assertSee('PLZ-010')
+            ->assertSee('SNTE')
+            ->assertSee('Título de Maestro en Educación')
+            ->assertSee('CED-0100200');
+
+        $this->get(route('admin.docentes.edit', $docente))
+            ->assertOk()
+            ->assertSee('SEP-2026-0100')
+            ->assertSee('CED-0100200');
     }
 
     public function test_docente_requiere_curp_rfc_licenciatura_y_tope_de_horas(): void

@@ -11,14 +11,14 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar docente</h2>
-                <p>Filtra por nombre, CURP, RFC, licenciatura, grados o usuario de acceso.</p>
+                <p>Filtra por nombre, CURP, RFC, personal SEP, nombramiento, sindicato, título, licenciatura o usuario.</p>
             </div>
         </div>
 
         <form method="GET" action="{{ route('admin.docentes.index') }}" class="filtros">
             <div class="filtro" style="grid-column: span 2;">
                 <label for="q">Búsqueda</label>
-                <input type="search" id="q" name="q" value="{{ $busqueda }}" placeholder="Nombre, CURP, RFC, licenciatura o usuario">
+                <input type="search" id="q" name="q" value="{{ $busqueda }}" placeholder="Nombre, CURP, RFC, personal SEP, nombramiento, sindicato o usuario">
             </div>
             <div class="filtro">
                 <button type="submit" class="btn-modulo btn-primario" style="width: 100%;">
@@ -42,10 +42,13 @@
                     <tr>
                         <th>Nombre</th>
                         <th>CURP / RFC</th>
+                        <th>Personal SEP</th>
+                        <th>Nombramiento / Plaza</th>
+                        <th>Sindicato / Título / Cédula</th>
                         <th>Carga</th>
                         <th>Licenciatura</th>
                         <th>Formación adicional</th>
-                        <th>Correo</th>
+                        <th>Correo / Contacto</th>
                         <th>Estatus</th>
                         <th>Acciones</th>
                     </tr>
@@ -60,6 +63,20 @@
                             <td class="texto-sutil">
                                 <strong>{{ $docente->curp ?: 'Sin CURP' }}</strong><br>
                                 RFC {{ $docente->rfc ?: '—' }}
+                            </td>
+                            <td class="texto-sutil">{{ $docente->numero_personal_sep ?: '—' }}</td>
+                            <td>
+                                <strong>{{ $docente->nombramiento ?: '—' }}</strong>
+                                @if ($docente->categoria || $docente->plaza)
+                                    <small class="detalle-compacto">
+                                        {{ trim(($docente->categoria ?: '').' · '.($docente->plaza ?: ''), ' ·') }}
+                                    </small>
+                                @endif
+                            </td>
+                            <td>
+                                <small class="detalle-compacto">Sindicato: {{ $docente->sindicato ?: '—' }}</small>
+                                <small class="detalle-compacto">Título: {{ $docente->titulo ?: '—' }}</small>
+                                <small class="detalle-compacto">Cédula: {{ $docente->cedula_profesional ?: '—' }}</small>
                             </td>
                             <td>
                                 <span class="carga-docente">{{ $docente->horas_semanales }} h</span>
@@ -77,7 +94,12 @@
                                     <span class="texto-sutil">Sin grados adicionales</span>
                                 @endforelse
                             </td>
-                            <td class="texto-sutil">{{ $docente->correo_institucional }}</td>
+                            <td class="texto-sutil">
+                                {{ $docente->correo_institucional }}
+                                @if ($docente->contacto)
+                                    <small class="detalle-compacto">Contacto: {{ $docente->contacto }}</small>
+                                @endif
+                            </td>
                             <td>
                                 @if ($docente->is_active)
                                     <span class="estado estado-activo"><i class="fas fa-circle-check"></i> Activo</span>
@@ -103,7 +125,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="vacio">No hay docentes que coincidan con la búsqueda.</td>
+                            <td colspan="11" class="vacio">No hay docentes que coincidan con la búsqueda.</td>
                         </tr>
                     @endforelse
                 </tbody>

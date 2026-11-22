@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -40,6 +41,47 @@ class Clase extends Model
     public function horarios(): HasMany
     {
         return $this->hasMany(Horario::class, 'id_clase', 'id_clase');
+    }
+
+    public function evaluaciones(): HasMany
+    {
+        return $this->hasMany(Evaluacion::class, 'id_clase', 'id_clase');
+    }
+
+    public function criterios(): HasMany
+    {
+        return $this->hasMany(CriterioEvaluacion::class, 'id_clase', 'id_clase');
+    }
+
+    public function asistencias(): HasMany
+    {
+        return $this->hasMany(Asistencia::class, 'id_clase', 'id_clase');
+    }
+
+    public function reincoExportaciones(): HasMany
+    {
+        return $this->hasMany(ReincoExportacion::class, 'id_clase', 'id_clase');
+    }
+
+    /**
+     * Alumnos del grupo que siguen activos para efectos de asistencia y calificación.
+     *
+     * @return Collection<int, Alumno>
+     */
+    public function alumnosActivos(): Collection
+    {
+        $grupo = $this->grupo;
+        if (! $grupo) {
+            return new Collection();
+        }
+
+        return $grupo->alumnos()
+            ->whereNotIn('id_estado_alumno', [EstadoAlumno::BAJA_DEFINITIVA, EstadoAlumno::GRADUADO])
+            ->with('usuario')
+            ->orderBy('apellido_paterno')
+            ->orderBy('apellido_materno')
+            ->orderBy('nombre')
+            ->get();
     }
 
     public function docenteNombre(): string

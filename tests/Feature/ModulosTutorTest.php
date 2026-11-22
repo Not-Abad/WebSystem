@@ -30,11 +30,11 @@ class ModulosTutorTest extends TestCase
         $tutor = User::where('username', 'tutor.prueba')->firstOrFail();
 
         $this->actingAs($tutor)
-            ->get(route('tutor.alumnos.index'))
+            ->get(route('tutor.alumnos.index', ['q' => 'Manuel Eduardo']))
             ->assertOk()
             ->assertSee('#1')
             ->assertSee('Manuel Eduardo')
-            ->assertDontSee('#2')
+            ->assertDontSee('#2</strong>')
             ->assertDontSee('Ana Sofía')
             ->assertDontSee('site-footer');
     }

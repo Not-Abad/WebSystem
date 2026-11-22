@@ -27,6 +27,14 @@ class Docente extends Model
         'especialidad',
         'maestria',
         'doctorado',
+        'numero_personal_sep',
+        'contacto',
+        'nombramiento',
+        'categoria',
+        'plaza',
+        'sindicato',
+        'titulo',
+        'cedula_profesional',
         'is_active',
     ];
 
@@ -74,6 +82,11 @@ class Docente extends Model
     public function clases(): HasMany
     {
         return $this->hasMany(Clase::class, 'id_docente', 'id_docente');
+    }
+
+    public function reincoExportaciones(): HasMany
+    {
+        return $this->hasMany(ReincoExportacion::class, 'id_docente', 'id_docente');
     }
 
     public function nombreCompleto(): string

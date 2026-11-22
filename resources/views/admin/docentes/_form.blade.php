@@ -31,7 +31,7 @@
         <div class="form-campo">
             <label for="curp">CURP</label>
             <input type="text" id="curp" name="curp" value="{{ $valor('curp', $docente->curp ?? null) }}" required minlength="18" maxlength="18" pattern="[A-Za-z0-9]{18}" style="text-transform:uppercase;" autocomplete="off">
-            <small>18 caracteres. Se mostrará en la asignación de materias.</small>
+            <small>18 caracteres. Se conserva en la ficha del docente.</small>
         </div>
 
         <div class="form-campo">
@@ -42,6 +42,68 @@
         <div class="form-campo">
             <label for="correo_institucional">Correo institucional</label>
             <input type="email" id="correo_institucional" name="correo_institucional" value="{{ $valor('correo_institucional', $docente->correo_institucional ?? null) }}" required maxlength="120">
+        </div>
+
+        <div class="form-separador">Ficha institucional y nombramiento</div>
+
+        <div class="form-campo">
+            <label for="numero_personal_sep">Número de personal (SEP)</label>
+            <input type="text" id="numero_personal_sep" name="numero_personal_sep"
+                   value="{{ $valor('numero_personal_sep', $docente->numero_personal_sep ?? null) }}"
+                   maxlength="30" style="text-transform:uppercase;" autocomplete="off">
+        </div>
+
+        <div class="form-campo">
+            <label for="contacto">Contacto</label>
+            <input type="text" id="contacto" name="contacto"
+                   value="{{ $valor('contacto', $docente->contacto ?? null) }}"
+                   maxlength="60" placeholder="Teléfono o extensión">
+        </div>
+
+        <div class="form-campo">
+            <label for="nombramiento">Nombramiento</label>
+            <input type="text" id="nombramiento" name="nombramiento"
+                   value="{{ $valor('nombramiento', $docente->nombramiento ?? null) }}"
+                   maxlength="100" placeholder="Ej. Definitivo, interino, PRODEP">
+        </div>
+
+        <div class="form-campo">
+            <label for="categoria">Categoría</label>
+            <input type="text" id="categoria" name="categoria"
+                   value="{{ $valor('categoria', $docente->categoria ?? null) }}"
+                   maxlength="100" placeholder="Ej. Profesor de asignatura">
+        </div>
+
+        <div class="form-campo">
+            <label for="plaza">Plaza</label>
+            <input type="text" id="plaza" name="plaza"
+                   value="{{ $valor('plaza', $docente->plaza ?? null) }}"
+                   maxlength="60">
+        </div>
+
+        <div class="form-campo">
+            <label for="sindicato">Sindicato</label>
+            <input type="text" id="sindicato" name="sindicato"
+                   value="{{ $valor('sindicato', $docente->sindicato ?? null) }}"
+                   maxlength="100">
+        </div>
+
+        <div class="form-campo">
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo"
+                   value="{{ $valor('titulo', $docente->titulo ?? null) }}"
+                   maxlength="120">
+        </div>
+
+        <div class="form-campo">
+            <label for="cedula_profesional">Cédula profesional</label>
+            <input type="text" id="cedula_profesional" name="cedula_profesional"
+                   value="{{ $valor('cedula_profesional', $docente->cedula_profesional ?? null) }}"
+                   maxlength="40" style="text-transform:uppercase;" autocomplete="off">
+        </div>
+
+        <div class="form-campo" style="grid-column: 1 / -1;">
+            <small>RFC y CURP se capturan en la sección de datos personales. Estos datos no se muestran al asignar materias.</small>
         </div>
 
         <div class="form-separador">Carga horaria y formación académica</div>

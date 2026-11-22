@@ -65,8 +65,14 @@ class DatabaseSeeder extends Seeder
         // Planes, materias por semestre y catálogos académicos
         $this->call(DatosAcademicosSeeder::class);
 
+        // Clases de ejemplo para los portales de Docentes y Alumnos
+        $this->call(PortalDocenteSeeder::class);
+
         // Alumnos, tutores y contenido del portal para los módulos de Administrador
         $this->call(AdminModulosSeeder::class);
+
+        // Grupos completos, docentes genéricos y evaluaciones de demostración
+        $this->call(DemoContenidoSeeder::class);
 
         // Estructura de carpetas del gestor de archivos
         $this->call(ArchivosSeeder::class);

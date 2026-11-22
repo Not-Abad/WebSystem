@@ -34,6 +34,14 @@ class DocentesController extends Controller
                         ->orWhere('especialidad', 'like', $like)
                         ->orWhere('maestria', 'like', $like)
                         ->orWhere('doctorado', 'like', $like)
+                        ->orWhere('numero_personal_sep', 'like', $like)
+                        ->orWhere('contacto', 'like', $like)
+                        ->orWhere('nombramiento', 'like', $like)
+                        ->orWhere('categoria', 'like', $like)
+                        ->orWhere('plaza', 'like', $like)
+                        ->orWhere('sindicato', 'like', $like)
+                        ->orWhere('titulo', 'like', $like)
+                        ->orWhere('cedula_profesional', 'like', $like)
                         ->orWhere('correo_institucional', 'like', $like)
                         ->orWhereHas('usuario', fn ($q) => $q->where('username', 'like', $like));
                 });
@@ -202,6 +210,14 @@ class DocentesController extends Controller
             'especialidad' => trim((string) $request->input('especialidad')) ?: null,
             'maestria' => trim((string) $request->input('maestria')) ?: null,
             'doctorado' => trim((string) $request->input('doctorado')) ?: null,
+            'numero_personal_sep' => mb_strtoupper(trim((string) $request->input('numero_personal_sep'))) ?: null,
+            'contacto' => trim((string) $request->input('contacto')) ?: null,
+            'nombramiento' => trim((string) $request->input('nombramiento')) ?: null,
+            'categoria' => trim((string) $request->input('categoria')) ?: null,
+            'plaza' => trim((string) $request->input('plaza')) ?: null,
+            'sindicato' => trim((string) $request->input('sindicato')) ?: null,
+            'titulo' => trim((string) $request->input('titulo')) ?: null,
+            'cedula_profesional' => mb_strtoupper(trim((string) $request->input('cedula_profesional'))) ?: null,
             'id_capacitacion' => $request->input('id_capacitacion') ?: null,
             'id_area_propedeutica' => $request->input('id_area_propedeutica') ?: null,
             'is_active' => $activo,
@@ -240,6 +256,14 @@ class DocentesController extends Controller
             'especialidad' => ['nullable', 'string', 'max:120'],
             'maestria' => ['nullable', 'string', 'max:120'],
             'doctorado' => ['nullable', 'string', 'max:120'],
+            'numero_personal_sep' => ['nullable', 'string', 'max:30'],
+            'contacto' => ['nullable', 'string', 'max:60'],
+            'nombramiento' => ['nullable', 'string', 'max:100'],
+            'categoria' => ['nullable', 'string', 'max:100'],
+            'plaza' => ['nullable', 'string', 'max:60'],
+            'sindicato' => ['nullable', 'string', 'max:100'],
+            'titulo' => ['nullable', 'string', 'max:120'],
+            'cedula_profesional' => ['nullable', 'string', 'max:40'],
             'id_capacitacion' => ['nullable', 'exists:capacitaciones,id_capacitacion'],
             'id_area_propedeutica' => ['nullable', 'exists:areas_propedeuticas,id_area_propedeutica'],
             'username' => ['required', 'string', 'max:60', 'regex:/^[A-Za-z0-9._-]+$/', $usernameRule],
@@ -272,6 +296,14 @@ class DocentesController extends Controller
             'horas_semanales.min' => 'El tope debe ser al menos 1 hora.',
             'horas_semanales.max' => 'El horario permite hasta 35 bloques por semana.',
             'licenciatura.required' => 'Ingresa la licenciatura del docente.',
+            'numero_personal_sep.max' => 'El número de personal SEP no puede superar 30 caracteres.',
+            'contacto.max' => 'El contacto no puede superar 60 caracteres.',
+            'nombramiento.max' => 'El nombramiento no puede superar 100 caracteres.',
+            'categoria.max' => 'La categoría no puede superar 100 caracteres.',
+            'plaza.max' => 'La plaza no puede superar 60 caracteres.',
+            'sindicato.max' => 'El sindicato no puede superar 100 caracteres.',
+            'titulo.max' => 'El título no puede superar 120 caracteres.',
+            'cedula_profesional.max' => 'La cédula profesional no puede superar 40 caracteres.',
             'username.required' => 'Ingresa el usuario de acceso.',
             'username.unique' => 'Ese usuario ya está registrado.',
             'username.regex' => 'El usuario solo puede contener letras, números, puntos, guiones y guiones bajos.',

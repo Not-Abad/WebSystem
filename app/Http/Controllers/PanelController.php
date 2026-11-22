@@ -41,15 +41,14 @@ class PanelController extends Controller
             ['icono' => 'fa-folder-open', 'titulo' => 'Gestor de archivos', 'descripcion' => 'Carpetas, boletas, certificados y documentos institucionales.', 'ruta' => 'admin.archivos.index'],
         ],
         'Docente' => [
-            ['icono' => 'fa-list-check', 'titulo' => 'Criterios de evaluación', 'descripcion' => 'Rubros por parcial con ponderación al 100 %.'],
-            ['icono' => 'fa-star-half-stroke', 'titulo' => 'Calificaciones', 'descripcion' => 'Captura de calificaciones de 0.00 a 10.00.'],
-            ['icono' => 'fa-clock', 'titulo' => 'Mi horario', 'descripcion' => 'Consulta de la carga horaria asignada.'],
+            ['icono' => 'fa-clock', 'titulo' => 'Mi horario', 'descripcion' => 'Consulta tus materias, grupos y bloques asignados.', 'ruta' => 'docente.horario.index'],
+            ['icono' => 'fa-list-check', 'titulo' => 'Asistencia y evaluación', 'descripcion' => 'Asistencia diaria, criterios por parcial y calificaciones.', 'ruta' => 'docente.horario.index'],
+            ['icono' => 'fa-file-excel', 'titulo' => 'Formatos REINCO', 'descripcion' => 'Genera y guarda los formatos 205 y 206 en Excel.', 'ruta' => 'docente.reinco.index'],
         ],
         'Alumno' => [
-            ['icono' => 'fa-address-card', 'titulo' => 'Expediente académico', 'descripcion' => 'Datos personales, plan de estudio y carga horaria.'],
-            ['icono' => 'fa-list-check', 'titulo' => 'Criterios', 'descripcion' => 'Rubros de evaluación de cada materia.'],
-            ['icono' => 'fa-star-half-stroke', 'titulo' => 'Calificaciones', 'descripcion' => 'Desglose de calificaciones por parcial.'],
-            ['icono' => 'fa-file-pdf', 'titulo' => 'Boletas', 'descripcion' => 'Descarga de boletas oficiales del semestre.'],
+            ['icono' => 'fa-book-open', 'titulo' => 'Mis materias', 'descripcion' => 'Horario, docentes y grupos de tu semestre.', 'ruta' => 'alumno.materias.index'],
+            ['icono' => 'fa-list-check', 'titulo' => 'Criterios y fechas', 'descripcion' => 'Rubros de evaluación y fechas de exámenes publicados.', 'ruta' => 'alumno.materias.index'],
+            ['icono' => 'fa-star-half-stroke', 'titulo' => 'Calificaciones y asistencia', 'descripcion' => 'Desglose de porcentajes y asistencia registrada.', 'ruta' => 'alumno.materias.index'],
         ],
         'Tutor' => [
             ['icono' => 'fa-chart-line', 'titulo' => 'Seguimiento académico', 'descripcion' => 'Desempeño y estatus de los estudiantes bajo tu tutela.', 'ruta' => 'tutor.alumnos.index'],

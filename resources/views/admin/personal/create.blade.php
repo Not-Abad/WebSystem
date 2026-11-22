@@ -101,6 +101,48 @@
                         <input type="text" id="doctorado" name="doctorado" value="{{ old('doctorado') }}" maxlength="120">
                     </div>
 
+                    <div class="form-separador">Ficha institucional y nombramiento (opcional)</div>
+
+                    <div class="form-campo">
+                        <label for="numero_personal_sep">Número de personal (SEP)</label>
+                        <input type="text" id="numero_personal_sep" name="numero_personal_sep" value="{{ old('numero_personal_sep') }}" maxlength="30" style="text-transform:uppercase;">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="contacto">Contacto</label>
+                        <input type="text" id="contacto" name="contacto" value="{{ old('contacto') }}" maxlength="60" placeholder="Teléfono o extensión">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="nombramiento">Nombramiento</label>
+                        <input type="text" id="nombramiento" name="nombramiento" value="{{ old('nombramiento') }}" maxlength="100">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="categoria">Categoría</label>
+                        <input type="text" id="categoria" name="categoria" value="{{ old('categoria') }}" maxlength="100">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="plaza">Plaza</label>
+                        <input type="text" id="plaza" name="plaza" value="{{ old('plaza') }}" maxlength="60">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="sindicato">Sindicato</label>
+                        <input type="text" id="sindicato" name="sindicato" value="{{ old('sindicato') }}" maxlength="100">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="titulo">Título</label>
+                        <input type="text" id="titulo" name="titulo" value="{{ old('titulo') }}" maxlength="120">
+                    </div>
+
+                    <div class="form-campo">
+                        <label for="cedula_profesional">Cédula profesional</label>
+                        <input type="text" id="cedula_profesional" name="cedula_profesional" value="{{ old('cedula_profesional') }}" maxlength="40" style="text-transform:uppercase;">
+                    </div>
+
                     <div class="form-campo">
                         <label for="id_capacitacion">Capacitación (opcional)</label>
                         <select id="id_capacitacion" name="id_capacitacion">

@@ -58,13 +58,23 @@ class ModulosPersonalTest extends TestCase
             ->assertOk()
             ->assertSee('curp')
             ->assertSee('horas_semanales')
-            ->assertSee('licenciatura');
+            ->assertSee('licenciatura')
+            ->assertSee('numero_personal_sep')
+            ->assertSee('contacto')
+            ->assertSee('nombramiento')
+            ->assertSee('categoria')
+            ->assertSee('plaza')
+            ->assertSee('sindicato')
+            ->assertSee('titulo')
+            ->assertSee('cedula_profesional');
 
         $this->get(route('admin.personal.edit', $docente))
             ->assertOk()
             ->assertSee('Maestría')
             ->assertSee('Doctorado')
-            ->assertSee('35');
+            ->assertSee('35')
+            ->assertSee('Número de personal (SEP)')
+            ->assertSee('Cédula profesional');
     }
 
     public function test_superusuario_puede_crear_administrador_y_queda_en_bitacora(): void
