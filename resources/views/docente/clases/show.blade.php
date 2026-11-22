@@ -130,7 +130,7 @@
     <div class="docente-cabecera">
         <div>
             <h2>Fechas de exámenes y entregas</h2>
-            <p class="docente-ayuda">Configura las tres evaluaciones. Estas fechas serán visibles para los alumnos.</p>
+            <p class="docente-ayuda">Configura las tres evaluaciones. El tipo determina qué fechas se capturan; serán visibles para los alumnos.</p>
         </div>
     </div>
 
@@ -141,26 +141,30 @@
                 @php
                     $evaluacion = $clase->evaluaciones->firstWhere('parcial', $parcial);
                     $prefijo = 'evaluaciones.'.$loop->index;
+                    $nombre = 'evaluaciones['.$loop->index.']';
+                    $tipo = old($prefijo.'.tipo', $evaluacion?->tipo ?? 'examen');
+                    $conExamen = in_array($tipo, ['examen', 'ambos'], true);
+                    $conProyecto = in_array($tipo, ['proyecto', 'ambos'], true);
                 @endphp
                 <div class="docente-evaluacion">
                     <h3>{{ ['Primera', 'Segunda', 'Tercera'][$parcial - 1] }} evaluación</h3>
-                    <input type="hidden" name="{{ $prefijo }}[parcial]" value="{{ $parcial }}">
+                    <input type="hidden" name="{{ $nombre }}[parcial]" value="{{ $parcial }}">
                     <label>
                         Tipo
-                        <select name="{{ $prefijo }}[tipo]">
+                        <select class="evaluacion-tipo" name="{{ $nombre }}[tipo]">
                             @foreach (['examen' => 'Examen', 'proyecto' => 'Proyecto', 'ambos' => 'Examen y proyecto'] as $valor => $etiqueta)
-                                <option value="{{ $valor }}" {{ old($prefijo.'.tipo', $evaluacion?->tipo ?? 'examen') === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
+                                <option value="{{ $valor }}" {{ $tipo === $valor ? 'selected' : '' }}>{{ $etiqueta }}</option>
                             @endforeach
                         </select>
                     </label>
-                    <label>
+                    <label data-fecha="examen" {{ $conExamen ? '' : 'hidden' }}>
                         Fecha de examen
-                        <input type="date" name="{{ $prefijo }}[fecha_examen]"
+                        <input type="date" name="{{ $nombre }}[fecha_examen]"
                                value="{{ old($prefijo.'.fecha_examen', $evaluacion?->fecha_examen?->format('Y-m-d')) }}">
                     </label>
-                    <label>
+                    <label data-fecha="proyecto" {{ $conProyecto ? '' : 'hidden' }}>
                         Fecha de entrega de proyecto
-                        <input type="date" name="{{ $prefijo }}[fecha_entrega_proyecto]"
+                        <input type="date" name="{{ $nombre }}[fecha_entrega_proyecto]"
                                value="{{ old($prefijo.'.fecha_entrega_proyecto', $evaluacion?->fecha_entrega_proyecto?->format('Y-m-d')) }}">
                     </label>
                 </div>
@@ -359,6 +363,23 @@
 @push('scripts')
 <script>
 (function () {
+    document.querySelectorAll('.docente-evaluacion').forEach((bloque) => {
+        const tipo = bloque.querySelector('.evaluacion-tipo');
+        const fechaExamen = bloque.querySelector('[data-fecha="examen"]');
+        const fechaProyecto = bloque.querySelector('[data-fecha="proyecto"]');
+        if (! tipo || ! fechaExamen || ! fechaProyecto) {
+            return;
+        }
+
+        function actualizarFechas() {
+            fechaExamen.hidden = ! ['examen', 'ambos'].includes(tipo.value);
+            fechaProyecto.hidden = ! ['proyecto', 'ambos'].includes(tipo.value);
+        }
+
+        tipo.addEventListener('change', actualizarFechas);
+        actualizarFechas();
+    });
+
     document.querySelectorAll('[data-criterios-parcial]').forEach((contenedor) => {
         const banco = contenedor.querySelector('.banco-criterios');
         if (! banco) {

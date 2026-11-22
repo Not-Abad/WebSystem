@@ -171,7 +171,28 @@ class ClaseController extends Controller
         $docente = $this->docente();
         $clase = $this->clase($docente, $clase);
 
-        Validator::make($request->all(), [
+        // Solo se guardan las fechas que corresponden al tipo indicado. Así,
+        // una evaluación de examen no arrastra una fecha de proyecto previa.
+        $filas = collect($request->input('evaluaciones', []))
+            ->map(function ($fila) {
+                $tipo = $fila['tipo'] ?? 'examen';
+
+                return [
+                    'parcial' => $fila['parcial'] ?? null,
+                    'tipo' => $tipo,
+                    'fecha_examen' => in_array($tipo, ['examen', 'ambos'], true)
+                        ? ($fila['fecha_examen'] ?? null)
+                        : null,
+                    'fecha_entrega_proyecto' => in_array($tipo, ['proyecto', 'ambos'], true)
+                        ? ($fila['fecha_entrega_proyecto'] ?? null)
+                        : null,
+                ];
+            })
+            ->values()
+            ->all();
+        $request->merge(['evaluaciones' => $filas]);
+
+        $validator = Validator::make($request->all(), [
             'evaluaciones' => ['required', 'array', 'size:3'],
             'evaluaciones.*.parcial' => ['required', 'integer', Rule::in([1, 2, 3])],
             'evaluaciones.*.tipo' => ['required', Rule::in(['examen', 'proyecto', 'ambos'])],
@@ -180,9 +201,30 @@ class ClaseController extends Controller
         ], [
             'evaluaciones.size' => 'Deben configurarse las tres evaluaciones.',
             'evaluaciones.*.tipo.in' => 'El tipo de evaluación no es válido.',
-        ])->validate();
+        ]);
 
-        $parciales = collect($request->input('evaluaciones'))->pluck('parcial')->map('intval')->all();
+        $validator->after(function ($validator) use ($filas) {
+            foreach ($filas as $indice => $fila) {
+                if (in_array($fila['tipo'], ['examen', 'ambos'], true) && empty($fila['fecha_examen'])) {
+                    $validator->errors()->add(
+                        'evaluaciones.'.$indice.'.fecha_examen',
+                        'Selecciona la fecha de examen de esta evaluación.'
+                    );
+                }
+                if (in_array($fila['tipo'], ['proyecto', 'ambos'], true) && empty($fila['fecha_entrega_proyecto'])) {
+                    $validator->errors()->add(
+                        'evaluaciones.'.$indice.'.fecha_entrega_proyecto',
+                        'Selecciona la fecha de entrega del proyecto de esta evaluación.'
+                    );
+                }
+            }
+        });
+        $validator->validate();
+
+        $parciales = collect($request->input('evaluaciones'))
+            ->pluck('parcial')
+            ->map(fn ($parcial) => (int) $parcial)
+            ->all();
         abort_unless(count(array_unique($parciales)) === 3, 422, 'Cada evaluación debe tener un parcial distinto.');
 
         DB::transaction(function () use ($request, $clase, $docente) {

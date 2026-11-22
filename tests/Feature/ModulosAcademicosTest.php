@@ -392,10 +392,12 @@ class ModulosAcademicosTest extends TestCase
             'hora_inicio' => '15:50:00',
             'hora_fin' => '16:40:00',
         ]);
-        $this->assertDatabaseMissing('horarios', [
-            'dia_semana' => 'Lunes',
-            'hora_inicio' => '15:00:00',
-        ]);
+        // La celda anterior desaparece del horario de este grupo (otros grupos
+        // pueden seguir usando ese mismo día y hora en salones distintos).
+        $this->assertSame(0, \App\Models\Horario::whereHas('clase', fn ($q) => $q->where('id_grupo', 3))
+            ->where('dia_semana', 'Lunes')
+            ->where('hora_inicio', '15:00:00')
+            ->count());
     }
 
     public function test_horario_rechaza_materia_de_otro_semestre_docente_solapado_y_salon_ocupado(): void

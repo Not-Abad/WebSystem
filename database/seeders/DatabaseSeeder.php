@@ -74,6 +74,9 @@ class DatabaseSeeder extends Seeder
         // Grupos completos, docentes genéricos y evaluaciones de demostración
         $this->call(DemoContenidoSeeder::class);
 
+        // Horarios completos para los 22 grupos con salones y docentes adicionales
+        $this->call(HorariosCompletosSeeder::class);
+
         // Estructura de carpetas del gestor de archivos
         $this->call(ArchivosSeeder::class);
     }

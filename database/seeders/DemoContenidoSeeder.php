@@ -203,11 +203,25 @@ class DemoContenidoSeeder extends Seeder
             ['20:30:00', '21:20:00'],
         ];
 
+        // Se precarga lo sembrado por PortalDocenteSeeder para no empalmar.
+        $celdasSalon = [];
+        $celdasDocente = [];
+        $celdasGrupo = [];
+        foreach (DB::table('horarios')
+            ->join('clases', 'clases.id_clase', '=', 'horarios.id_clase')
+            ->select('horarios.*', 'clases.id_docente', 'clases.id_grupo')
+            ->get() as $horario) {
+            $clave = $horario->dia_semana.'|'.substr($horario->hora_inicio, 0, 8).'|'.substr($horario->hora_fin, 0, 8);
+            $celdasSalon[$horario->id_salon][$clave] = true;
+            $celdasDocente[$horario->id_docente][$clave] = true;
+            $celdasGrupo[$horario->id_grupo][$clave] = true;
+        }
+
         $idClase = 3;
         $idHorario = 5;
         $primerasClases = [];
 
-        foreach ($asignaciones as $indice => $asignacion) {
+        foreach ($asignaciones as $asignacion) {
             [$idGrupo, $semestre, $idMateria, $idDocente] = $asignacion;
 
             DB::table('clases')->insertOrIgnore([
@@ -220,16 +234,31 @@ class DemoContenidoSeeder extends Seeder
                 'updated_at' => $ahora,
             ]);
 
-            $bloque = $bloques[intdiv($indice, count($salones) * count($dias)) % count($bloques)];
+            [$dia, $inicio, $fin, $idSalon] = $this->siguienteCeldaLibre(
+                $dias,
+                $bloques,
+                $salones,
+                (int) $idGrupo,
+                (int) $idDocente,
+                $celdasGrupo,
+                $celdasDocente,
+                $celdasSalon
+            );
+
             DB::table('horarios')->insertOrIgnore([
                 'id_horario' => $idHorario,
                 'id_clase' => $idClase,
-                'dia_semana' => $dias[intdiv($indice, count($salones)) % count($dias)],
-                'hora_inicio' => $bloque[0],
-                'hora_fin' => $bloque[1],
+                'dia_semana' => $dia,
+                'hora_inicio' => $inicio,
+                'hora_fin' => $fin,
                 'aula' => null,
-                'id_salon' => $salones[$indice % count($salones)],
+                'id_salon' => $idSalon,
             ]);
+
+            $clave = $dia.'|'.$inicio.'|'.$fin;
+            $celdasSalon[$idSalon][$clave] = true;
+            $celdasDocente[$idDocente][$clave] = true;
+            $celdasGrupo[$idGrupo][$clave] = true;
 
             if (! isset($primerasClases[$idGrupo])) {
                 $primerasClases[$idGrupo] = ['id_clase' => $idClase, 'semestre' => $semestre];
@@ -242,6 +271,43 @@ class DemoContenidoSeeder extends Seeder
         foreach ($primerasClases as $datos) {
             $this->capturarEvaluaciones($datos['id_clase'], $ahora);
         }
+    }
+
+    /**
+     * @param  array<int, string>  $dias
+     * @param  array<int, array<int, string>>  $bloques
+     * @param  array<int, int>  $salones
+     * @param  array<int, array<string, bool>>  $celdasGrupo
+     * @param  array<int, array<string, bool>>  $celdasDocente
+     * @param  array<int, array<string, bool>>  $celdasSalon
+     * @return array{0: string, 1: string, 2: string, 3: int}
+     */
+    private function siguienteCeldaLibre(
+        array $dias,
+        array $bloques,
+        array $salones,
+        int $idGrupo,
+        int $idDocente,
+        array $celdasGrupo,
+        array $celdasDocente,
+        array $celdasSalon
+    ): array {
+        foreach ($dias as $dia) {
+            foreach ($bloques as [$inicio, $fin]) {
+                $clave = $dia.'|'.$inicio.'|'.$fin;
+                foreach ($salones as $idSalon) {
+                    if (isset($celdasGrupo[$idGrupo][$clave])
+                        || isset($celdasDocente[$idDocente][$clave])
+                        || isset($celdasSalon[$idSalon][$clave])) {
+                        continue;
+                    }
+
+                    return [$dia, $inicio, $fin, $idSalon];
+                }
+            }
+        }
+
+        throw new \RuntimeException('No hay celdas libres para el grupo '.$idGrupo);
     }
 
     private function capturarEvaluaciones(int $idClase, $ahora): void

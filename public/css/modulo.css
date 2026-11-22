@@ -3,6 +3,10 @@
    Paleta: dark #161b22 / azul #0066ff / Raleway.
    ========================================================================== */
 
+[hidden] {
+    display: none !important;
+}
+
 body.modulo-body {
     margin: 0;
     padding: 0;
@@ -1396,6 +1400,7 @@ body.modulo-body {
     background: #0d1117;
     border: 1px solid #30363d;
     border-radius: 5px;
+    box-sizing: border-box;
     color: #e6edf3;
     font-family: inherit;
     font-size: .78rem;
@@ -1513,18 +1518,18 @@ body.modulo-body {
 
 .banco-criterios {
     display: grid;
-    gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .criterio-opcion {
-    align-items: center;
+    align-items: start;
     background: #0d1117;
     border: 1px solid #30363d;
     border-radius: 6px;
     display: grid;
-    gap: 12px;
-    grid-template-columns: minmax(140px, 1fr) minmax(180px, 1fr);
+    gap: 10px;
+    grid-template-columns: minmax(0, 1fr);
     padding: 12px;
 }
 
@@ -1551,8 +1556,8 @@ body.modulo-body {
 
 .criterio-campos {
     display: grid;
-    gap: 8px;
-    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .criterio-campos label {
@@ -1561,6 +1566,12 @@ body.modulo-body {
     flex-direction: column;
     font-size: .7rem;
     gap: 4px;
+    min-width: 0;
+}
+
+.criterio-opcion input {
+    max-width: 100%;
+    min-width: 0;
 }
 
 .criterio-opcion input:disabled {
@@ -1573,8 +1584,7 @@ body.modulo-body {
     color: #ff8b94;
 }
 
-@media (max-width: 900px) {
-    .criterio-opcion,
+@media (max-width: 520px) {
     .criterio-campos {
         grid-template-columns: 1fr;
     }

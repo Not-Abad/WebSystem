@@ -6,6 +6,7 @@ use App\Models\Clase;
 use App\Models\ReincoExportacion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use ZipArchive;
@@ -28,13 +29,81 @@ class PortalDocenteTest extends TestCase
         $this->actingAs($docente)
             ->post(route('docente.clases.evaluaciones', $clase), [
                 'evaluaciones' => [
-                    ['parcial' => 1, 'tipo' => 'ambos', 'fecha_examen' => '2026-11-30', 'fecha_entrega_proyecto' => '2026-12-05'],
-                    ['parcial' => 2, 'tipo' => 'examen', 'fecha_examen' => '2027-01-20', 'fecha_entrega_proyecto' => ''],
-                    ['parcial' => 3, 'tipo' => 'proyecto', 'fecha_examen' => '', 'fecha_entrega_proyecto' => '2027-03-10'],
+                    ['parcial' => '1', 'tipo' => 'ambos', 'fecha_examen' => '2026-11-30', 'fecha_entrega_proyecto' => '2026-12-05'],
+                    ['parcial' => '2', 'tipo' => 'examen', 'fecha_examen' => '2027-01-20', 'fecha_entrega_proyecto' => ''],
+                    ['parcial' => '3', 'tipo' => 'proyecto', 'fecha_examen' => '', 'fecha_entrega_proyecto' => '2027-03-10'],
                 ],
             ])->assertRedirect();
 
         return $clase;
+    }
+
+    public function test_las_fechas_guardadas_dependen_del_tipo_de_evaluacion(): void
+    {
+        $clase = Clase::findOrFail(1);
+
+        $this->actingAs($this->usuario('docente.historia'))
+            ->post(route('docente.clases.evaluaciones', $clase), [
+                'evaluaciones' => [
+                    ['parcial' => '1', 'tipo' => 'examen', 'fecha_examen' => '2026-11-30', 'fecha_entrega_proyecto' => '2026-12-05'],
+                    ['parcial' => '2', 'tipo' => 'proyecto', 'fecha_examen' => '2027-01-20', 'fecha_entrega_proyecto' => '2027-02-10'],
+                    ['parcial' => '3', 'tipo' => 'ambos', 'fecha_examen' => '2027-03-01', 'fecha_entrega_proyecto' => '2027-03-10'],
+                ],
+            ])->assertRedirect();
+
+        $evaluaciones = DB::table('evaluaciones')->where('id_clase', 1)->orderBy('parcial')->get()->keyBy('parcial');
+
+        $this->assertSame('examen', $evaluaciones[1]->tipo);
+        $this->assertSame('2026-11-30', $evaluaciones[1]->fecha_examen);
+        $this->assertNull($evaluaciones[1]->fecha_entrega_proyecto);
+
+        $this->assertSame('proyecto', $evaluaciones[2]->tipo);
+        $this->assertNull($evaluaciones[2]->fecha_examen);
+        $this->assertSame('2027-02-10', $evaluaciones[2]->fecha_entrega_proyecto);
+
+        $this->assertSame('ambos', $evaluaciones[3]->tipo);
+        $this->assertSame('2027-03-01', $evaluaciones[3]->fecha_examen);
+        $this->assertSame('2027-03-10', $evaluaciones[3]->fecha_entrega_proyecto);
+    }
+
+    public function test_el_tipo_de_evaluacion_exige_solo_su_fecha_correspondiente(): void
+    {
+        $clase = Clase::findOrFail(1);
+
+        $this->actingAs($this->usuario('docente.historia'))
+            ->post(route('docente.clases.evaluaciones', $clase), [
+                'evaluaciones' => [
+                    ['parcial' => '1', 'tipo' => 'examen', 'fecha_examen' => '', 'fecha_entrega_proyecto' => '2026-12-05'],
+                    ['parcial' => '2', 'tipo' => 'proyecto', 'fecha_examen' => '2027-01-20', 'fecha_entrega_proyecto' => ''],
+                    ['parcial' => '3', 'tipo' => 'examen', 'fecha_examen' => '2027-03-01', 'fecha_entrega_proyecto' => ''],
+                ],
+            ])->assertSessionHasErrors([
+                'evaluaciones.0.fecha_examen',
+                'evaluaciones.1.fecha_entrega_proyecto',
+            ]);
+    }
+
+    public function test_el_formulario_muestra_solo_las_fechas_del_tipo_seleccionado(): void
+    {
+        $docente = $this->usuario('docente.historia');
+        $this->configurarEvaluaciones($docente);
+
+        $html = $this->actingAs($docente)
+            ->get(route('docente.clases.show', 1))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/data-fecha="examen"[^>]*>/',
+            $html
+        );
+        $this->assertMatchesRegularExpression(
+            '/data-fecha="proyecto"[^>]*hidden/',
+            $html
+        );
+        $this->assertStringContainsString('name="evaluaciones[0][parcial]"', $html);
+        $this->assertStringContainsString('name="evaluaciones[0][tipo]"', $html);
+        $this->assertStringContainsString('name="evaluaciones[0][fecha_examen]"', $html);
     }
 
     public function test_panel_del_docente_enlaza_sus_modulos_reales(): void
