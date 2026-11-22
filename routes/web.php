@@ -16,6 +16,7 @@ use App\Http\Controllers\Alumno\MateriasController as AlumnoMateriasController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Docente\ClaseController as DocenteClaseController;
 use App\Http\Controllers\Docente\HorarioController as DocenteHorarioController;
+use App\Http\Controllers\Docente\PerfilController as DocentePerfilController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\Tutor\AlumnosController as TutorAlumnosController;
 use Illuminate\Support\Facades\Route;
@@ -159,6 +160,9 @@ Route::middleware(['auth', 'role:Docente'])
     ->name('docente.')
     ->group(function () {
         Route::get('/horario', [DocenteHorarioController::class, 'index'])->name('horario.index');
+
+        Route::get('/mis-datos', [DocentePerfilController::class, 'index'])->name('perfil.index');
+        Route::post('/mis-datos/foto', [DocentePerfilController::class, 'actualizarFoto'])->name('perfil.foto');
 
         Route::get('/clases/{clase}', [DocenteClaseController::class, 'show'])->name('clases.show');
         Route::post('/clases/{clase}/asistencia', [DocenteClaseController::class, 'guardarAsistencia'])->name('clases.asistencia');

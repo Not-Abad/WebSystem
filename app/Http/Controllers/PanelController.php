@@ -41,6 +41,7 @@ class PanelController extends Controller
             ['icono' => 'fa-folder-open', 'titulo' => 'Gestor de archivos', 'descripcion' => 'Carpetas, boletas, certificados y documentos institucionales.', 'ruta' => 'admin.archivos.index'],
         ],
         'Docente' => [
+            ['icono' => 'fa-id-card', 'titulo' => 'Mis datos', 'descripcion' => 'Ficha institucional, correo, CURP e imagen de perfil.', 'ruta' => 'docente.perfil.index'],
             ['icono' => 'fa-clock', 'titulo' => 'Mi horario', 'descripcion' => 'Consulta tus materias, grupos y bloques asignados.', 'ruta' => 'docente.horario.index'],
             ['icono' => 'fa-list-check', 'titulo' => 'Asistencia y evaluación', 'descripcion' => 'Asistencia diaria, criterios por parcial y calificaciones.', 'ruta' => 'docente.horario.index'],
             ['icono' => 'fa-file-excel', 'titulo' => 'Formatos REINCO', 'descripcion' => 'Genera y guarda los formatos 205 y 206 en Excel.', 'ruta' => 'docente.reinco.index'],
@@ -58,7 +59,7 @@ class PanelController extends Controller
 
     public function index()
     {
-        $usuario = Auth::user()->load('rol');
+        $usuario = Auth::user()->load('rol', 'docente');
         $rol = $usuario->rol?->nombre ?? 'Invitado';
 
         return view('panel.index', [
@@ -67,6 +68,7 @@ class PanelController extends Controller
             'rol' => $rol,
             'iconoRol' => self::ICONOS[$rol] ?? 'fa-user',
             'colorRol' => self::COLORES[$rol] ?? '#0066ff',
+            'fotoPerfilUrl' => $usuario->docente?->fotoPerfilUrl(),
             'modulos' => self::MODULOS[$rol] ?? [],
         ]);
     }

@@ -34,7 +34,11 @@
                 Sesión activa · {{ $rol }}
             </span>
 
-            <div class="panel-avatar">{{ $iniciales }}</div>
+            @if (! empty($fotoPerfilUrl))
+                <img class="panel-avatar panel-avatar-foto" src="{{ $fotoPerfilUrl }}" alt="Foto de perfil de {{ $nombre }}">
+            @else
+                <div class="panel-avatar">{{ $iniciales }}</div>
+            @endif
 
             <h1>Hola, <span class="panel-usuario">{{ $nombre }}</span></h1>
             <p class="panel-sub">

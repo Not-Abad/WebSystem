@@ -35,6 +35,7 @@ class Docente extends Model
         'sindicato',
         'titulo',
         'cedula_profesional',
+        'foto_perfil_ruta',
         'is_active',
     ];
 
@@ -92,5 +93,12 @@ class Docente extends Model
     public function nombreCompleto(): string
     {
         return trim($this->nombre.' '.$this->apellido_paterno.' '.$this->apellido_materno);
+    }
+
+    public function fotoPerfilUrl(): ?string
+    {
+        $ruta = trim((string) $this->foto_perfil_ruta);
+
+        return $ruta !== '' ? asset('storage/'.$ruta) : null;
     }
 }

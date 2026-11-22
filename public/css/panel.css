@@ -67,6 +67,11 @@ body.panel-body {
     box-shadow: 0 0 0 5px rgba(255, 255, 255, .03);
 }
 
+img.panel-avatar {
+    display: block;
+    object-fit: cover;
+}
+
 .panel-hero h1 {
     font-size: 2.2rem;
     font-weight: 700;
