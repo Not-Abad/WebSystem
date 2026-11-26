@@ -143,6 +143,12 @@ Cuentas creadas (contraseña `Prueba123!` para todas):
 
 El seeder incluye `EvaluacionesCompletasSeeder`, que garantiza que **todos los docentes** tengan clases, evaluaciones, criterios, calificaciones y asistencias; también corrige perfiles docentes que pudieron quedar ligados a cuentas de tutor en cargas anteriores.
 
+Además, `GruposCompletosSeeder` garantiza que **ningún grupo quede vacío**: completa cada grupo con alumnos y tutores, crea una clase cuando hace falta y captura evaluaciones, criterios, calificaciones y asistencias para ese grupo. Si ya tenías la demo cargada antes de actualizar, puedes completarla sin borrar nada:
+
+```bash
+php artisan db:seed --class='Database\Seeders\Demo\GruposCompletosSeeder' --force
+```
+
 Estos datos **no se cargan** con `php artisan migrate:fresh --seed`. Para volver a una instalación limpia y sin demos, ejecuta de nuevo `php artisan migrate:fresh --seed --force`.
 
 ### Pruebas sobre MySQL

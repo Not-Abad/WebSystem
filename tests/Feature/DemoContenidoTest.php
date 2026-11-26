@@ -95,7 +95,27 @@ class DemoContenidoTest extends TestCase
 
             $this->assertGreaterThanOrEqual(3, $evaluaciones, 'Docente '.$idDocente.' sin evaluaciones');
             $this->assertGreaterThanOrEqual(12, $criterios, 'Docente '.$idDocente.' sin criterios');
-            $this->assertGreaterThan(0, $calificaciones, 'Docente '.$idDocente.' sin calificaciones');
+            $this->assertGreaterThanOrEqual(100, $calificaciones, 'Docente '.$idDocente.' con calificaciones incompletas');
+        }
+    }
+
+    public function test_no_hay_grupos_vacios_ni_grupos_sin_calificaciones(): void
+    {
+        foreach (DB::table('grupos')->pluck('id_grupo') as $idGrupo) {
+            $alumnos = DB::table('alumnos')->where('id_grupo', $idGrupo)->count();
+            $clases = DB::table('clases')
+                ->where('id_grupo', $idGrupo)
+                ->where('is_active', 1)
+                ->count();
+            $calificaciones = DB::table('calificaciones')
+                ->join('criterios_evaluacion', 'criterios_evaluacion.id_criterio', '=', 'calificaciones.id_criterio')
+                ->join('clases', 'clases.id_clase', '=', 'criterios_evaluacion.id_clase')
+                ->where('clases.id_grupo', $idGrupo)
+                ->count();
+
+            $this->assertGreaterThanOrEqual(15, $alumnos, 'Grupo '.$idGrupo.' vacío');
+            $this->assertGreaterThanOrEqual(1, $clases, 'Grupo '.$idGrupo.' sin clases');
+            $this->assertGreaterThan(0, $calificaciones, 'Grupo '.$idGrupo.' sin calificaciones');
         }
     }
 

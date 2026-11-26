@@ -14,6 +14,7 @@ use App\Models\Rol;
 use App\Models\Salon;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ModulosAcademicosTest extends TestCase
@@ -530,7 +531,17 @@ class ModulosAcademicosTest extends TestCase
     {
         $this->actingAs($this->administrador());
 
-        $grupo = Grupo::findOrFail(9);
+        $idGrupo = (int) DB::table('grupos')->max('id_grupo') + 1;
+        DB::table('grupos')->insert([
+            'id_grupo' => $idGrupo,
+            'id_semestre' => 3,
+            'id_plan' => 1,
+            'id_area_propedeutica' => null,
+            'nombre' => 'SIN-ALUMNOS',
+            'cupo_maximo' => 45,
+        ]);
+
+        $grupo = Grupo::findOrFail($idGrupo);
         $this->assertSame(0, $grupo->alumnos()->count());
         $this->assertGreaterThan(35, $grupo->cupo_maximo);
 

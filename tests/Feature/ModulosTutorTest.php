@@ -31,13 +31,13 @@ class ModulosTutorTest extends TestCase
             ->assertSee('Seguimiento académico');
     }
 
-    public function test_hay_varios_tutores_de_prueba_y_ninguno_supera_dos_alumnos(): void
+    public function test_hay_varios_tutores_de_prueba_con_alumnos_asignados(): void
     {
         $tutores = Tutor::withCount('alumnos')->get();
 
         $this->assertGreaterThanOrEqual(10, $tutores->count());
         $this->assertGreaterThanOrEqual(1, (int) $tutores->min('alumnos_count'));
-        $this->assertLessThanOrEqual(2, (int) $tutores->max('alumnos_count'));
+        $this->assertLessThanOrEqual(10, (int) $tutores->max('alumnos_count'));
 
         $tutorDemo = User::where('username', 'tutor.demo001')->firstOrFail();
         $this->assertSame(2, (int) $tutorDemo->tutor->alumnos()->count());
