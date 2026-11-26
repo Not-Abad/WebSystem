@@ -69,7 +69,7 @@
     <form method="GET" action="{{ route('docente.clases.show', $clase) }}" class="docente-filtro">
         <input type="hidden" name="horario" value="{{ $horarioSeleccionado?->id_horario ?? '' }}">
         <label for="fecha">Fecha a consultar</label>
-        <input type="date" id="fecha" name="fecha" value="{{ $fechaAsistencia }}" max="{{ now()->toDateString() }}">
+        <input type="date" id="fecha" name="fecha" value="{{ $fechaAsistencia }}" min="2000-01-01" max="{{ now()->toDateString() }}">
         <button type="submit" class="btn-modulo btn-secundario"><i class="fas fa-magnifying-glass"></i> Consultar</button>
     </form>
 
@@ -161,12 +161,14 @@
                     <label data-fecha="examen" {{ $conExamen ? '' : 'hidden' }}>
                         Fecha de examen
                         <input type="date" name="{{ $nombre }}[fecha_examen]"
-                               value="{{ old($prefijo.'.fecha_examen', $evaluacion?->fecha_examen?->format('Y-m-d')) }}">
+                               value="{{ old($prefijo.'.fecha_examen', $evaluacion?->fecha_examen?->format('Y-m-d')) }}"
+                               min="2000-01-01" max="2100-12-31">
                     </label>
                     <label data-fecha="proyecto" {{ $conProyecto ? '' : 'hidden' }}>
                         Fecha de entrega de proyecto
                         <input type="date" name="{{ $nombre }}[fecha_entrega_proyecto]"
-                               value="{{ old($prefijo.'.fecha_entrega_proyecto', $evaluacion?->fecha_entrega_proyecto?->format('Y-m-d')) }}">
+                               value="{{ old($prefijo.'.fecha_entrega_proyecto', $evaluacion?->fecha_entrega_proyecto?->format('Y-m-d')) }}"
+                               min="2000-01-01" max="2100-12-31">
                     </label>
                 </div>
             @endforeach

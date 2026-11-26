@@ -20,7 +20,7 @@
             <input type="date" class="criterio-fecha"
                    name="criterios[{{ $indice }}][fecha_entrega]"
                    value="{{ old('criterios.'.$indice.'.fecha_entrega', $criterio?->fecha_entrega?->format('Y-m-d')) }}"
-                   {{ $criterio ? '' : 'disabled' }}>
+                   min="2000-01-01" max="2100-12-31" {{ $criterio ? '' : 'disabled' }}>
         </label>
     </div>
 </div>

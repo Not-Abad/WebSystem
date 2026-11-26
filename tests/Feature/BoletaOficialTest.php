@@ -129,12 +129,10 @@ class BoletaOficialTest extends TestCase
 
         $idDocente = $docente->docente()->firstOrFail()->id_docente;
         $otra = Clase::where('id_docente', '!=', $idDocente)->firstOrFail();
-        $evaluacion = \App\Models\Evaluacion::create([
-            'id_clase' => $otra->id_clase,
-            'parcial' => 1,
-            'tipo' => 'examen',
-            'fecha_examen' => '2026-11-30',
-        ]);
+        $evaluacion = \App\Models\Evaluacion::firstOrCreate(
+            ['id_clase' => $otra->id_clase, 'parcial' => 1],
+            ['tipo' => 'examen', 'fecha_examen' => '2026-11-30']
+        );
 
         $this->actingAs($docente)
             ->post(route('docente.clases.boleta', [$otra, $evaluacion]), ['columna' => 'AA'])

@@ -13,6 +13,7 @@ use App\Models\ReincoExportacion;
 use App\Services\BitacoraService;
 use App\Services\BoletaService;
 use App\Support\CalificacionService;
+use App\Support\FechaSegura;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -135,18 +136,20 @@ class ClaseController extends Controller
         $alumnos = $clase->alumnosActivos()->keyBy('id_alumno');
 
         Validator::make($request->all(), [
-            'fecha' => ['required', 'date', 'before_or_equal:today'],
+            'fecha' => array_merge(FechaSegura::reglas(), ['before_or_equal:today']),
             'asistencias' => ['required', 'array', 'min:1'],
             'asistencias.*.id_alumno' => ['required', 'integer'],
             'asistencias.*.estatus' => ['required', Rule::in(self::ESTATUS_ASISTENCIA)],
             'asistencias.*.observaciones' => ['nullable', 'string', 'max:200'],
-        ], [
+        ], array_merge([
             'fecha.required' => 'Selecciona la fecha de la asistencia.',
             'fecha.before_or_equal' => 'No se puede registrar asistencia en una fecha futura.',
             'asistencias.required' => 'No se recibieron registros de asistencia.',
             'asistencias.*.estatus.in' => 'El estatus de asistencia no es válido.',
-        ])->validate();
+        ], FechaSegura::mensajes('fecha')))->validate();
 
+        $fecha = FechaSegura::normalizar($request->input('fecha'));
+        $request->merge(['fecha' => $fecha]);
         $registros = $request->input('asistencias', []);
         foreach ($registros as $registro) {
             abort_unless($alumnos->has((int) ($registro['id_alumno'] ?? 0)), 422, 'El alumno no pertenece al grupo de esta clase.');
@@ -196,10 +199,10 @@ class ClaseController extends Controller
                     'parcial' => $fila['parcial'] ?? null,
                     'tipo' => $tipo,
                     'fecha_examen' => in_array($tipo, ['examen', 'ambos'], true)
-                        ? ($fila['fecha_examen'] ?? null)
+                        ? FechaSegura::normalizar($fila['fecha_examen'] ?? null)
                         : null,
                     'fecha_entrega_proyecto' => in_array($tipo, ['proyecto', 'ambos'], true)
-                        ? ($fila['fecha_entrega_proyecto'] ?? null)
+                        ? FechaSegura::normalizar($fila['fecha_entrega_proyecto'] ?? null)
                         : null,
                 ];
             })
@@ -211,12 +214,12 @@ class ClaseController extends Controller
             'evaluaciones' => ['required', 'array', 'size:3'],
             'evaluaciones.*.parcial' => ['required', 'integer', Rule::in([1, 2, 3])],
             'evaluaciones.*.tipo' => ['required', Rule::in(['examen', 'proyecto', 'ambos'])],
-            'evaluaciones.*.fecha_examen' => ['nullable', 'date'],
-            'evaluaciones.*.fecha_entrega_proyecto' => ['nullable', 'date'],
-        ], [
+            'evaluaciones.*.fecha_examen' => FechaSegura::reglas(false),
+            'evaluaciones.*.fecha_entrega_proyecto' => FechaSegura::reglas(false),
+        ], array_merge([
             'evaluaciones.size' => 'Deben configurarse las tres evaluaciones.',
             'evaluaciones.*.tipo.in' => 'El tipo de evaluación no es válido.',
-        ]);
+        ], FechaSegura::mensajes('evaluaciones.*.fecha_examen'), FechaSegura::mensajes('evaluaciones.*.fecha_entrega_proyecto')));
 
         $validator->after(function ($validator) use ($filas) {
             foreach ($filas as $indice => $fila) {
@@ -282,7 +285,7 @@ class ClaseController extends Controller
                 'nombre_rubro' => $fila['nombre_rubro'] ?? $fila['tipo_evidencia'] ?? '',
                 'tipo_evidencia' => $fila['tipo_evidencia'] ?? '',
                 'porcentaje' => $fila['porcentaje'] ?? '',
-                'fecha_entrega' => $fila['fecha_entrega'] ?? '',
+                'fecha_entrega' => FechaSegura::normalizar($fila['fecha_entrega'] ?? null),
             ])
             ->values()
             ->all();
@@ -293,13 +296,13 @@ class ClaseController extends Controller
             'criterios.*.nombre_rubro' => ['required', 'string', 'max:60'],
             'criterios.*.tipo_evidencia' => ['required', 'string', 'max:60', Rule::in(self::BANCO_EVIDENCIAS)],
             'criterios.*.porcentaje' => ['required', 'numeric', 'min:1'],
-            'criterios.*.fecha_entrega' => ['nullable', 'date'],
-        ], [
+            'criterios.*.fecha_entrega' => FechaSegura::reglas(false),
+        ], array_merge([
             'criterios.required' => 'Selecciona al menos un criterio del banco de evaluación.',
             'criterios.min' => 'Selecciona al menos un criterio del banco de evaluación.',
             'criterios.*.porcentaje.min' => 'Cada criterio debe tener un porcentaje mínimo de 1.',
             'criterios.*.tipo_evidencia.in' => 'Selecciona una evidencia del banco institucional.',
-        ]);
+        ], FechaSegura::mensajes('criterios.*.fecha_entrega')));
 
         $validator->after(function ($validator) use ($filas) {
             $total = collect($filas)->sum(fn ($fila) => (float) ($fila['porcentaje'] ?? 0));

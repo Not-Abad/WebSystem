@@ -85,6 +85,24 @@ class PortalDocenteTest extends TestCase
             ]);
     }
 
+    public function test_rechaza_fechas_con_anio_de_cinco_digitos(): void
+    {
+        $clase = Clase::findOrFail(1);
+        $antes = DB::table('evaluaciones')->where('id_clase', $clase->id_clase)->count();
+
+        $this->actingAs($this->usuario('docente.historia'))
+            ->post(route('docente.clases.evaluaciones', $clase), [
+                'evaluaciones' => [
+                    ['parcial' => '1', 'tipo' => 'examen', 'fecha_examen' => '20026-11-30', 'fecha_entrega_proyecto' => ''],
+                    ['parcial' => '2', 'tipo' => 'examen', 'fecha_examen' => '2027-01-20', 'fecha_entrega_proyecto' => ''],
+                    ['parcial' => '3', 'tipo' => 'examen', 'fecha_examen' => '2027-03-01', 'fecha_entrega_proyecto' => ''],
+                ],
+            ])->assertSessionHasErrors(['evaluaciones.0.fecha_examen']);
+
+        $this->assertSame($antes, DB::table('evaluaciones')->where('id_clase', $clase->id_clase)->count());
+        $this->assertDatabaseMissing('evaluaciones', ['fecha_examen' => '20026-11-28']);
+    }
+
     public function test_el_formulario_muestra_solo_las_fechas_del_tipo_seleccionado(): void
     {
         $docente = $this->usuario('docente.historia');

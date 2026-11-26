@@ -395,7 +395,7 @@ class DemoContenidoSeeder extends Seeder
         throw new \RuntimeException('No hay celdas libres para el grupo '.$idGrupo);
     }
 
-    private function capturarEvaluaciones(int $idClase, $ahora): void
+    public function capturarEvaluaciones(int $idClase, $ahora): void
     {
         $tipos = ['ambos', 'examen', 'proyecto'];
         $fechasExamen = ['2026-11-30', '2027-01-20', '2027-03-10'];

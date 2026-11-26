@@ -50,6 +50,24 @@ class ModulosPersonalTest extends TestCase
             ->assertDontSee('Ubicación');
     }
 
+    public function test_control_de_personal_no_mezcla_tutores_con_docentes(): void
+    {
+        $super = User::where('username', 'superadmin')->firstOrFail();
+        $docente = User::where('username', 'docente.horario17')->firstOrFail();
+
+        // Simula un perfil docente ligado por error a una cuenta de tutor.
+        $docente->forceFill(['id_rol' => 5])->save();
+
+        $contenido = $this->actingAs($super)
+            ->get(route('admin.personal.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('docente.horario17', $contenido);
+        $this->assertStringNotContainsString('Tutores registrados', $contenido);
+        $this->assertStringContainsString('docente.historia', $contenido);
+    }
+
     public function test_formularios_de_personal_incluyen_el_perfil_docente(): void
     {
         $super = User::where('username', 'superadmin')->firstOrFail();

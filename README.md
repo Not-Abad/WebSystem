@@ -141,6 +141,8 @@ Cuentas creadas (contraseña `Prueba123!` para todas):
 | Alumno | `alumno.prueba` |
 | Tutor | `tutor.prueba` |
 
+El seeder incluye `EvaluacionesCompletasSeeder`, que garantiza que **todos los docentes** tengan clases, evaluaciones, criterios, calificaciones y asistencias; también corrige perfiles docentes que pudieron quedar ligados a cuentas de tutor en cargas anteriores.
+
 Estos datos **no se cargan** con `php artisan migrate:fresh --seed`. Para volver a una instalación limpia y sin demos, ejecuta de nuevo `php artisan migrate:fresh --seed --force`.
 
 ### Pruebas sobre MySQL

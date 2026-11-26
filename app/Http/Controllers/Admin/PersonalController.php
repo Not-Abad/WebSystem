@@ -27,6 +27,7 @@ class PersonalController extends Controller
         $like = '%'.addcslashes($busqueda, '%_\\').'%';
 
         $administradores = Administrador::with(['usuario', 'puesto'])
+            ->whereHas('usuario', fn ($query) => $query->where('id_rol', Rol::ADMINISTRADOR))
             ->when($busqueda !== '', function ($query) use ($like) {
                 $query->where(function ($query) use ($like) {
                     $query->where('nombre', 'like', $like)
@@ -41,6 +42,7 @@ class PersonalController extends Controller
             ->get();
 
         $docentes = Docente::with('usuario')
+            ->whereHas('usuario', fn ($query) => $query->where('id_rol', Rol::DOCENTE))
             ->when($busqueda !== '', function ($query) use ($like) {
                 $query->where(function ($query) use ($like) {
                     $query->where('nombre', 'like', $like)

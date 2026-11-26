@@ -90,7 +90,8 @@ class HorariosCompletosSeeder extends Seeder
             $iniciales = mb_strtoupper(mb_substr($paterno, 0, 1).mb_substr($materno, 0, 1));
 
             $usuarios[] = [
-                'id_usuario' => 3000 + $idDocente,
+                // Rango propio: DemoContenidoSeeder ya usa 3000+ para tutores.
+                'id_usuario' => 4000 + $idDocente,
                 'id_rol' => 3,
                 'username' => 'docente.horario'.$idDocente,
                 'password_hash' => $password,
@@ -100,7 +101,7 @@ class HorariosCompletosSeeder extends Seeder
 
             $docentes[] = [
                 'id_docente' => $idDocente,
-                'id_usuario' => 3000 + $idDocente,
+                'id_usuario' => 4000 + $idDocente,
                 'id_capacitacion' => $capacitacion,
                 'id_area_propedeutica' => $area,
                 'nombre' => $nombre,

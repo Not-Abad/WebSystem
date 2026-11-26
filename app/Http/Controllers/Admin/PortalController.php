@@ -8,6 +8,7 @@ use App\Models\ImagenGaleria;
 use App\Models\Noticia;
 use App\Models\ReporteFinanciero;
 use App\Services\BitacoraService;
+use App\Support\FechaSegura;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,19 +49,20 @@ class PortalController extends Controller
 
     public function guardarNoticia(Request $request)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), [
             'titulo' => ['required', 'string', 'max:160'],
             'contenido' => ['required', 'string', 'min:20'],
             'imagen_portada_ruta' => ['nullable', 'string', 'max:255'],
-            'fecha_publicacion' => ['required', 'date'],
+            'fecha_publicacion' => FechaSegura::reglasHora(),
             'is_active' => ['boolean'],
-        ], [
+        ], array_merge([
             'titulo.required' => 'Ingresa el título de la noticia.',
             'contenido.required' => 'Ingresa el contenido de la noticia.',
             'contenido.min' => 'El contenido debe tener al menos 20 caracteres.',
             'fecha_publicacion.required' => 'Ingresa la fecha de publicación.',
-            'fecha_publicacion.date' => 'Ingresa una fecha válida.',
-        ])->validate();
+        ], FechaSegura::mensajesHora('fecha_publicacion')))->validate();
 
         DB::transaction(function () use ($request) {
             $noticia = Noticia::create([
@@ -68,7 +70,7 @@ class PortalController extends Controller
                 'titulo' => $request->input('titulo'),
                 'contenido' => $request->input('contenido'),
                 'imagen_portada_ruta' => $request->input('imagen_portada_ruta') ?: null,
-                'fecha_publicacion' => $request->input('fecha_publicacion'),
+                'fecha_publicacion' => FechaSegura::normalizarHora($request->input('fecha_publicacion')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -80,20 +82,22 @@ class PortalController extends Controller
 
     public function actualizarNoticia(Request $request, Noticia $noticia)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), [
             'titulo' => ['required', 'string', 'max:160'],
             'contenido' => ['required', 'string', 'min:20'],
             'imagen_portada_ruta' => ['nullable', 'string', 'max:255'],
-            'fecha_publicacion' => ['required', 'date'],
+            'fecha_publicacion' => FechaSegura::reglasHora(),
             'is_active' => ['boolean'],
-        ])->validate();
+        ], FechaSegura::mensajesHora('fecha_publicacion'))->validate();
 
         DB::transaction(function () use ($request, $noticia) {
             $noticia->update([
                 'titulo' => $request->input('titulo'),
                 'contenido' => $request->input('contenido'),
                 'imagen_portada_ruta' => $request->input('imagen_portada_ruta') ?: null,
-                'fecha_publicacion' => $request->input('fecha_publicacion'),
+                'fecha_publicacion' => FechaSegura::normalizarHora($request->input('fecha_publicacion')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -159,6 +163,8 @@ class PortalController extends Controller
 
     public function guardarDocumento(Request $request)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), $this->reglasDocumento(), $this->mensajesDocumento())->validate();
 
         DB::transaction(function () use ($request) {
@@ -167,7 +173,7 @@ class PortalController extends Controller
                 'titulo' => $request->input('titulo'),
                 'categoria' => $request->input('categoria'),
                 'archivo_ruta' => $request->input('archivo_ruta'),
-                'fecha_subida' => $request->input('fecha_subida'),
+                'fecha_subida' => FechaSegura::normalizarHora($request->input('fecha_subida')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -179,6 +185,8 @@ class PortalController extends Controller
 
     public function actualizarDocumento(Request $request, Documento $documento)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), $this->reglasDocumento(), $this->mensajesDocumento())->validate();
 
         DB::transaction(function () use ($request, $documento) {
@@ -186,7 +194,7 @@ class PortalController extends Controller
                 'titulo' => $request->input('titulo'),
                 'categoria' => $request->input('categoria'),
                 'archivo_ruta' => $request->input('archivo_ruta'),
-                'fecha_subida' => $request->input('fecha_subida'),
+                'fecha_subida' => FechaSegura::normalizarHora($request->input('fecha_subida')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -235,6 +243,8 @@ class PortalController extends Controller
 
     public function guardarReporte(Request $request)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), $this->reglasReporte(), $this->mensajesReporte())->validate();
 
         DB::transaction(function () use ($request) {
@@ -244,7 +254,7 @@ class PortalController extends Controller
                 'mes' => $request->input('mes'),
                 'anio' => $request->input('anio'),
                 'archivo_pdf_ruta' => $request->input('archivo_pdf_ruta'),
-                'fecha_publicacion' => $request->input('fecha_publicacion'),
+                'fecha_publicacion' => FechaSegura::normalizarHora($request->input('fecha_publicacion')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -256,6 +266,8 @@ class PortalController extends Controller
 
     public function actualizarReporte(Request $request, ReporteFinanciero $reporte)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), $this->reglasReporte($reporte), $this->mensajesReporte())->validate();
 
         DB::transaction(function () use ($request, $reporte) {
@@ -264,7 +276,7 @@ class PortalController extends Controller
                 'mes' => $request->input('mes'),
                 'anio' => $request->input('anio'),
                 'archivo_pdf_ruta' => $request->input('archivo_pdf_ruta'),
-                'fecha_publicacion' => $request->input('fecha_publicacion'),
+                'fecha_publicacion' => FechaSegura::normalizarHora($request->input('fecha_publicacion')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -328,6 +340,8 @@ class PortalController extends Controller
 
     public function guardarImagen(Request $request)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), $this->reglasImagen(), $this->mensajesImagen())->validate();
 
         DB::transaction(function () use ($request) {
@@ -336,7 +350,7 @@ class PortalController extends Controller
                 'titulo' => $request->input('titulo'),
                 'descripcion' => $request->input('descripcion') ?: null,
                 'imagen_ruta' => $request->input('imagen_ruta'),
-                'fecha_subida' => $request->input('fecha_subida'),
+                'fecha_subida' => FechaSegura::normalizarHora($request->input('fecha_subida')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -348,6 +362,8 @@ class PortalController extends Controller
 
     public function actualizarImagen(Request $request, ImagenGaleria $imagen)
     {
+        $this->normalizarFechas($request);
+
         Validator::make($request->all(), $this->reglasImagen(), $this->mensajesImagen())->validate();
 
         DB::transaction(function () use ($request, $imagen) {
@@ -355,7 +371,7 @@ class PortalController extends Controller
                 'titulo' => $request->input('titulo'),
                 'descripcion' => $request->input('descripcion') ?: null,
                 'imagen_ruta' => $request->input('imagen_ruta'),
-                'fecha_subida' => $request->input('fecha_subida'),
+                'fecha_subida' => FechaSegura::normalizarHora($request->input('fecha_subida')),
                 'is_active' => $request->boolean('is_active'),
             ]);
 
@@ -434,7 +450,7 @@ class PortalController extends Controller
             'titulo' => ['required', 'string', 'max:150'],
             'categoria' => ['required', 'in:'.implode(',', $this->categorias())],
             'archivo_ruta' => ['required', 'string', 'max:255'],
-            'fecha_subida' => ['required', 'date'],
+            'fecha_subida' => FechaSegura::reglasHora(),
             'is_active' => ['boolean'],
         ];
     }
@@ -447,8 +463,7 @@ class PortalController extends Controller
             'categoria.required' => 'Selecciona una categoría.',
             'archivo_ruta.required' => 'Ingresa la ruta del archivo.',
             'fecha_subida.required' => 'Ingresa la fecha de subida.',
-            'fecha_subida.date' => 'Ingresa una fecha válida.',
-        ];
+        ] + FechaSegura::mensajesHora('fecha_subida');
     }
 
     /** @return array<string, array<int, mixed>> */
@@ -464,7 +479,7 @@ class PortalController extends Controller
             'mes' => ['required', 'integer', 'between:1,12', $unico],
             'anio' => ['required', 'integer', 'digits:4', 'min:2000', 'max:2100'],
             'archivo_pdf_ruta' => ['required', 'string', 'max:255'],
-            'fecha_publicacion' => ['required', 'date'],
+            'fecha_publicacion' => FechaSegura::reglasHora(),
             'is_active' => ['boolean'],
         ];
     }
@@ -481,7 +496,7 @@ class PortalController extends Controller
             'anio.digits' => 'El año debe tener 4 dígitos.',
             'archivo_pdf_ruta.required' => 'Ingresa la ruta del PDF.',
             'fecha_publicacion.required' => 'Ingresa la fecha de publicación.',
-        ];
+        ] + FechaSegura::mensajesHora('fecha_publicacion');
     }
 
     /** @return array<string, array<int, mixed>> */
@@ -491,7 +506,7 @@ class PortalController extends Controller
             'titulo' => ['required', 'string', 'max:120'],
             'descripcion' => ['nullable', 'string', 'max:255'],
             'imagen_ruta' => ['required', 'string', 'max:255'],
-            'fecha_subida' => ['required', 'date'],
+            'fecha_subida' => FechaSegura::reglasHora(),
             'is_active' => ['boolean'],
         ];
     }
@@ -503,7 +518,17 @@ class PortalController extends Controller
             'titulo.required' => 'Ingresa el título de la imagen.',
             'imagen_ruta.required' => 'Ingresa la ruta de la imagen.',
             'fecha_subida.required' => 'Ingresa la fecha de subida.',
-            'fecha_subida.date' => 'Ingresa una fecha válida.',
-        ];
+        ] + FechaSegura::mensajesHora('fecha_subida');
+    }
+
+    private function normalizarFechas(Request $request): void
+    {
+        foreach (['fecha_publicacion', 'fecha_subida'] as $campo) {
+            if ($request->exists($campo)) {
+                $request->merge([
+                    $campo => FechaSegura::normalizarHora($request->input($campo)),
+                ]);
+            }
+        }
     }
 }

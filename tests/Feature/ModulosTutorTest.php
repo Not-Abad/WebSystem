@@ -106,6 +106,7 @@ class ModulosTutorTest extends TestCase
             ['id_clase' => $clase->id_clase, 'parcial' => 1],
             ['tipo' => 'ambos', 'estatus' => 'publicada', 'formato_calificacion' => 'decimal']
         );
+        Calificacion::whereIn('id_criterio', $evaluacion->criterios()->pluck('id_criterio'))->delete();
         $evaluacion->criterios()->delete();
 
         $criterio = CriterioEvaluacion::create([

@@ -287,6 +287,34 @@ class ModulosAdministradorTest extends TestCase
         ])->assertSessionHasErrors('id_grupo');
     }
 
+    public function test_el_portal_acepta_datetime_local_y_rechaza_anios_mal_formados(): void
+    {
+        $this->actingAs($this->administrador());
+
+        $this->post(route('admin.portal.noticias.guardar'), [
+            'titulo' => 'Noticia con fecha del navegador',
+            'contenido' => 'Contenido suficiente para cumplir con la validación del formulario de noticias.',
+            'imagen_portada_ruta' => 'imagenes/noticias/prueba.jpg',
+            'fecha_publicacion' => '2026-11-20T10:30',
+            'is_active' => 1,
+        ])->assertRedirect(route('admin.portal.noticias'));
+
+        $this->assertDatabaseHas('noticias', [
+            'titulo' => 'Noticia con fecha del navegador',
+            'fecha_publicacion' => '2026-11-20 10:30:00',
+        ]);
+
+        $this->post(route('admin.portal.noticias.guardar'), [
+            'titulo' => 'Noticia con fecha invalida',
+            'contenido' => 'Contenido suficiente para cumplir con la validación del formulario de noticias.',
+            'imagen_portada_ruta' => 'imagenes/noticias/prueba.jpg',
+            'fecha_publicacion' => '20026-11-20T10:30',
+            'is_active' => 1,
+        ])->assertSessionHasErrors('fecha_publicacion');
+
+        $this->assertDatabaseMissing('noticias', ['titulo' => 'Noticia con fecha invalida']);
+    }
+
     public function test_administrador_puede_gestionar_el_portal_y_las_bajas_logicas(): void
     {
         $this->actingAs($this->administrador());

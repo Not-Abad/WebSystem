@@ -67,6 +67,38 @@ class DemoContenidoTest extends TestCase
         $this->assertGreaterThanOrEqual(200, DB::table('asistencias')->count());
     }
 
+    public function test_todos_los_docentes_tienen_evaluaciones_criterios_y_calificaciones(): void
+    {
+        $docentes = DB::table('docentes')
+            ->join('usuarios', 'usuarios.id_usuario', '=', 'docentes.id_usuario')
+            ->where('usuarios.id_rol', 3)
+            ->pluck('docentes.id_docente');
+
+        $this->assertGreaterThanOrEqual(23, $docentes->count());
+
+        foreach ($docentes as $idDocente) {
+            $evaluaciones = DB::table('evaluaciones')
+                ->join('clases', 'clases.id_clase', '=', 'evaluaciones.id_clase')
+                ->where('clases.id_docente', $idDocente)
+                ->count();
+
+            $criterios = DB::table('criterios_evaluacion')
+                ->join('clases', 'clases.id_clase', '=', 'criterios_evaluacion.id_clase')
+                ->where('clases.id_docente', $idDocente)
+                ->count();
+
+            $calificaciones = DB::table('calificaciones')
+                ->join('criterios_evaluacion', 'criterios_evaluacion.id_criterio', '=', 'calificaciones.id_criterio')
+                ->join('clases', 'clases.id_clase', '=', 'criterios_evaluacion.id_clase')
+                ->where('clases.id_docente', $idDocente)
+                ->count();
+
+            $this->assertGreaterThanOrEqual(3, $evaluaciones, 'Docente '.$idDocente.' sin evaluaciones');
+            $this->assertGreaterThanOrEqual(12, $criterios, 'Docente '.$idDocente.' sin criterios');
+            $this->assertGreaterThan(0, $calificaciones, 'Docente '.$idDocente.' sin calificaciones');
+        }
+    }
+
     public function test_los_seeders_pueden_ejecutarse_dos_veces_sin_duplicar_datos(): void
     {
         $tablas = [

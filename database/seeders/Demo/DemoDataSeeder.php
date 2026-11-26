@@ -25,6 +25,7 @@ class DemoDataSeeder extends Seeder
         $this->call(PortalDocenteSeeder::class);
         $this->call(DemoContenidoSeeder::class);
         $this->call(HorariosCompletosSeeder::class);
+        $this->call(EvaluacionesCompletasSeeder::class);
         $this->call(ArchivosSeeder::class);
     }
 }

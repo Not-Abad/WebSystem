@@ -62,12 +62,14 @@ class PortalAlumnoTest extends TestCase
 
         $evaluaciones = collect();
         foreach ([1, 2, 3] as $parcial) {
-            $evaluacion = Evaluacion::create([
-                'id_clase' => $clase->id_clase,
-                'parcial' => $parcial,
-                'estatus' => 'publicada',
-                'formato_calificacion' => 'decimal',
-            ]);
+            $evaluacion = Evaluacion::firstOrCreate(
+                ['id_clase' => $clase->id_clase, 'parcial' => $parcial],
+                ['estatus' => 'publicada', 'formato_calificacion' => 'decimal', 'tipo' => 'examen']
+            );
+            $idsCriterios = $evaluacion->criterios()->pluck('id_criterio');
+            Calificacion::whereIn('id_criterio', $idsCriterios)->delete();
+            $evaluacion->criterios()->delete();
+
             foreach ([40, 60] as $porcentaje) {
                 CriterioEvaluacion::create([
                     'id_clase' => $clase->id_clase,
