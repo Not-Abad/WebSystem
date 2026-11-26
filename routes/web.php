@@ -19,13 +19,20 @@ use App\Http\Controllers\Docente\ClaseController as DocenteClaseController;
 use App\Http\Controllers\Docente\HorarioController as DocenteHorarioController;
 use App\Http\Controllers\Docente\PerfilController as DocentePerfilController;
 use App\Http\Controllers\PanelController;
+use App\Http\Controllers\PortalPublicoController;
 use App\Http\Controllers\Tutor\AlumnosController as TutorAlumnosController;
 use App\Http\Controllers\Tutor\PerfilController as TutorPerfilController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'index')->name('home');
+Route::get('/', [PortalPublicoController::class, 'index'])->name('home');
 Route::view('/historia', 'historia')->name('historia');
 Route::view('/mision-vision', 'mision-vision')->name('mision.vision');
+
+Route::get('/avisos', [PortalPublicoController::class, 'avisos'])->name('avisos');
+Route::get('/avisos/{noticia}', [PortalPublicoController::class, 'aviso'])->name('avisos.show');
+Route::get('/documentos', [PortalPublicoController::class, 'documentos'])->name('documentos');
+Route::get('/documentos/{documento}/descargar', [PortalPublicoController::class, 'descargarDocumento'])->name('documentos.descargar');
+Route::get('/documentos/reporte/{reporte}/descargar', [PortalPublicoController::class, 'descargarReporte'])->name('documentos.reporte.descargar');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.store');
@@ -172,6 +179,8 @@ Route::middleware(['auth', 'role:Docente'])
         Route::post('/clases/{clase}/evaluaciones/{evaluacion}/criterios', [DocenteClaseController::class, 'guardarCriterios'])->name('clases.criterios');
         Route::post('/clases/{clase}/evaluaciones/{evaluacion}/calificaciones', [DocenteClaseController::class, 'guardarCalificaciones'])->name('clases.calificaciones');
         Route::post('/clases/{clase}/evaluaciones/{evaluacion}/reinco', [DocenteClaseController::class, 'generarReinco'])->name('clases.reinco');
+
+        Route::post('/clases/{clase}/evaluaciones/{evaluacion}/boleta', [DocenteClaseController::class, 'generarBoleta'])->name('clases.boleta');
 
         Route::get('/formatos-reinco', [DocenteClaseController::class, 'exportaciones'])->name('reinco.index');
         Route::get('/formatos-reinco/{exportacion}/descargar', [DocenteClaseController::class, 'descargarReinco'])->name('reinco.descargar');

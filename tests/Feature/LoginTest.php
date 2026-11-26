@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,7 +12,7 @@ class LoginTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     public function test_pagina_de_login_carga(): void
     {

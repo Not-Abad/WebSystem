@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use App\Models\Clase;
 use App\Models\ReincoExportacion;
 use App\Models\User;
@@ -15,7 +17,7 @@ class PortalDocenteTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     private function usuario(string $username): User
     {

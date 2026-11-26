@@ -21,6 +21,9 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
+            // El índice simple debe crearse antes que el compuesto: MySQL lo
+            // usa para la llave foránea y permite eliminar el compuesto después.
+            $table->index('id_materia', 'idx_clases_materia');
             $table->unique(['id_materia', 'id_grupo', 'id_periodo'], 'uk_clases_materia_grupo_periodo');
             $table->index('id_docente', 'idx_clases_docente');
             $table->index('id_grupo', 'idx_clases_grupo');

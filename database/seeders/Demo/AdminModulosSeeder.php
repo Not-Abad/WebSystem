@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Demo;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -222,6 +222,28 @@ class AdminModulosSeeder extends Seeder
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
             ],
+            [
+                'id_noticia' => 4,
+                'id_administrador' => 1,
+                'titulo' => 'Entrega de boletas del segundo parcial',
+                'contenido' => "La subdirección académica informa que las boletas del segundo parcial estarán disponibles a partir del 27 de noviembre. Los estudiantes pueden revisar sus calificaciones en el portal con su usuario institucional y resolver dudas con su tutor.",
+                'imagen_portada_ruta' => null,
+                'fecha_publicacion' => '2026-11-21 10:00:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_noticia' => 5,
+                'id_administrador' => 1,
+                'titulo' => 'Taller de orientación vocacional para sexto semestre',
+                'contenido' => "Se invita a los estudiantes de sexto semestre al taller de orientación vocacional que se realizará en el auditorio del plantel. La actividad ayudará a comparar opciones universitarias y a preparar el proceso de inscripción.",
+                'imagen_portada_ruta' => null,
+                'fecha_publicacion' => '2026-11-23 11:30:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
         ]);
 
         DB::table('documentos')->insertOrIgnore([
@@ -266,6 +288,39 @@ class AdminModulosSeeder extends Seeder
                 'archivo_ruta' => 'documentos/manuales/plataforma-educativa.pdf',
                 'fecha_subida' => '2026-11-02 13:20:00',
                 'is_active' => 0,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_documento' => 5,
+                'id_administrador' => 1,
+                'titulo' => 'Calendario escolar 2026-2027',
+                'categoria' => 'Recursos',
+                'archivo_ruta' => 'documentos/convocatorias/calendario-2026-2027.pdf',
+                'fecha_subida' => '2026-11-16 09:40:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_documento' => 6,
+                'id_administrador' => 1,
+                'titulo' => 'Formatos de evaluación REINCO',
+                'categoria' => 'Formatos',
+                'archivo_ruta' => 'documentos/formatos/reinco.pdf',
+                'fecha_subida' => '2026-11-20 12:10:00',
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ],
+            [
+                'id_documento' => 7,
+                'id_administrador' => 1,
+                'titulo' => 'Formato oficial de boleta de calificaciones',
+                'categoria' => 'Formatos',
+                'archivo_ruta' => 'documentos/formatos/boleta-oficial.xlsx',
+                'fecha_subida' => '2026-11-24 10:00:00',
+                'is_active' => 1,
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
             ],

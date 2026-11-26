@@ -55,6 +55,7 @@
     <a href="#criterios"><i class="fas fa-list-check"></i> Criterios</a>
     <a href="#calificaciones"><i class="fas fa-star-half-stroke"></i> Calificaciones</a>
     <a href="#reinco"><i class="fas fa-file-excel"></i> REINCO</a>
+    <a href="#boleta"><i class="fas fa-file-lines"></i> Boleta oficial</a>
 </nav>
 
 <section class="modulo-card" id="asistencia">
@@ -353,6 +354,45 @@
             </table>
         </div>
     @endif
+</section>
+
+<section class="modulo-card" id="boleta">
+    <div class="docente-cabecera">
+        <div>
+            <h2>Boleta oficial de calificaciones</h2>
+            <p class="docente-ayuda">
+                Exporta las calificaciones capturadas en el formato oficial de la Dirección General de Bachillerato.
+                El archivo conserva las cuatro hojas, las fórmulas y la configuración de impresión de la boleta.
+            </p>
+            <p class="docente-ayuda">
+                Selecciona la unidad de aprendizaje que corresponde a esta materia; el sistema coloca su calificación
+                en la columna oficial y completa los datos del grupo, el periodo y los alumnos. La boleta admite hasta
+                25 estudiantes por grupo. Actualmente hay {{ $alumnos->count() }} alumnos activos en este grupo.
+            </p>
+        </div>
+    </div>
+
+    @foreach ([1, 2, 3] as $parcial)
+        @php
+            $evaluacion = $clase->evaluaciones->firstWhere('parcial', $parcial);
+        @endphp
+        <div class="docente-bloque">
+            <h3>{{ ['Primera', 'Segunda', 'Tercera'][$parcial - 1] }} evaluación</h3>
+            @if (! $evaluacion || $evaluacion->criterios->isEmpty())
+                <p class="docente-ayuda">Guarda las fechas, los criterios y las calificaciones para generar la boleta.</p>
+            @else
+                <form method="POST" action="{{ route('docente.clases.boleta', [$clase, $evaluacion]) }}">
+                    @csrf
+                    @include('docente.clases._opciones-boleta')
+                    <div class="docente-acciones">
+                        <button type="submit" class="btn-modulo btn-primario">
+                            <i class="fas fa-download"></i> Descargar boleta
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+    @endforeach
 </section>
 @endsection
 

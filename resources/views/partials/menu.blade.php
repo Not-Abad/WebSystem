@@ -17,7 +17,7 @@
                         <li><a href="#">Personal</a></li>
                     </ul>
                 </li>
-                <li><a href="#">Avisos</a></li>
+                <li><a href="{{ route('avisos') }}">Avisos</a></li>
                 @auth
                     <li><a href="{{ route('panel') }}">Mi panel</a></li>
                     <li class="dropdown">
@@ -38,10 +38,10 @@
                     <li><a href="{{ route('login') }}"><i class="fas fa-right-to-bracket"></i> Portal</a></li>
                 @endauth
                 <li class="dropdown">
-                    <a href="#">Documentos</a>
+                    <a href="{{ route('documentos') }}">Documentos</a>
                     <ul class="dropdown-menu">
-                        <li><a href="#">Financiero</a></li>
-                        <li><a href="#">Formatos</a></li>
+                        <li><a href="{{ route('documentos') }}#financiero">Financiero</a></li>
+                        <li><a href="{{ route('documentos', ['categoria' => 'Formatos']) }}">Formatos</a></li>
                     </ul>
                 </li>
             </ul>

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -10,7 +12,7 @@ class HorariosCompletosTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     public function test_todos_los_grupos_tienen_horario_completo(): void
     {

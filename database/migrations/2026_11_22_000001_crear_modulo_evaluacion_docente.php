@@ -65,7 +65,8 @@ return new class extends Migration
         });
 
         if (DB::connection()->getDriverName() === 'mysql') {
-            DB::statement('ALTER TABLE `criterios_evaluacion` DROP CHECK `chk_criterios_porcentaje`');
+            // DROP CONSTRAINT funciona igual en MySQL 8 y MariaDB (XAMPP).
+            DB::statement('ALTER TABLE `criterios_evaluacion` DROP CONSTRAINT `chk_criterios_porcentaje`');
             DB::statement('ALTER TABLE `criterios_evaluacion` MODIFY `porcentaje` DECIMAL(7,2) NOT NULL');
             DB::statement('ALTER TABLE `asistencias` ADD CONSTRAINT `chk_asistencias_estatus` CHECK (`estatus` IN (\'presente\', \'falta\', \'retardo\', \'justificada\'))');
             DB::statement('ALTER TABLE `evaluaciones` ADD CONSTRAINT `chk_evaluaciones_parcial` CHECK (`parcial` IN (1, 2, 3))');

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use App\Models\AceptacionCriterio;
 use App\Models\Calificacion;
 use App\Models\Clase;
@@ -15,7 +17,7 @@ class PortalAlumnoTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     public function test_mis_datos_muestra_el_expediente_sin_opcion_de_foto(): void
     {

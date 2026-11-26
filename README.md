@@ -9,7 +9,7 @@ Plataforma web integral de **Gestión Académica y Portal Institucional** desarr
 1. [Módulos y Roles del Sistema](#módulos-y-roles-del-sistema)
 2. [Stack Tecnológico y Requisitos Previos](#stack-tecnológico-y-requisitos-previos)
 3. [Instalación y Configuración Local](#instalación-y-configuración-local)
-4. [Usuarios de Prueba](#usuarios-de-prueba)
+4. [Alta Inicial de Cuentas](#alta-inicial-de-cuentas)
 5. [Documentación Técnica (Wiki)](#documentación-técnica-wiki)
 6. [Convenciones de Desarrollo y Git](#convenciones-de-desarrollo-y-git)
 7. [Equipo de Desarrollo](#equipo-de-desarrollo)
@@ -89,10 +89,12 @@ CREATE DATABASE IF NOT EXISTS control_escolar
   COLLATE utf8mb4_unicode_ci;
 ```
 
-### 4. Ejecutar las 25 migraciones y cargar datos semilla
-Ejecuta el comando de migración con *seeders* para construir las 25 tablas del modelo, insertar los catálogos base (`roles`, `puestos_administrativos`, `estados_alumno`, `semestres`, `capacitaciones`) y crear los usuarios de prueba:
+### 4. Ejecutar las migraciones y cargar los catálogos base
+Ejecuta el comando de migración con *seeders* para construir las tablas del modelo e insertar únicamente la estructura institucional: roles, puestos, estados de alumno, semestres, capacitaciones, áreas propedéuticas, plan de estudios, materias, grupos y salones.
+
+**No se crean usuarios, personas, avisos, documentos ni calificaciones de demostración.** Todo eso se da de alta desde los módulos administrativos o se importa de la fuente institucional real.
 ```bash
-php artisan migrate:fresh --seed
+php artisan migrate:fresh --seed --force
 ```
 
 ### 5. Compilar recursos y arrancar el servidor local
@@ -108,17 +110,51 @@ Accede desde tu navegador a `http://127.0.0.1:8000`.
 
 ---
 
-## Usuarios de Prueba
+## Alta Inicial de Cuentas
 
-Al ejecutar `php artisan migrate:fresh --seed`, el seeder `UsuariosPruebaSeeder` genera **1 cuenta activa por cada rol** con su respectivo perfil vinculado. Todas comparten la contraseña **`Prueba123!`**:
+La instalación queda sin cuentas de acceso. Para crear la primera cuenta de **SuperUsuario**, ejecuta:
 
-| Rol | Usuario (`username`) | Contraseña | Perfil Asociado |
-| :--- | :--- | :--- | :--- |
-| **SuperUsuario** | `superadmin` | `Prueba123!` | Cuenta raíz de auditoría y control de personal |
-| **Administrador** | `admin.escolar` | `Prueba123!` | Laura Méndez Salazar (`secretaria`) |
-| **Docente** | `docente.prueba` | `Prueba123!` | Carlos Hernández Vega (Capacitación: `Informática`) |
-| **Alumno** | `alumno.prueba` | `Prueba123!` | Diego Pérez Gómez (Matrícula `2026AMR001`, 4.º Semestre) |
-| **Tutor** | `tutor.prueba` | `Prueba123!` | Martha Gómez Ruiz (Tutora de `2026AMR001`) |
+```bash
+php artisan usuarios:crear-superadmin TU_USUARIO
+```
+
+El comando solicita la contraseña de forma interactiva y oculta, valida una longitud mínima de 12 caracteres y exige mayúscula, minúscula y número.
+
+Con esa cuenta entra al sistema y da de alta al resto del personal desde los módulos correspondientes.
+
+### Datos inventados para demostración (opcional)
+
+Si necesitas **mostrar el sistema** con alumnos, docentes, tutores, clases, calificaciones, avisos y documentos de ejemplo, carga el seeder de demostración **sobre la base de datos real**:
+
+```bash
+php artisan migrate:fresh --force
+php artisan db:seed --class='Database\Seeders\Demo\DemoDataSeeder' --force
+```
+
+Cuentas creadas (contraseña `Prueba123!` para todas):
+
+| Rol | Usuario |
+| :--- | :--- |
+| SuperUsuario | `superadmin` |
+| Administrador | `admin.escolar` |
+| Docente | `docente.historia` |
+| Alumno | `alumno.prueba` |
+| Tutor | `tutor.prueba` |
+
+Estos datos **no se cargan** con `php artisan migrate:fresh --seed`. Para volver a una instalación limpia y sin demos, ejecuta de nuevo `php artisan migrate:fresh --seed --force`.
+
+### Pruebas sobre MySQL
+
+La configuración por defecto (`phpunit.xml`) usa SQLite en memoria. Para ejecutar la misma suite sobre MySQL, en el mismo servidor que la base real, usa la base separada `control_escolar_pruebas` (así no se borran los datos de demostración):
+
+```bash
+# Crear una sola vez la base de pruebas:
+# CREATE DATABASE control_escolar_pruebas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+php vendor/bin/phpunit -c phpunit.mysql.xml
+```
+
+`RefreshDatabase` migra y siembra automáticamente esa base con el seeder de demostración; no hace falta cargarla a mano.
 
 ---
 

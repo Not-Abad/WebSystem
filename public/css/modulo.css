@@ -1523,7 +1523,8 @@ body.modulo-body {
     gap: 4px;
 }
 
-.docente-opciones-reinco select {
+.docente-opciones-reinco select,
+.docente-opciones-reinco input {
     background: #0d1117;
     border: 1px solid #30363d;
     border-radius: 5px;
@@ -1531,6 +1532,14 @@ body.modulo-body {
     font-family: inherit;
     font-size: .78rem;
     padding: 7px 8px;
+}
+
+.docente-opciones-boleta label {
+    min-width: 190px;
+}
+
+.docente-opciones-boleta input {
+    width: 100%;
 }
 
 .criterios-total {

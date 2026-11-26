@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use App\Http\Controllers\Docente\ClaseController;
 use App\Models\Grupo;
 use App\Models\User;
@@ -13,7 +15,7 @@ class DemoContenidoTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     public function test_cada_semestre_tiene_un_grupo_lleno_de_alumnos(): void
     {
@@ -63,5 +65,24 @@ class DemoContenidoTest extends TestCase
         $this->assertGreaterThanOrEqual(6, DB::table('evaluaciones')->count());
         $this->assertGreaterThanOrEqual(72, DB::table('criterios_evaluacion')->count());
         $this->assertGreaterThanOrEqual(200, DB::table('asistencias')->count());
+    }
+
+    public function test_los_seeders_pueden_ejecutarse_dos_veces_sin_duplicar_datos(): void
+    {
+        $tablas = [
+            'usuarios', 'docentes', 'alumnos', 'tutores', 'clases', 'horarios',
+            'evaluaciones', 'criterios_evaluacion', 'calificaciones', 'asistencias',
+        ];
+
+        $antes = [];
+        foreach ($tablas as $tabla) {
+            $antes[$tabla] = DB::table($tabla)->count();
+        }
+
+        $this->seed(DemoDataSeeder::class);
+
+        foreach ($antes as $tabla => $total) {
+            $this->assertSame($total, DB::table($tabla)->count(), 'El seeder duplicó '.$tabla);
+        }
     }
 }

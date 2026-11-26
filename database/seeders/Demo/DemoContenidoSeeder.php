@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Demo;
 
 use App\Support\CalificacionService;
 use Illuminate\Database\Seeder;
@@ -259,9 +259,19 @@ class DemoContenidoSeeder extends Seeder
             [12, 6, 21, 8], [12, 6, 22, 12], [12, 6, 23, 7], [12, 6, 24, 14], [12, 6, 27, 5], [12, 6, 38, 7],
         ];
 
-        // Se usan salones 2 a 4 y de martes a viernes para no interferir con
-        // las celdas que las pruebas de horarios reservan en salón 1 / lunes.
-        $salones = [2, 3, 4];
+        // Se deja libre el salón 1 y el lunes para las pruebas de horarios. El
+        // resto de salones se toma de la BD para que el seeder siga funcionando
+        // cuando HorariosCompletosSeeder ya creó los salones adicionales.
+        $salones = DB::table('salones')
+            ->where('is_active', true)
+            ->where('id_salon', '!=', 1)
+            ->orderBy('id_salon')
+            ->pluck('id_salon')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        if ($salones === []) {
+            $salones = [2, 3, 4];
+        }
         $dias = ['Martes', 'Miercoles', 'Jueves', 'Viernes'];
         $bloques = [
             ['15:00:00', '15:50:00'],
@@ -304,31 +314,36 @@ class DemoContenidoSeeder extends Seeder
                 'updated_at' => $ahora,
             ]);
 
-            [$dia, $inicio, $fin, $idSalon] = $this->siguienteCeldaLibre(
-                $dias,
-                $bloques,
-                $salones,
-                (int) $idGrupo,
-                (int) $idDocente,
-                $celdasGrupo,
-                $celdasDocente,
-                $celdasSalon
-            );
+            // Si el horario fijo ya existe (seeders anteriores), se reutiliza:
+            // buscar una celda nueva cuando la malla ya está completa haría
+            // fallar una segunda ejecución de db:seed.
+            if (! DB::table('horarios')->where('id_horario', $idHorario)->exists()) {
+                [$dia, $inicio, $fin, $idSalon] = $this->siguienteCeldaLibre(
+                    $dias,
+                    $bloques,
+                    $salones,
+                    (int) $idGrupo,
+                    (int) $idDocente,
+                    $celdasGrupo,
+                    $celdasDocente,
+                    $celdasSalon
+                );
 
-            DB::table('horarios')->insertOrIgnore([
-                'id_horario' => $idHorario,
-                'id_clase' => $idClase,
-                'dia_semana' => $dia,
-                'hora_inicio' => $inicio,
-                'hora_fin' => $fin,
-                'aula' => null,
-                'id_salon' => $idSalon,
-            ]);
+                DB::table('horarios')->insertOrIgnore([
+                    'id_horario' => $idHorario,
+                    'id_clase' => $idClase,
+                    'dia_semana' => $dia,
+                    'hora_inicio' => $inicio,
+                    'hora_fin' => $fin,
+                    'aula' => null,
+                    'id_salon' => $idSalon,
+                ]);
 
-            $clave = $dia.'|'.$inicio.'|'.$fin;
-            $celdasSalon[$idSalon][$clave] = true;
-            $celdasDocente[$idDocente][$clave] = true;
-            $celdasGrupo[$idGrupo][$clave] = true;
+                $clave = $dia.'|'.$inicio.'|'.$fin;
+                $celdasSalon[$idSalon][$clave] = true;
+                $celdasDocente[$idDocente][$clave] = true;
+                $celdasGrupo[$idGrupo][$clave] = true;
+            }
 
             if (! isset($primerasClases[$idGrupo])) {
                 $primerasClases[$idGrupo] = ['id_clase' => $idClase, 'semestre' => $semestre];
@@ -390,27 +405,42 @@ class DemoContenidoSeeder extends Seeder
         ];
 
         foreach ($tipos as $indice => $tipo) {
-            $idEvaluacion = DB::table('evaluaciones')->insertGetId([
-                'id_clase' => $idClase,
-                'parcial' => $indice + 1,
-                'tipo' => $tipo,
-                'fecha_examen' => $fechasExamen[$indice],
-                'fecha_entrega_proyecto' => $fechasEntrega[$indice] ?: null,
-                'created_at' => $ahora,
-                'updated_at' => $ahora,
-            ]);
+            $parcial = $indice + 1;
+            $evaluacion = DB::table('evaluaciones')
+                ->where('id_clase', $idClase)
+                ->where('parcial', $parcial)
+                ->first();
+
+            $idEvaluacion = $evaluacion
+                ? (int) $evaluacion->id_evaluacion
+                : (int) DB::table('evaluaciones')->insertGetId([
+                    'id_clase' => $idClase,
+                    'parcial' => $parcial,
+                    'tipo' => $tipo,
+                    'fecha_examen' => $fechasExamen[$indice],
+                    'fecha_entrega_proyecto' => $fechasEntrega[$indice] ?: null,
+                    'created_at' => $ahora,
+                    'updated_at' => $ahora,
+                ]);
 
             $criterios = [];
             foreach ($ponderaciones as $posicion => [$rubro, $porcentaje]) {
-                $idCriterio = DB::table('criterios_evaluacion')->insertGetId([
-                    'id_clase' => $idClase,
-                    'parcial' => $indice + 1,
-                    'id_evaluacion' => $idEvaluacion,
-                    'nombre_rubro' => $rubro,
-                    'tipo_evidencia' => $rubro,
-                    'porcentaje' => $porcentaje,
-                    'fecha_entrega' => $fechasEntrega[$indice] ?: null,
-                ]);
+                $criterio = DB::table('criterios_evaluacion')
+                    ->where('id_evaluacion', $idEvaluacion)
+                    ->where('nombre_rubro', $rubro)
+                    ->first();
+
+                $idCriterio = $criterio
+                    ? (int) $criterio->id_criterio
+                    : (int) DB::table('criterios_evaluacion')->insertGetId([
+                        'id_clase' => $idClase,
+                        'parcial' => $parcial,
+                        'id_evaluacion' => $idEvaluacion,
+                        'nombre_rubro' => $rubro,
+                        'tipo_evidencia' => $rubro,
+                        'porcentaje' => $porcentaje,
+                        'fecha_entrega' => $fechasEntrega[$indice] ?: null,
+                    ]);
                 $criterios[] = ['id' => $idCriterio, 'peso' => $porcentaje, 'orden' => $posicion];
             }
 

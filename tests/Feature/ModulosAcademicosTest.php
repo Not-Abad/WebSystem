@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use App\Models\Alumno;
 use App\Models\Docente;
 use App\Models\EstadoAlumno;
@@ -18,7 +20,7 @@ class ModulosAcademicosTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     private function administrador(): User
     {

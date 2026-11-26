@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+
+use Database\Seeders\Demo\DemoDataSeeder;
 use App\Models\Alumno;
 use App\Models\Calificacion;
 use App\Models\Clase;
@@ -16,7 +18,7 @@ class ModulosTutorTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $seed = true;
+    protected $seeder = DemoDataSeeder::class;
 
     public function test_panel_de_tutor_enlaza_el_seguimiento_de_sus_alumnos(): void
     {

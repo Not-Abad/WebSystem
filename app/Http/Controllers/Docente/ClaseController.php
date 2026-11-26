@@ -11,6 +11,7 @@ use App\Models\Docente;
 use App\Models\Evaluacion;
 use App\Models\ReincoExportacion;
 use App\Services\BitacoraService;
+use App\Services\BoletaService;
 use App\Support\CalificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -121,6 +122,9 @@ class ClaseController extends Controller
             'horarioSeleccionado' => $horarioSeleccionado,
             'bancoEvidencias' => self::BANCO_EVIDENCIAS,
             'estatusAsistencia' => self::ESTATUS_ASISTENCIA,
+            'columnasBoleta' => (array) config('boleta.columnas'),
+            'columnaBoletaSugerida' => BoletaService::columnaSugerida($clase->materia->nombre),
+            'periodoBoleta' => now()->format('y').'-'.now()->addYear()->format('y'),
         ]);
     }
 
@@ -506,6 +510,60 @@ class ClaseController extends Controller
         }
 
         return back()->with('status', 'Formato REINCO guardado en el gestor de archivos.');
+    }
+
+    /**
+     * Genera la boleta oficial a partir de las calificaciones ya capturadas.
+     * El docente elige la columna de la boleta que corresponde a su materia.
+     */
+    public function generarBoleta(Request $request, Clase $clase, Evaluacion $evaluacion)
+    {
+        $docente = $this->docente();
+        $clase = $this->clase($docente, $clase);
+        $this->evaluacion($clase, $evaluacion);
+
+        Validator::make($request->all(), [
+            'columna' => ['required', 'string', Rule::in(array_keys((array) config('boleta.columnas')))],
+            'periodo_escolar' => ['nullable', 'string', 'max:16'],
+            'director' => ['nullable', 'string', 'max:120'],
+            'subdirector' => ['nullable', 'string', 'max:120'],
+        ], [
+            'columna.required' => 'Selecciona la unidad de aprendizaje de la boleta.',
+            'columna.in' => 'La unidad de aprendizaje seleccionada no es válida.',
+        ])->validate();
+
+        $servicio = app(BoletaService::class);
+        $nombre = $servicio->nombreArchivo($clase, $evaluacion);
+        $temporal = tempnam(sys_get_temp_dir(), 'boleta_');
+        abort_if($temporal === false, 500, 'No se pudo preparar el archivo de la boleta.');
+        $contenido = null;
+
+        try {
+            $servicio->generar($clase, $evaluacion, $temporal, $request->only([
+                'columna',
+                'periodo_escolar',
+                'director',
+                'subdirector',
+            ]));
+            $contenido = (string) file_get_contents($temporal);
+        } finally {
+            if (is_file($temporal)) {
+                @unlink($temporal);
+            }
+        }
+
+        BitacoraService::registrar(
+            'calificaciones',
+            'EDICION',
+            'Boleta oficial de la evaluación '.$evaluacion->parcial.' exportada para la clase '.$clase->id_clase.'.',
+            $clase->id_clase
+        );
+
+        return response()->streamDownload(function () use ($contenido) {
+            echo $contenido;
+        }, $nombre, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     public function descargarReinco(ReincoExportacion $exportacion)

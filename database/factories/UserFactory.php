@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Hash;
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * Contraseña aleatoria reutilizable dentro de una misma ejecución.
+     * No hay contraseñas fijas de demostración en el proyecto.
      */
     protected static ?string $password;
 
@@ -27,7 +28,7 @@ class UserFactory extends Factory
         return [
             'id_rol' => Rol::ALUMNO,
             'username' => fake()->unique()->userName(),
-            'password_hash' => static::$password ??= Hash::make('Prueba123!'),
+            'password_hash' => static::$password ??= Hash::make(fake()->password(16, 24)),
             'is_active' => true,
             'intentos_fallidos' => 0,
         ];
