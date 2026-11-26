@@ -295,6 +295,10 @@ class PortalDocenteTest extends TestCase
             ->assertSee(route('alumno.materias.index'))
             ->assertDontSee('Próximamente');
 
+        $this->post(route('alumno.materias.aceptarCriterios', [$clase, $evaluacion]), [
+            'acepto' => 1,
+        ])->assertRedirect();
+
         $this->get(route('alumno.materias.show', $clase))
             ->assertOk()
             ->assertSee('Examen')

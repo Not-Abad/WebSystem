@@ -11,6 +11,7 @@ use App\Models\Docente;
 use App\Models\Evaluacion;
 use App\Models\ReincoExportacion;
 use App\Services\BitacoraService;
+use App\Support\CalificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -90,6 +91,7 @@ class ClaseController extends Controller
             'horarios.salon',
             'evaluaciones' => fn ($q) => $q->orderBy('parcial'),
             'evaluaciones.criterios' => fn ($q) => $q->orderBy('id_criterio'),
+            'evaluaciones.criterios.calificaciones',
             'reincoExportaciones' => fn ($q) => $q->orderByDesc('id_exportacion'),
         ]);
 
@@ -373,7 +375,9 @@ class ClaseController extends Controller
             abort_unless($idsAlumnos->contains((int) $idAlumno), 422, 'El alumno no pertenece al grupo de esta clase.');
         }
 
-        DB::transaction(function () use ($request, $criterios) {
+        $ponderacionTotal = CalificacionService::ponderacionTotal($criterios);
+
+        DB::transaction(function () use ($request, $criterios, $ponderacionTotal) {
             foreach ($request->input('calificaciones') as $idAlumno => $filas) {
                 foreach ($criterios as $criterio) {
                     $porcentaje = (float) $filas[$criterio->id_criterio];
@@ -385,7 +389,11 @@ class ClaseController extends Controller
                         ],
                         [
                             'porcentaje_obtenido' => $porcentaje,
-                            'puntaje_obtenido' => round($porcentaje * (float) $criterio->porcentaje / 1000, 2),
+                            'puntaje_obtenido' => CalificacionService::aportacionCriterio(
+                                CalificacionService::notaCriterio($porcentaje),
+                                (float) $criterio->porcentaje,
+                                $ponderacionTotal
+                            ),
                         ]
                     );
                 }

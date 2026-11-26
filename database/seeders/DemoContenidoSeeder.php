@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\CalificacionService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -147,7 +148,7 @@ class DemoContenidoSeeder extends Seeder
                 $alumnos[] = [
                     'id_alumno' => $numero,
                     'id_usuario' => $idUsuario,
-                    'id_tutor' => 1 + ($indice % 4),
+                    'id_tutor' => null,
                     'id_estado_alumno' => 2,
                     'id_plan' => 1,
                     'id_semestre' => $grupo['semestre'],
@@ -169,12 +170,81 @@ class DemoContenidoSeeder extends Seeder
             }
         }
 
-        foreach (array_chunk($usuarios, 100) as $lote) {
+        [$tutoresUsuarios, $tutores, $alumnos] = $this->asignarTutoresDemo($alumnos, $password, $ahora);
+
+        foreach (array_chunk(array_merge($tutoresUsuarios, $usuarios), 100) as $lote) {
             DB::table('usuarios')->insertOrIgnore($lote);
+        }
+        foreach (array_chunk($tutores, 100) as $lote) {
+            DB::table('tutores')->insertOrIgnore($lote);
         }
         foreach (array_chunk($alumnos, 100) as $lote) {
             DB::table('alumnos')->insertOrIgnore($lote);
         }
+    }
+
+    /**
+     * Reparte los alumnos demo entre tutores, máximo dos por tutor. Los tutores
+     * 1–4 ya existen en otros seeders; aquí se crean los demás con cuentas
+     * `tutor.demo###` y la misma contraseña de demostración.
+     *
+     * @param  array<int, array<string, mixed>>  $alumnos
+     * @return array{0: array<int, array<string, mixed>>, 1: array<int, array<string, mixed>>, 2: array<int, array<string, mixed>>}
+     */
+    private function asignarTutoresDemo(array $alumnos, string $password, $ahora): array
+    {
+        $nombres = ['Mariana', 'Rodolfo', 'Elena', 'Gerardo', 'Patricia', 'Joaquín', 'Lucrecia', 'Fernando', 'Alicia', 'Ramiro'];
+        $paternos = ['Vázquez', 'Corona', 'Espinoza', 'Lagunes', 'Márquez', 'Nava', 'Otero', 'Palacios', 'Quintero', 'Salinas'];
+        $maternos = ['Benítez', 'Cabrera', 'Domínguez', 'Escobar', 'Franco', 'Galindo', 'Heredia', 'Ibarra', 'Juárez', 'Kindelán'];
+
+        $usuariosTutores = [];
+        $tutores = [];
+        $idTutor = 5;
+        $idUsuarioBase = 3000;
+        $conteoAlumnos = 0;
+
+        foreach ($alumnos as $indice => $alumno) {
+            if ($conteoAlumnos % 2 === 0) {
+                $numero = intdiv($conteoAlumnos, 2) + 1;
+                $sufijo = str_pad((string) $numero, 3, '0', STR_PAD_LEFT);
+                $nombre = $nombres[$conteoAlumnos % count($nombres)];
+                $paterno = $paternos[intdiv($conteoAlumnos, count($nombres)) % count($paternos)];
+                $materno = $maternos[($conteoAlumnos * 5) % count($maternos)];
+                $idUsuario = $idUsuarioBase + $numero;
+
+                $usuariosTutores[] = [
+                    'id_usuario' => $idUsuario,
+                    'id_rol' => 5,
+                    'username' => 'tutor.demo'.$sufijo,
+                    'password_hash' => $password,
+                    'is_active' => 1,
+                    'intentos_fallidos' => 0,
+                    'created_at' => $ahora,
+                    'updated_at' => $ahora,
+                ];
+
+                $tutores[] = [
+                    'id_tutor' => $idTutor,
+                    'id_usuario' => $idUsuario,
+                    'nombre' => $nombre,
+                    'apellido_paterno' => $paterno,
+                    'apellido_materno' => $materno,
+                    'telefono' => '2283'.str_pad((string) $numero, 6, '0', STR_PAD_LEFT),
+                    'correo' => 'tutor.demo'.$sufijo.'@ejemplo.com',
+                    'ine_ruta' => 'tutores/ine_demo_'.$sufijo.'.pdf',
+                    'is_active' => 1,
+                    'created_at' => $ahora,
+                    'updated_at' => $ahora,
+                ];
+
+                $idTutor++;
+            }
+
+            $alumnos[$indice]['id_tutor'] = $idTutor - 1;
+            $conteoAlumnos++;
+        }
+
+        return [$usuariosTutores, $tutores, $alumnos];
     }
 
     private function sembrarClasesYEvaluaciones($ahora): void
@@ -368,7 +438,11 @@ class DemoContenidoSeeder extends Seeder
                     'id_criterio' => $criterio['id'],
                     'id_alumno' => $idAlumno,
                     'porcentaje_obtenido' => $obtenido,
-                    'puntaje_obtenido' => round($obtenido * $criterio['peso'] / 1000, 2),
+                    'puntaje_obtenido' => CalificacionService::aportacionCriterio(
+                        CalificacionService::notaCriterio($obtenido),
+                        $criterio['peso'],
+                        100
+                    ),
                     'created_at' => $ahora,
                     'updated_at' => $ahora,
                 ];

@@ -47,13 +47,15 @@ class PanelController extends Controller
             ['icono' => 'fa-file-excel', 'titulo' => 'Formatos REINCO', 'descripcion' => 'Genera y guarda los formatos 205 y 206 en Excel.', 'ruta' => 'docente.reinco.index'],
         ],
         'Alumno' => [
+            ['icono' => 'fa-id-card', 'titulo' => 'Mis datos', 'descripcion' => 'Expediente, grupo, plan de estudio y datos de contacto.', 'ruta' => 'alumno.perfil.index'],
             ['icono' => 'fa-book-open', 'titulo' => 'Mis materias', 'descripcion' => 'Horario, docentes y grupos de tu semestre.', 'ruta' => 'alumno.materias.index'],
             ['icono' => 'fa-list-check', 'titulo' => 'Criterios y fechas', 'descripcion' => 'Rubros de evaluación y fechas de exámenes publicados.', 'ruta' => 'alumno.materias.index'],
             ['icono' => 'fa-star-half-stroke', 'titulo' => 'Calificaciones y asistencia', 'descripcion' => 'Desglose de porcentajes y asistencia registrada.', 'ruta' => 'alumno.materias.index'],
         ],
         'Tutor' => [
+            ['icono' => 'fa-id-card', 'titulo' => 'Mis datos', 'descripcion' => 'Tu información personal y de contacto como tutor.', 'ruta' => 'tutor.perfil.index'],
             ['icono' => 'fa-chart-line', 'titulo' => 'Seguimiento académico', 'descripcion' => 'Desempeño y estatus de los estudiantes bajo tu tutela.', 'ruta' => 'tutor.alumnos.index'],
-            ['icono' => 'fa-file-pdf', 'titulo' => 'Boletas', 'descripcion' => 'Consulta y descarga de boletas de evaluación.'],
+            ['icono' => 'fa-list-check', 'titulo' => 'Materias y calificaciones', 'descripcion' => 'Docentes, criterios y calificaciones de cada alumno.', 'ruta' => 'tutor.alumnos.index'],
         ],
     ];
 

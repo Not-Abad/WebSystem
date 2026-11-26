@@ -1765,3 +1765,130 @@ body.modulo-body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   PORTAL ALUMNO · DATOS DE MATERIA, ACEPTACIÓN Y CALIFICACIONES
+   ========================================================================== */
+
+.alumno-descripcion {
+    border-top: 1px solid #30363d;
+    margin-top: 16px;
+    padding-top: 6px;
+}
+
+.alumno-descripcion h3 {
+    color: #e6edf3;
+    font-size: .88rem;
+    margin: 14px 0 6px;
+}
+
+.alumno-descripcion h3 i {
+    color: #79b8ff;
+    margin-right: 7px;
+}
+
+.alumno-descripcion p {
+    color: #8b949e;
+    font-size: .82rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.alumno-pdf {
+    display: inline-flex;
+    font-size: .72rem;
+    padding: 7px 10px;
+    text-decoration: none;
+}
+
+.alumno-chip-aceptado {
+    background: rgba(0, 102, 255, .14);
+    border-color: rgba(0, 102, 255, .5);
+    color: #c9d1d9;
+}
+
+.alumno-chip-aceptado i {
+    color: #79b8ff;
+}
+
+.alumno-aceptacion {
+    align-items: center;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-left: 3px solid #0066ff;
+    border-radius: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding: 12px;
+}
+
+.alumno-aceptacion label {
+    align-items: center;
+    color: #c9d1d9;
+    display: flex;
+    font-size: .82rem;
+    gap: 8px;
+}
+
+.alumno-aceptacion input {
+    accent-color: #0066ff;
+}
+
+.alumno-calificacion {
+    align-items: center;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding: 12px;
+}
+
+.alumno-calificacion span {
+    color: #8b949e;
+    font-size: .78rem;
+}
+
+.alumno-calificacion strong {
+    color: #e6edf3;
+    font-size: 1.05rem;
+}
+
+.alumno-calificacion-final {
+    align-items: center;
+    background: rgba(0, 102, 255, .08);
+    border: 1px solid rgba(0, 102, 255, .4);
+    border-left: 3px solid #0066ff;
+    border-radius: 6px;
+    display: flex;
+    gap: 14px;
+    padding: 18px;
+}
+
+.alumno-calificacion-final > i {
+    color: #79b8ff;
+    font-size: 1.6rem;
+}
+
+.alumno-calificacion-final span {
+    color: #8b949e;
+    display: block;
+    font-size: .72rem;
+    text-transform: uppercase;
+}
+
+.alumno-calificacion-final strong {
+    color: #e6edf3;
+    font-size: 1.8rem;
+}
+
+@media (max-width: 620px) {
+    .alumno-aceptacion {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

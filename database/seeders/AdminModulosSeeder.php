@@ -69,7 +69,7 @@ class AdminModulosSeeder extends Seeder
                 'telefono' => '2281234570',
                 'correo' => 'lorena.vargas@ejemplo.com',
                 'ine_ruta' => 'tutores/ine_vargas.pdf',
-                'is_active' => 0,
+                'is_active' => 1,
                 'created_at' => $ahora,
                 'updated_at' => $ahora,
             ],
@@ -166,7 +166,7 @@ class AdminModulosSeeder extends Seeder
             [
                 'id_alumno' => 5,
                 'id_usuario' => 33,
-                'id_tutor' => 3,
+                'id_tutor' => 4,
                 'id_estado_alumno' => 3,
                 'id_plan' => 1,
                 'id_semestre' => 5,

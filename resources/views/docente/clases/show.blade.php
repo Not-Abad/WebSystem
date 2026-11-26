@@ -223,8 +223,8 @@
         <div>
             <h2>Calificaciones por criterio</h2>
             <p class="docente-ayuda">
-                Captura el porcentaje obtenido por alumno (0–100). El sistema calcula la calificación de 0.00 a 10.00
-                aplicando la ponderación de cada evidencia.
+                Captura el porcentaje obtenido por alumno (0–100). Cada evidencia se convierte a una nota de 0.00 a
+                10.00 y la calificación del parcial es el promedio ponderado de esas notas.
             </p>
         </div>
     </div>
@@ -255,11 +255,10 @@
                             <tbody>
                                 @foreach ($alumnos as $alumno)
                                     @php
-                                        $calificacion = round((float) $criteriosEvaluacion->sum(function ($criterio) use ($alumno) {
-                                            $nota = $criterio->calificaciones->firstWhere('id_alumno', $alumno->id_alumno);
-
-                                            return $nota ? (float) $nota->puntaje_obtenido : 0;
-                                        }), 2);
+                                        $calificacion = \App\Support\CalificacionService::calificacionParcial(
+                                            $criteriosEvaluacion,
+                                            $alumno
+                                        )['calificacion'];
                                     @endphp
                                     <tr>
                                         <td><strong>{{ $nombreAlumno($alumno) }}</strong></td>

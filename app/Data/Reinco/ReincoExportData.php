@@ -8,6 +8,7 @@ use App\Models\Calificacion;
 use App\Models\Clase;
 use App\Models\CriterioEvaluacion;
 use App\Models\Evaluacion;
+use App\Support\CalificacionService;
 use Illuminate\Support\Collection;
 
 /**
@@ -79,12 +80,14 @@ final readonly class ReincoExportData
         $asistencias = $clase->asistencias()->get();
         $alumnos = $clase->alumnosActivos();
         $decimales = $presentacion->decimales;
+        $ponderacionTotal = CalificacionService::ponderacionTotal($criterios);
 
         $filas = $alumnos->map(function (Alumno $alumno, int $indice) use (
             $criterios,
             $calificaciones,
             $asistencias,
-            $decimales
+            $decimales,
+            $ponderacionTotal
         ) {
             $notas = [];
             foreach ($criterios as $criterio) {
@@ -97,7 +100,19 @@ final readonly class ReincoExportData
 
             $examinado = $criterios->isNotEmpty()
                 && $criterios->every(fn (CriterioEvaluacion $criterio) => $calificaciones->has($criterio->id_criterio.'-'.$alumno->id_alumno));
-            $final = round(array_sum(array_column($notas, 'puntaje')), $decimales);
+            $suma = 0.0;
+            foreach ($criterios as $criterio) {
+                $calificacion = $calificaciones->get($criterio->id_criterio.'-'.$alumno->id_alumno);
+
+                if ($calificacion) {
+                    $suma += CalificacionService::aportacionCriterio(
+                        CalificacionService::notaCriterio((float) $calificacion->porcentaje_obtenido),
+                        (float) $criterio->porcentaje,
+                        $ponderacionTotal
+                    );
+                }
+            }
+            $final = round($suma, $decimales);
 
             $registros = $asistencias->where('id_alumno', $alumno->id_alumno);
             $porParcial = [];

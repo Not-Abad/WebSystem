@@ -61,4 +61,34 @@
             </div>
         </div>
     </section>
+
+    <section class="modulo-card">
+        <div class="modulo-card-header">
+            <div>
+                <h2><i class="fas fa-book-open"></i> Materias del alumno</h2>
+                <p>Consulta al docente de cada materia, sus criterios y las calificaciones parciales del estudiante.</p>
+            </div>
+        </div>
+
+        @if ($clases->isEmpty())
+            <div class="docente-vacio">
+                <i class="fas fa-book-open"></i>
+                <strong>No hay materias activas asignadas al grupo del alumno.</strong>
+            </div>
+        @else
+            <div class="docente-tarjetas">
+                @foreach ($clases as $clase)
+                    <a class="docente-tarjeta" href="{{ route('tutor.alumnos.materia', [$alumno, $clase]) }}">
+                        <span class="docente-tarjeta-clave">{{ $clase->materia->clave }}</span>
+                        <strong>{{ $clase->materia->nombre }}</strong>
+                        <span>{{ $clase->docente?->nombreCompleto() ?? 'Docente por asignar' }}</span>
+                        <span class="docente-tarjeta-pie">
+                            {{ $clase->evaluaciones->count() }} evaluación(es)
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </section>
 @endsection

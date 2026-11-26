@@ -13,12 +13,14 @@ use App\Http\Controllers\Admin\SalonesController;
 use App\Http\Controllers\Admin\SeguridadController;
 use App\Http\Controllers\Admin\TutoresController;
 use App\Http\Controllers\Alumno\MateriasController as AlumnoMateriasController;
+use App\Http\Controllers\Alumno\PerfilController as AlumnoPerfilController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Docente\ClaseController as DocenteClaseController;
 use App\Http\Controllers\Docente\HorarioController as DocenteHorarioController;
 use App\Http\Controllers\Docente\PerfilController as DocentePerfilController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\Tutor\AlumnosController as TutorAlumnosController;
+use App\Http\Controllers\Tutor\PerfilController as TutorPerfilController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'index')->name('home');
@@ -179,14 +181,21 @@ Route::middleware(['auth', 'role:Alumno'])
     ->prefix('alumno')
     ->name('alumno.')
     ->group(function () {
+        Route::get('/mis-datos', [AlumnoPerfilController::class, 'index'])->name('perfil.index');
+
         Route::get('/materias', [AlumnoMateriasController::class, 'index'])->name('materias.index');
         Route::get('/materias/{clase}', [AlumnoMateriasController::class, 'show'])->name('materias.show');
+        Route::post('/materias/{clase}/evaluaciones/{evaluacion}/aceptar', [AlumnoMateriasController::class, 'aceptarCriterios'])->name('materias.aceptarCriterios');
+        Route::get('/materias/{clase}/programa-pdf', [AlumnoMateriasController::class, 'programaPdf'])->name('materias.programaPdf');
     });
 
 Route::middleware(['auth', 'role:Tutor'])
     ->prefix('tutor')
     ->name('tutor.')
     ->group(function () {
+        Route::get('/mis-datos', [TutorPerfilController::class, 'index'])->name('perfil.index');
+
         Route::get('/alumnos', [TutorAlumnosController::class, 'index'])->name('alumnos.index');
         Route::get('/alumnos/{alumno}', [TutorAlumnosController::class, 'show'])->name('alumnos.show');
+        Route::get('/alumnos/{alumno}/materias/{clase}', [TutorAlumnosController::class, 'materia'])->name('alumnos.materia');
     });

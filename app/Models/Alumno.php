@@ -84,4 +84,14 @@ class Alumno extends Model
     {
         return $this->hasMany(Calificacion::class, 'id_alumno', 'id_alumno');
     }
+
+    public function aceptacionesCriterios(): HasMany
+    {
+        return $this->hasMany(AceptacionCriterio::class, 'id_alumno', 'id_alumno');
+    }
+
+    public function nombreCompleto(): string
+    {
+        return trim($this->nombre.' '.$this->apellido_paterno.' '.$this->apellido_materno);
+    }
 }

@@ -3,6 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Alumno;
+use App\Models\Calificacion;
+use App\Models\Clase;
+use App\Models\CriterioEvaluacion;
+use App\Models\Evaluacion;
 use App\Models\Tutor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,6 +27,18 @@ class ModulosTutorTest extends TestCase
             ->assertOk()
             ->assertSee(route('tutor.alumnos.index'))
             ->assertSee('Seguimiento académico');
+    }
+
+    public function test_hay_varios_tutores_de_prueba_y_ninguno_supera_dos_alumnos(): void
+    {
+        $tutores = Tutor::withCount('alumnos')->get();
+
+        $this->assertGreaterThanOrEqual(10, $tutores->count());
+        $this->assertGreaterThanOrEqual(1, (int) $tutores->min('alumnos_count'));
+        $this->assertLessThanOrEqual(2, (int) $tutores->max('alumnos_count'));
+
+        $tutorDemo = User::where('username', 'tutor.demo001')->firstOrFail();
+        $this->assertSame(2, (int) $tutorDemo->tutor->alumnos()->count());
     }
 
     public function test_tutor_solo_ve_a_los_alumnos_bajo_su_tutela(): void
@@ -56,6 +72,90 @@ class ModulosTutorTest extends TestCase
 
         $this->get(route('admin.alumnos.index'))
             ->assertForbidden();
+    }
+
+    public function test_tutor_ve_sus_datos_personales_sin_opcion_de_foto(): void
+    {
+        $usuario = User::where('username', 'tutor.prueba')->firstOrFail();
+        $tutor = $usuario->tutor;
+
+        $this->actingAs($usuario)
+            ->get(route('tutor.perfil.index'))
+            ->assertOk()
+            ->assertSee('Mis datos')
+            ->assertSee($tutor->nombre)
+            ->assertSee($tutor->apellido_paterno)
+            ->assertSee($tutor->correo)
+            ->assertSee($tutor->telefono)
+            ->assertSee($usuario->username)
+            ->assertDontSee('Subir foto')
+            ->assertDontSee('site-footer');
+    }
+
+    public function test_tutor_ve_materias_criterios_y_calificaciones_del_alumno(): void
+    {
+        $usuario = User::where('username', 'tutor.prueba')->firstOrFail();
+        $alumno = Alumno::findOrFail(1);
+        $clase = Clase::where('id_grupo', $alumno->id_grupo)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $evaluacion = Evaluacion::firstOrCreate(
+            ['id_clase' => $clase->id_clase, 'parcial' => 1],
+            ['tipo' => 'ambos', 'estatus' => 'publicada', 'formato_calificacion' => 'decimal']
+        );
+        $evaluacion->criterios()->delete();
+
+        $criterio = CriterioEvaluacion::create([
+            'id_clase' => $clase->id_clase,
+            'parcial' => 1,
+            'id_evaluacion' => $evaluacion->id_evaluacion,
+            'nombre_rubro' => 'Examen',
+            'tipo_evidencia' => 'Examen',
+            'porcentaje' => 70,
+        ]);
+        Calificacion::create([
+            'id_criterio' => $criterio->id_criterio,
+            'id_alumno' => $alumno->id_alumno,
+            'porcentaje_obtenido' => 80,
+            'puntaje_obtenido' => 5.60,
+        ]);
+
+        $this->actingAs($usuario)
+            ->get(route('tutor.alumnos.show', $alumno))
+            ->assertOk()
+            ->assertSee('Materias del alumno')
+            ->assertSee(route('tutor.alumnos.materia', [$alumno, $clase]));
+
+        $this->get(route('tutor.alumnos.materia', [$alumno, $clase]))
+            ->assertOk()
+            ->assertSee('Correo institucional')
+            ->assertSee($clase->docente?->correo_institucional ?? '—')
+            ->assertSee('Examen')
+            ->assertSee('70.00 %')
+            ->assertSee('80.00 %')
+            ->assertSee('Calificación (0–10)')
+            ->assertSee('Aportación al parcial')
+            ->assertSee('8.00')
+            ->assertSee('Calificación obtenida en el parcial')
+            ->assertDontSee('5.60')
+            ->assertDontSee('site-footer');
+    }
+
+    public function test_tutor_no_puede_ver_materias_de_otro_alumno_ni_de_otro_grupo(): void
+    {
+        $usuario = User::where('username', 'tutor.prueba')->firstOrFail();
+        $alumnoPropio = Alumno::findOrFail(1);
+        $alumnoAjeno = Alumno::findOrFail(2);
+        $clasePropia = Clase::where('id_grupo', $alumnoPropio->id_grupo)->firstOrFail();
+        $claseAjena = Clase::where('id_grupo', '!=', $alumnoPropio->id_grupo)->firstOrFail();
+
+        $this->actingAs($usuario)
+            ->get(route('tutor.alumnos.materia', [$alumnoAjeno, $clasePropia]))
+            ->assertNotFound();
+
+        $this->get(route('tutor.alumnos.materia', [$alumnoPropio, $claseAjena]))
+            ->assertNotFound();
     }
 
     public function test_administrador_puede_vincular_y_desasignar_alumnos_desde_tutores(): void

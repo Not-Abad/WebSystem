@@ -37,6 +37,11 @@ class Evaluacion extends Model
         return $this->hasMany(CriterioEvaluacion::class, 'id_evaluacion', 'id_evaluacion');
     }
 
+    public function aceptaciones(): HasMany
+    {
+        return $this->hasMany(AceptacionCriterio::class, 'id_evaluacion', 'id_evaluacion');
+    }
+
     public function etiqueta(): string
     {
         return match ((int) $this->parcial) {
