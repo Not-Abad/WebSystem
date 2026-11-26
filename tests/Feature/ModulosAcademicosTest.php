@@ -403,6 +403,36 @@ class ModulosAcademicosTest extends TestCase
             ->count());
     }
 
+    public function test_horario_no_permite_dos_docentes_para_la_misma_materia(): void
+    {
+        $this->actingAs($this->administrador());
+
+        $materia = Materia::where('clave', 'LIT-203')->firstOrFail();
+
+        $this->post(route('admin.horarios.guardar'), [
+            'id_plan' => 1,
+            'id_grupo' => 3,
+            'celdas' => [
+                [
+                    'dia' => 'Lunes',
+                    'inicio' => '15:00:00',
+                    'fin' => '15:50:00',
+                    'id_materia' => $materia->id_materia,
+                    'id_docente' => 1,
+                    'id_salon' => 1,
+                ],
+                [
+                    'dia' => 'Martes',
+                    'inicio' => '15:00:00',
+                    'fin' => '15:50:00',
+                    'id_materia' => $materia->id_materia,
+                    'id_docente' => 2,
+                    'id_salon' => 1,
+                ],
+            ],
+        ])->assertSessionHasErrors('celdas');
+    }
+
     public function test_horario_rechaza_materia_de_otro_semestre_docente_solapado_y_salon_ocupado(): void
     {
         $this->actingAs($this->administrador());

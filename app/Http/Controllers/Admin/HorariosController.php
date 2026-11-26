@@ -300,6 +300,25 @@ class HorariosController extends Controller
                     );
                 }
             }
+
+            // Una materia solo puede tener un docente en este horario: todas sus
+            // horas deben impartirlas el mismo profesor.
+            $docentesPorMateria = collect($celdas)
+                ->filter(fn ($celda) => ! empty($celda['id_materia']) && ! empty($celda['id_docente']))
+                ->groupBy(fn ($celda) => (int) $celda['id_materia'])
+                ->map(fn ($filas) => $filas->pluck('id_docente')->map(fn ($id) => (int) $id)->unique());
+
+            foreach ($docentesPorMateria as $idMateria => $idsDocente) {
+                if ($idsDocente->count() <= 1) {
+                    continue;
+                }
+
+                $materia = Materia::find($idMateria);
+                $validator->errors()->add(
+                    'celdas',
+                    'La materia '.($materia?->nombre ?? 'seleccionada').' solo puede tener un docente en este horario.'
+                );
+            }
         });
 
         $validator->validate();

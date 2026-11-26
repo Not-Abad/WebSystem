@@ -74,7 +74,7 @@
             <div class="modulo-card-header">
                 <div>
                     <h2><i class="fas fa-book-bookmark"></i> 1. Materia</h2>
-                    <p>Solo materias del plan, semestre y área del grupo, más el tronco común.</p>
+                    <p>Solo materias del plan, semestre y área del grupo, más el tronco común. Cada materia se imparte siempre con el mismo docente en este horario.</p>
                 </div>
             </div>
 
@@ -104,7 +104,7 @@
             <div class="modulo-card-header">
                 <div>
                     <h2><i class="fas fa-chalkboard-user"></i> 2. Docente</h2>
-                    <p>Se habilita al seleccionar una materia.</p>
+                    <p>Se habilita al seleccionar una materia. Si la materia ya tiene docente en este horario, se selecciona automáticamente.</p>
                 </div>
             </div>
 
@@ -261,6 +261,14 @@
                 }).length;
             }
 
+            function docenteDeMateria(idMateria) {
+                const asignacion = Object.values(asignaciones).find(function (item) {
+                    return Number(item.id_materia) === Number(idMateria);
+                });
+
+                return asignacion ? Number(asignacion.id_docente) : null;
+            }
+
             function celdasOcupadas(mapa, id) {
                 if (!id) return [];
                 return mapa[String(id)] || [];
@@ -282,11 +290,21 @@
 
             function actualizarDisponibilidadSelector() {
                 const total = document.querySelectorAll('.celda-horario').length;
+                const docenteAsignado = seleccion.materia
+                    ? docenteDeMateria(seleccion.materia.dataset.id)
+                    : null;
 
                 document.querySelectorAll('.docente-item').forEach(function (item) {
+                    const id = Number(item.dataset.id);
                     const agotado = celdasOcupadas(ocupacionesDocentes, item.dataset.id).length >= total;
-                    item.disabled = agotado;
-                    item.classList.toggle('selector-agotado', agotado);
+                    const otroDocente = docenteAsignado !== null && id !== docenteAsignado;
+                    item.disabled = agotado || otroDocente;
+                    item.classList.toggle('selector-agotado', agotado || otroDocente);
+                    if (otroDocente) {
+                        item.title = 'Esta materia ya tiene un docente asignado en este horario.';
+                    } else {
+                        item.title = '';
+                    }
                 });
 
                 document.querySelectorAll('.salon-item').forEach(function (item) {
@@ -422,6 +440,22 @@
                 actualizarDisponibilidadSelector();
             }
 
+            function seleccionarDocente(item) {
+                if (item.disabled || !seleccion.materia) return false;
+
+                document.querySelectorAll('.docente-item').forEach(function (otro) {
+                    otro.classList.remove('seleccion-activo');
+                });
+                item.classList.add('seleccion-activo');
+                seleccion.docente = item;
+                actualizarDisponibilidadSelector();
+                habilitarSalones();
+                renderCeldas();
+                actualizarResumen();
+
+                return true;
+            }
+
             function bloquearSalones() {
                 if (buscadorSalon) {
                     buscadorSalon.disabled = true;
@@ -461,22 +495,40 @@
                         });
                         habilitarDocentes();
                         bloquearSalones();
-                        renderCeldas();
-                        actualizarResumen();
+
+                        const idDocenteAsignado = docenteDeMateria(item.dataset.id);
+                        if (idDocenteAsignado !== null) {
+                            const docenteAsignado = document.querySelector(
+                                '.docente-item[data-id="' + idDocenteAsignado + '"]'
+                            );
+                            if (docenteAsignado && seleccionarDocente(docenteAsignado)) {
+                                resumen.innerHTML += '<span class="resumen-formacion"><strong>Docente fijo de la materia:</strong> '
+                                    + escapar(seleccion.docente.dataset.nombre) + '</span>';
+                            } else {
+                                actualizarDisponibilidadSelector();
+                                renderCeldas();
+                                actualizarResumen();
+                                resumen.innerHTML += '<span class="resumen-alerta">El docente asignado a esta materia no está disponible. Quita sus celdas para cambiarlo.</span>';
+                            }
+                        } else {
+                            actualizarDisponibilidadSelector();
+                            renderCeldas();
+                            actualizarResumen();
+                        }
                     });
                 });
 
                 document.querySelectorAll('.docente-item').forEach(function (item) {
                     item.addEventListener('click', function () {
                         if (item.disabled || !seleccion.materia) return;
-                        document.querySelectorAll('.docente-item').forEach(function (otro) {
-                            otro.classList.remove('seleccion-activo');
-                        });
-                        item.classList.add('seleccion-activo');
-                        seleccion.docente = item;
-                        habilitarSalones();
-                        renderCeldas();
-                        actualizarResumen();
+
+                        const idDocenteAsignado = docenteDeMateria(seleccion.materia.dataset.id);
+                        if (idDocenteAsignado !== null && Number(item.dataset.id) !== idDocenteAsignado) {
+                            resumen.innerHTML = '<span class="resumen-alerta">Esta materia ya tiene un docente asignado en este horario. Quita sus celdas para cambiarlo.</span>';
+                            return;
+                        }
+
+                        seleccionarDocente(item);
                     });
                 });
 
@@ -502,6 +554,7 @@
                             renderCeldas();
                             renderOcultos();
                             actualizarContadores();
+                            actualizarDisponibilidadSelector();
                             actualizarResumen();
                             return;
                         }
@@ -538,6 +591,7 @@
                         renderCeldas();
                         renderOcultos();
                         actualizarContadores();
+                        actualizarDisponibilidadSelector();
                         actualizarResumen();
                     });
                 });

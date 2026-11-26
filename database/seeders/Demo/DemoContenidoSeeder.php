@@ -354,6 +354,12 @@ class DemoContenidoSeeder extends Seeder
         }
 
         foreach ($primerasClases as $datos) {
+            // La unificación puede dejar de baja la clase base del grupo; en
+            // ese caso sus evaluaciones ya viven en la clase canónica.
+            if (! DB::table('clases')->where('id_clase', $datos['id_clase'])->where('is_active', true)->exists()) {
+                continue;
+            }
+
             $this->capturarEvaluaciones($datos['id_clase'], $ahora);
         }
     }
@@ -423,6 +429,8 @@ class DemoContenidoSeeder extends Seeder
                     'updated_at' => $ahora,
                 ]);
 
+            $this->normalizarEvaluacion($idEvaluacion);
+
             $criterios = [];
             foreach ($ponderaciones as $posicion => [$rubro, $porcentaje]) {
                 $criterio = DB::table('criterios_evaluacion')
@@ -430,24 +438,61 @@ class DemoContenidoSeeder extends Seeder
                     ->where('nombre_rubro', $rubro)
                     ->first();
 
-                $idCriterio = $criterio
-                    ? (int) $criterio->id_criterio
-                    : (int) DB::table('criterios_evaluacion')->insertGetId([
+                if ($criterio) {
+                    $peso = (float) $criterio->porcentaje;
+                    $idCriterio = (int) $criterio->id_criterio;
+                } else {
+                    $disponible = round(100 - collect($criterios)->sum('peso'), 2);
+                    if ($disponible < 1) {
+                        continue;
+                    }
+
+                    $peso = min((float) $porcentaje, $disponible);
+                    $idCriterio = (int) DB::table('criterios_evaluacion')->insertGetId([
                         'id_clase' => $idClase,
                         'parcial' => $parcial,
                         'id_evaluacion' => $idEvaluacion,
                         'nombre_rubro' => $rubro,
                         'tipo_evidencia' => $rubro,
-                        'porcentaje' => $porcentaje,
+                        'porcentaje' => $peso,
                         'fecha_entrega' => $fechasEntrega[$indice] ?: null,
                     ]);
-                $criterios[] = ['id' => $idCriterio, 'peso' => $porcentaje, 'orden' => $posicion];
+                }
+
+                $criterios[] = ['id' => $idCriterio, 'peso' => $peso, 'orden' => $posicion];
             }
 
             $this->capturarCalificaciones($idClase, $criterios, $ahora);
         }
 
         $this->capturarAsistencias($idClase, $ahora);
+    }
+
+    /**
+     * Sanea evaluaciones de la demo cuyos criterios suman más de 100 %.
+     * Elimina los rubros sobrantes (y sus calificaciones) desde el último.
+     */
+    private function normalizarEvaluacion(int $idEvaluacion): void
+    {
+        $criterios = DB::table('criterios_evaluacion')
+            ->where('id_evaluacion', $idEvaluacion)
+            ->orderBy('id_criterio')
+            ->get();
+
+        $excedente = (float) $criterios->sum(fn ($criterio) => (float) $criterio->porcentaje) - 100;
+        if ($excedente <= 0.009) {
+            return;
+        }
+
+        foreach ($criterios->reverse() as $criterio) {
+            if ($excedente <= 0.009) {
+                break;
+            }
+
+            DB::table('calificaciones')->where('id_criterio', $criterio->id_criterio)->delete();
+            DB::table('criterios_evaluacion')->where('id_criterio', $criterio->id_criterio)->delete();
+            $excedente -= (float) $criterio->porcentaje;
+        }
     }
 
     /** @param array<int, array<string, int>> $criterios */
@@ -493,9 +538,28 @@ class DemoContenidoSeeder extends Seeder
             ->select('alumnos.id_alumno')
             ->pluck('id_alumno');
 
-        $fechas = collect(range(6, 1))->map(fn ($dias) => now()->subDays($dias)->toDateString());
-        $filas = [];
+        // La demo no registra asistencia en fin de semana.
+        $fechasFinDeSemana = DB::table('asistencias')
+            ->distinct()
+            ->pluck('fecha')
+            ->filter(fn ($fecha) => \Illuminate\Support\Carbon::parse($fecha)->isWeekend())
+            ->all();
+        if ($fechasFinDeSemana !== []) {
+            DB::table('asistencias')->whereIn('fecha', $fechasFinDeSemana)->delete();
+        }
 
+        // Últimos diez días hábiles (lunes a viernes), sin sábados ni domingos.
+        $fechas = collect();
+        $fecha = now()->startOfDay();
+        while ($fechas->count() < 10) {
+            if (! $fecha->isWeekend()) {
+                $fechas->push($fecha->toDateString());
+            }
+            $fecha = $fecha->copy()->subDay();
+        }
+        $fechas = $fechas->reverse()->values();
+
+        $filas = [];
         foreach ($fechas as $indice => $fecha) {
             $parcial = ($indice % 3) + 1;
             foreach ($alumnos as $idAlumno) {

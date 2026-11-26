@@ -295,12 +295,13 @@ class ClaseController extends Controller
             'criterios' => ['required', 'array', 'min:1'],
             'criterios.*.nombre_rubro' => ['required', 'string', 'max:60'],
             'criterios.*.tipo_evidencia' => ['required', 'string', 'max:60', Rule::in(self::BANCO_EVIDENCIAS)],
-            'criterios.*.porcentaje' => ['required', 'numeric', 'min:1'],
+            'criterios.*.porcentaje' => ['required', 'numeric', 'min:1', 'max:'.self::PORCENTAJE_MAXIMO_EVALUACION],
             'criterios.*.fecha_entrega' => FechaSegura::reglas(false),
         ], array_merge([
             'criterios.required' => 'Selecciona al menos un criterio del banco de evaluación.',
             'criterios.min' => 'Selecciona al menos un criterio del banco de evaluación.',
             'criterios.*.porcentaje.min' => 'Cada criterio debe tener un porcentaje mínimo de 1.',
+            'criterios.*.porcentaje.max' => 'Ningún criterio puede superar el 100 %.',
             'criterios.*.tipo_evidencia.in' => 'Selecciona una evidencia del banco institucional.',
         ], FechaSegura::mensajes('criterios.*.fecha_entrega')));
 

@@ -14,12 +14,6 @@ use Illuminate\Support\Facades\DB;
  */
 class EvaluacionesCompletasSeeder extends Seeder
 {
-    /** Cada docente sin clases recibe una de estas asignaciones. */
-    private const CLASES_INICIALES = [
-        1 => ['id_materia' => 1, 'id_grupo' => 1],
-        2 => ['id_materia' => 5, 'id_grupo' => 2],
-    ];
-
     public function run(): void
     {
         $ahora = now();
@@ -39,10 +33,11 @@ class EvaluacionesCompletasSeeder extends Seeder
             $idDocente = (int) $idDocente;
 
             $idClase = DB::table('clases')
-                ->where('id_docente', $idDocente)
-                ->where('is_active', true)
-                ->orderBy('id_clase')
-                ->value('id_clase');
+                ->join('evaluaciones', 'evaluaciones.id_clase', '=', 'clases.id_clase')
+                ->where('clases.id_docente', $idDocente)
+                ->where('clases.is_active', true)
+                ->orderBy('clases.id_clase')
+                ->value('clases.id_clase');
 
             if (! $idClase) {
                 $idClase = $this->crearClaseInicial($idDocente, $ahora);
@@ -90,28 +85,40 @@ class EvaluacionesCompletasSeeder extends Seeder
 
     private function crearClaseInicial(int $idDocente, $ahora): ?int
     {
-        $asignacion = self::CLASES_INICIALES[$idDocente] ?? null;
+        // Se busca una materia que todavía no tenga docente asignado en el
+        // grupo para no repetir la misma materia con dos profesores.
+        foreach (DB::table('grupos')->orderBy('id_grupo')->get() as $grupo) {
+            $materia = DB::table('materias')
+                ->where('id_plan', 1)
+                ->where('id_semestre', $grupo->id_semestre)
+                ->where('is_active', true)
+                ->whereNotExists(function ($consulta) use ($grupo) {
+                    $consulta->select(DB::raw(1))
+                        ->from('clases')
+                        ->whereColumn('clases.id_materia', 'materias.id_materia')
+                        ->where('clases.id_grupo', $grupo->id_grupo)
+                        ->where('clases.is_active', true);
+                })
+                ->orderBy('es_tronco_comun', 'desc')
+                ->orderBy('id_materia')
+                ->first();
 
-        if (! $asignacion) {
-            return null;
+            if (! $materia) {
+                continue;
+            }
+
+            $idClase = (int) DB::table('clases')->insertGetId([
+                'id_materia' => $materia->id_materia,
+                'id_docente' => $idDocente,
+                'id_grupo' => $grupo->id_grupo,
+                'is_active' => 1,
+                'created_at' => $ahora,
+                'updated_at' => $ahora,
+            ]);
+
+            return $idClase;
         }
 
-        $idClase = (int) DB::table('clases')->max('id_clase') + 1;
-
-        DB::table('clases')->insertOrIgnore([
-            'id_clase' => $idClase,
-            'id_materia' => $asignacion['id_materia'],
-            'id_docente' => $idDocente,
-            'id_grupo' => $asignacion['id_grupo'],
-            'is_active' => 1,
-            'created_at' => $ahora,
-            'updated_at' => $ahora,
-        ]);
-
-        return DB::table('clases')
-            ->where('id_materia', $asignacion['id_materia'])
-            ->where('id_docente', $idDocente)
-            ->where('id_grupo', $asignacion['id_grupo'])
-            ->value('id_clase');
+        return null;
     }
 }

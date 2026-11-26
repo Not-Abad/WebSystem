@@ -27,6 +27,7 @@ class DemoDataSeeder extends Seeder
         $this->call(HorariosCompletosSeeder::class);
         $this->call(EvaluacionesCompletasSeeder::class);
         $this->call(GruposCompletosSeeder::class);
+        (new HorariosCompletosSeeder())->unificarDocentePorMateria();
         $this->call(ArchivosSeeder::class);
     }
 }

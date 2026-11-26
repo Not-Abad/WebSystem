@@ -8,6 +8,7 @@ use App\Http\Controllers\Docente\ClaseController;
 use App\Models\Grupo;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -50,9 +51,14 @@ class DemoContenidoTest extends TestCase
     public function test_banco_de_criterios_ofrece_opciones_multiples_y_evaluaciones_llenas(): void
     {
         $docente = User::where('username', 'docente.demo5')->firstOrFail();
+        $idClase = DB::table('clases')
+            ->where('id_docente', $docente->docente->id_docente)
+            ->where('is_active', true)
+            ->orderBy('id_clase')
+            ->value('id_clase');
 
         $this->actingAs($docente)
-            ->get(route('docente.clases.show', 3))
+            ->get(route('docente.clases.show', $idClase))
             ->assertOk()
             ->assertSee('Banco de criterios de evaluación')
             ->assertSee('Actividades en clase')
@@ -116,6 +122,58 @@ class DemoContenidoTest extends TestCase
             $this->assertGreaterThanOrEqual(15, $alumnos, 'Grupo '.$idGrupo.' vacío');
             $this->assertGreaterThanOrEqual(1, $clases, 'Grupo '.$idGrupo.' sin clases');
             $this->assertGreaterThan(0, $calificaciones, 'Grupo '.$idGrupo.' sin calificaciones');
+        }
+    }
+
+    public function test_cada_materia_tiene_un_solo_docente_por_grupo(): void
+    {
+        $duplicados = DB::table('clases')
+            ->where('is_active', true)
+            ->select('id_grupo', 'id_materia')
+            ->groupBy('id_grupo', 'id_materia')
+            ->havingRaw('COUNT(DISTINCT id_docente) > 1')
+            ->get();
+
+        $this->assertCount(0, $duplicados, 'Hay materias con más de un docente en el mismo horario.');
+    }
+
+    public function test_las_evaluaciones_de_la_demo_no_superan_el_cien_por_ciento(): void
+    {
+        foreach (DB::table('evaluaciones')->pluck('id_evaluacion') as $idEvaluacion) {
+            $total = (float) DB::table('criterios_evaluacion')
+                ->where('id_evaluacion', $idEvaluacion)
+                ->sum('porcentaje');
+
+            $this->assertLessThanOrEqual(100, $total, 'Evaluación '.$idEvaluacion.' supera el 100 %.');
+        }
+    }
+
+    public function test_docente_prueba_tiene_todos_los_alumnos_calificados_y_diez_dias_habiles(): void
+    {
+        $docente = User::where('username', 'docente.prueba')->firstOrFail()->docente;
+
+        $this->assertNotNull($docente);
+
+        foreach ($docente->clases()->where('is_active', 1)->get() as $clase) {
+            $alumnos = DB::table('alumnos')->where('id_grupo', $clase->id_grupo)->count();
+            $calificados = DB::table('calificaciones')
+                ->join('criterios_evaluacion', 'criterios_evaluacion.id_criterio', '=', 'calificaciones.id_criterio')
+                ->where('criterios_evaluacion.id_clase', $clase->id_clase)
+                ->distinct()
+                ->count('calificaciones.id_alumno');
+
+            $this->assertSame($alumnos, $calificados, 'Clase '.$clase->id_clase.' con calificaciones incompletas.');
+
+            $fechas = DB::table('asistencias')
+                ->where('id_clase', $clase->id_clase)
+                ->distinct()
+                ->pluck('fecha');
+
+            $this->assertGreaterThanOrEqual(10, $fechas->count(), 'Clase '.$clase->id_clase.' con menos de 10 días de asistencia.');
+
+            foreach ($fechas as $fecha) {
+                $this->assertFalse(Carbon::parse($fecha)->isWeekend(), 'Asistencia registrada en fin de semana.');
+            }
         }
     }
 

@@ -31,6 +31,10 @@ class GruposCompletosSeeder extends Seeder
         $this->sembrarAlumnosYTutores(Hash::make('Prueba123!'), $ahora);
         $this->sembrarEvaluacionesPorGrupo($ahora);
         $this->sembrarEvaluacionesPorDocente($ahora);
+
+        // Unifica la malla al final para que las clases nuevas también queden
+        // con un solo docente por materia en cada grupo.
+        (new HorariosCompletosSeeder())->unificarDocentePorMateria();
     }
 
     private function sembrarAlumnosYTutores(string $password, $ahora): void

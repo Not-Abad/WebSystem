@@ -97,7 +97,10 @@ class PortalAlumnoTest extends TestCase
         $this->actingAs($usuario)
             ->get(route('alumno.materias.show', $clase))
             ->assertOk()
-            ->assertSee('Aceptar criterios');
+            ->assertSee('Aceptar criterios')
+            ->assertSee('Criterio de evaluación')
+            ->assertDontSee('<th>Evidencia</th>', false)
+            ->assertDontSee('<th>Rubro</th>', false);
 
         $this->post(route('alumno.materias.aceptarCriterios', [$clase, $evaluaciones[0]]), [
             'acepto' => 1,

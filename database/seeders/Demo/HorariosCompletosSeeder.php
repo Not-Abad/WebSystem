@@ -228,7 +228,13 @@ class HorariosCompletosSeeder extends Seeder
                 $faltan += max(0, (int) $materia->horas_semana - $asignadas);
             }
 
-            $candidatos[] = ['grupo' => $grupo, 'materias' => $disponibles, 'faltan' => $faltan];
+            // Las materias con más horas se colocan primero: así el docente
+            // que se les asigne todavía tiene celdas libres suficientes.
+            $candidatos[] = [
+                'grupo' => $grupo,
+                'materias' => $disponibles->sortByDesc('horas_semana')->values(),
+                'faltan' => $faltan,
+            ];
         }
 
         // Los grupos con más horas pendientes se resuelven primero. Se usa el
@@ -237,6 +243,7 @@ class HorariosCompletosSeeder extends Seeder
             ?: $a['grupo']->id_grupo <=> $b['grupo']->id_grupo);
 
         $nuevosHorarios = [];
+        $docenteFijado = [];
 
         foreach ($candidatos as $candidato) {
             $grupo = $candidato['grupo'];
@@ -245,6 +252,30 @@ class HorariosCompletosSeeder extends Seeder
             foreach ($candidato['materias'] as $materia) {
                 $asignadas = $horasPorGrupo[$grupo->id_grupo][$materia->id_materia] ?? 0;
                 $pendientes = (int) $materia->horas_semana - $asignadas;
+
+                if ($pendientes <= 0) {
+                    continue;
+                }
+
+                // Una materia siempre la imparte el mismo docente en el
+                // horario del grupo. Se elige a uno que pueda cubrir todas las
+                // horas pendientes antes de colocar la primera celda.
+                $idFijado = $this->elegirDocenteParaMateria(
+                    $materia,
+                    (int) $grupo->id_grupo,
+                    $pendientes,
+                    $docentePreferido,
+                    $docentes,
+                    $docenteOcupado,
+                    $cargaDocente,
+                    $grupoOcupado
+                );
+
+                if (! $idFijado) {
+                    continue;
+                }
+
+                $docenteFijado[$grupo->id_grupo][$materia->id_materia] = $idFijado;
 
                 for ($i = 0; $i < $pendientes; $i++) {
                     $celdasLibres = [];
@@ -277,7 +308,8 @@ class HorariosCompletosSeeder extends Seeder
                             $docentePreferido,
                             $docentes,
                             $docenteOcupado,
-                            $cargaDocente
+                            $cargaDocente,
+                            $docenteFijado[$grupo->id_grupo][$materia->id_materia] ?? null
                         );
 
                         if (! $idDocente) {
@@ -326,6 +358,187 @@ class HorariosCompletosSeeder extends Seeder
     }
 
     /**
+     * Deja un solo docente activo por materia en cada grupo. Se conserva la
+     * clase con más horarios (o la reservada para las pruebas) y se le
+     * traspasan evaluaciones, criterios, calificaciones y asistencias. Los
+     * horarios de las clases absorbidas se mantienen como parte de la malla
+     * del grupo, pero esas clases quedan dadas de baja lógica.
+     */
+    public function unificarDocentePorMateria(): void
+    {
+        $pares = DB::table('clases')
+            ->where('is_active', true)
+            ->select('id_grupo', 'id_materia')
+            ->groupBy('id_grupo', 'id_materia')
+            ->havingRaw('COUNT(DISTINCT id_docente) > 1')
+            ->get();
+
+        foreach ($pares as $par) {
+            $idGrupo = (int) $par->id_grupo;
+            $idMateria = (int) $par->id_materia;
+
+            $clases = DB::table('clases')
+                ->where('id_grupo', $idGrupo)
+                ->where('id_materia', $idMateria)
+                ->where('is_active', true)
+                ->get();
+
+            if ($clases->count() < 2) {
+                continue;
+            }
+
+            $ordenadas = $clases->sort(function ($a, $b) {
+                $reservadaA = in_array((int) $a->id_docente, self::DOCENTES_RESERVADOS, true) ? 0 : 1;
+                $reservadaB = in_array((int) $b->id_docente, self::DOCENTES_RESERVADOS, true) ? 0 : 1;
+
+                return $reservadaA <=> $reservadaB
+                    ?: DB::table('horarios')->where('id_clase', $b->id_clase)->count()
+                        <=> DB::table('horarios')->where('id_clase', $a->id_clase)->count()
+                    ?: (int) $a->id_clase <=> (int) $b->id_clase;
+            })->values();
+
+            $canonical = $ordenadas->first();
+            foreach ($ordenadas->skip(1) as $clase) {
+                $this->fusionarClase((int) $clase->id_clase, (int) $canonical->id_clase);
+            }
+        }
+    }
+
+    private function fusionarClase(int $origen, int $destino): void
+    {
+        foreach (DB::table('evaluaciones')->where('id_clase', $origen)->get() as $evaluacion) {
+            $equivalente = DB::table('evaluaciones')
+                ->where('id_clase', $destino)
+                ->where('parcial', $evaluacion->parcial)
+                ->first();
+
+            if (! $equivalente) {
+                DB::table('evaluaciones')->where('id_evaluacion', $evaluacion->id_evaluacion)
+                    ->update(['id_clase' => $destino]);
+                DB::table('criterios_evaluacion')->where('id_evaluacion', $evaluacion->id_evaluacion)
+                    ->update(['id_clase' => $destino]);
+                DB::table('aceptaciones_criterios')->where('id_evaluacion', $evaluacion->id_evaluacion)
+                    ->update(['id_clase' => $destino]);
+                DB::table('reinco_exportaciones')->where('id_evaluacion', $evaluacion->id_evaluacion)
+                    ->update(['id_clase' => $destino]);
+                continue;
+            }
+
+            foreach (DB::table('criterios_evaluacion')->where('id_evaluacion', $evaluacion->id_evaluacion)->get() as $criterio) {
+                $existe = DB::table('criterios_evaluacion')
+                    ->where('id_evaluacion', $equivalente->id_evaluacion)
+                    ->where('nombre_rubro', $criterio->nombre_rubro)
+                    ->exists();
+
+                if ($existe) {
+                    DB::table('calificaciones')->where('id_criterio', $criterio->id_criterio)->delete();
+                    DB::table('criterios_evaluacion')->where('id_criterio', $criterio->id_criterio)->delete();
+                } else {
+                    DB::table('criterios_evaluacion')->where('id_criterio', $criterio->id_criterio)->update([
+                        'id_clase' => $destino,
+                        'id_evaluacion' => $equivalente->id_evaluacion,
+                    ]);
+                }
+            }
+
+            DB::table('aceptaciones_criterios')
+                ->where('id_evaluacion', $evaluacion->id_evaluacion)
+                ->update(['id_evaluacion' => $equivalente->id_evaluacion, 'id_clase' => $destino]);
+            DB::table('reinco_exportaciones')
+                ->where('id_evaluacion', $evaluacion->id_evaluacion)
+                ->update(['id_evaluacion' => $equivalente->id_evaluacion, 'id_clase' => $destino]);
+            DB::table('evaluaciones')->where('id_evaluacion', $evaluacion->id_evaluacion)->delete();
+        }
+
+        foreach (DB::table('asistencias')->where('id_clase', $origen)->get() as $asistencia) {
+            $duplicado = DB::table('asistencias')
+                ->where('id_clase', $destino)
+                ->where('id_alumno', $asistencia->id_alumno)
+                ->where('fecha', $asistencia->fecha)
+                ->exists();
+
+            if ($duplicado) {
+                DB::table('asistencias')->where('id_asistencia', $asistencia->id_asistencia)->delete();
+            } else {
+                DB::table('asistencias')->where('id_asistencia', $asistencia->id_asistencia)
+                    ->update(['id_clase' => $destino]);
+            }
+        }
+
+        foreach (['criterios_evaluacion', 'aceptaciones_criterios', 'reinco_exportaciones'] as $tabla) {
+            DB::table($tabla)->where('id_clase', $origen)->update(['id_clase' => $destino]);
+        }
+
+        // Se mantiene la fila como baja lógica para no reinsertarla en una
+        // segunda ejecución de los seeders.
+        DB::table('clases')->where('id_clase', $origen)->update(['is_active' => false]);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $docentes
+     * @param  array<int, array<int, int>>  $docentePreferido
+     * @param  array<int, array<string, bool>>  $docenteOcupado
+     * @param  array<int, int>  $cargaDocente
+     * @param  array<int, array<string, bool>>  $grupoOcupado
+     */
+    private function elegirDocenteParaMateria(
+        object $materia,
+        int $idGrupo,
+        int $pendientes,
+        array $docentePreferido,
+        $docentes,
+        array $docenteOcupado,
+        array $cargaDocente,
+        array $grupoOcupado
+    ): ?int {
+        $libresGrupo = [];
+        foreach (self::DIAS as $dia) {
+            foreach (self::BLOQUES as [$inicio, $fin]) {
+                $clave = $this->clave($dia, $inicio, $fin);
+                if (empty($grupoOcupado[$idGrupo][$clave])) {
+                    $libresGrupo[] = $clave;
+                }
+            }
+        }
+
+        $preferido = $docentePreferido[$idGrupo][$materia->id_materia] ?? null;
+        $mejor = null;
+        $mejorPuntaje = null;
+
+        foreach ($docentes as $docente) {
+            $id = (int) $docente->id_docente;
+            if (($cargaDocente[$id] ?? 0) + $pendientes > (int) $docente->horas_semanales) {
+                continue;
+            }
+
+            $disponibles = 0;
+            foreach ($libresGrupo as $clave) {
+                if (empty($docenteOcupado[$id][$clave])) {
+                    $disponibles++;
+                }
+            }
+            if ($disponibles < $pendientes) {
+                continue;
+            }
+
+            $puntaje = [
+                $preferido !== null && $id === (int) $preferido ? 0 : 1,
+                -$disponibles,
+                $this->esAfin($docente, $materia, $preferido !== null ? (int) $preferido : null) ? 0 : 1,
+                (int) ($cargaDocente[$id] ?? 0),
+                $id,
+            ];
+
+            if ($mejorPuntaje === null || $puntaje < $mejorPuntaje) {
+                $mejor = $id;
+                $mejorPuntaje = $puntaje;
+            }
+        }
+
+        return $mejor;
+    }
+
+    /**
      * @param  \Illuminate\Support\Collection<int, object>  $docentes
      * @param  array<int, array<int, int>>  $docentePreferido
      * @param  array<int, array<string, bool>>  $docenteOcupado
@@ -338,8 +551,20 @@ class HorariosCompletosSeeder extends Seeder
         array $docentePreferido,
         $docentes,
         array $docenteOcupado,
-        array &$cargaDocente
+        array &$cargaDocente,
+        ?int $docenteFijado = null
     ): ?int {
+        if ($docenteFijado !== null) {
+            $docente = $docentes->first(fn ($item) => (int) $item->id_docente === $docenteFijado);
+            if ($docente
+                && ($cargaDocente[$docenteFijado] ?? 0) < (int) $docente->horas_semanales
+                && empty($docenteOcupado[$docenteFijado][$clave])) {
+                return $docenteFijado;
+            }
+
+            return null;
+        }
+
         $preferido = $docentePreferido[$idGrupo][$materia->id_materia] ?? null;
         $ordenados = $docentes
             ->sort(function ($a, $b) use ($materia, $preferido, $cargaDocente) {

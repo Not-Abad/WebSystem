@@ -85,6 +85,10 @@
         @php
             $evaluacion = $parcial['evaluacion'];
             $criterios = $parcial['criterios'];
+            $rubroDistinto = $criterios->contains(function ($criterio) {
+                return trim((string) ($criterio['tipo_evidencia'] ?? ''))
+                    !== trim((string) ($criterio['nombre_rubro'] ?? ''));
+            });
         @endphp
         <div class="docente-bloque">
             <div class="docente-cabecera">
@@ -108,13 +112,24 @@
                 <div class="tabla-wrap">
                     <table class="tabla-docente-grid">
                         <thead>
-                            <tr><th>Evidencia</th><th>Rubro</th><th>Ponderación</th><th>Fecha de entrega</th></tr>
+                            <tr>
+                                @if ($rubroDistinto)
+                                    <th>Evidencia</th>
+                                    <th>Rubro</th>
+                                @else
+                                    <th>Criterio de evaluación</th>
+                                @endif
+                                <th>Ponderación</th>
+                                <th>Fecha de entrega</th>
+                            </tr>
                         </thead>
                         <tbody>
                             @foreach ($criterios as $criterio)
                                 <tr>
-                                    <td>{{ $criterio['tipo_evidencia'] ?: '—' }}</td>
-                                    <td>{{ $criterio['nombre_rubro'] }}</td>
+                                    @if ($rubroDistinto)
+                                        <td>{{ $criterio['tipo_evidencia'] ?: '—' }}</td>
+                                    @endif
+                                    <td>{{ $criterio['nombre_rubro'] ?: ($criterio['tipo_evidencia'] ?: '—') }}</td>
                                     <td>{{ number_format((float) $criterio['porcentaje'], 2) }} %</td>
                                     <td>
                                         {{ ! empty($criterio['fecha_entrega'])

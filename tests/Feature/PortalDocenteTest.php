@@ -111,6 +111,7 @@ class PortalDocenteTest extends TestCase
         $html = $this->actingAs($docente)
             ->get(route('docente.clases.show', 1))
             ->assertOk()
+            ->assertSee('max="100"', false)
             ->getContent();
 
         $this->assertMatchesRegularExpression(

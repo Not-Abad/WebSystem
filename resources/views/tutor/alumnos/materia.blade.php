@@ -76,7 +76,14 @@
     </div>
 
     @forelse ($parciales as $parcial)
-        @php $evaluacion = $parcial['evaluacion']; @endphp
+        @php
+            $evaluacion = $parcial['evaluacion'];
+            $criterios = $parcial['criterios'];
+            $rubroDistinto = $criterios->contains(function ($criterio) {
+                return trim((string) ($criterio['tipo_evidencia'] ?? ''))
+                    !== trim((string) ($criterio['nombre_rubro'] ?? ''));
+            });
+        @endphp
         <div class="docente-bloque">
             <div class="docente-cabecera">
                 <h3>{{ $evaluacion->etiqueta() }}</h3>
@@ -101,8 +108,12 @@
                     <table class="tabla-docente-grid">
                         <thead>
                             <tr>
-                                <th>Evidencia</th>
-                                <th>Rubro</th>
+                                @if ($rubroDistinto)
+                                    <th>Evidencia</th>
+                                    <th>Rubro</th>
+                                @else
+                                    <th>Criterio de evaluación</th>
+                                @endif
                                 <th>Ponderación</th>
                                 <th>Porcentaje obtenido</th>
                                 <th>Calificación (0–10)</th>
@@ -111,10 +122,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($parcial['criterios'] as $criterio)
+                            @foreach ($criterios as $criterio)
                                 <tr>
-                                    <td>{{ $criterio['tipo_evidencia'] ?: '—' }}</td>
-                                    <td>{{ $criterio['nombre_rubro'] }}</td>
+                                    @if ($rubroDistinto)
+                                        <td>{{ $criterio['tipo_evidencia'] ?: '—' }}</td>
+                                    @endif
+                                    <td>{{ $criterio['nombre_rubro'] ?: ($criterio['tipo_evidencia'] ?: '—') }}</td>
                                     <td>{{ number_format($criterio['porcentaje'], 2) }} %</td>
                                     <td>
                                         {{ $criterio['porcentaje_obtenido'] !== null

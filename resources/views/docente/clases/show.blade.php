@@ -430,23 +430,55 @@
 
         function recalcular() {
             let suma = 0;
-            banco.querySelectorAll('[data-criterio-opcion]').forEach((opcion) => {
-                const activa = opcion.querySelector('.criterio-check').checked;
+            const opciones = Array.from(banco.querySelectorAll('[data-criterio-opcion]'));
+
+            opciones.forEach((opcion) => {
+                const check = opcion.querySelector('.criterio-check');
+                const porcentaje = opcion.querySelector('.criterio-porcentaje');
+                const fecha = opcion.querySelector('.criterio-fecha');
+                const activa = check.checked;
+
                 opcion.classList.toggle('seleccionado', activa);
-                opcion.querySelectorAll('.criterio-porcentaje, .criterio-fecha').forEach((campo) => {
-                    campo.disabled = ! activa;
-                    if (! activa) campo.value = '';
-                });
-                if (activa) {
-                    suma += parseFloat(opcion.querySelector('.criterio-porcentaje').value || '0');
+                porcentaje.disabled = ! activa;
+                fecha.disabled = ! activa;
+
+                if (! activa) {
+                    porcentaje.value = '';
+                    fecha.value = '';
+                    return;
+                }
+
+                // El máximo de cada campo es el porcentaje que aún queda libre.
+                const disponible = Math.max(0, 100 - suma);
+                let valor = parseFloat(porcentaje.value || '0');
+                if (! Number.isFinite(valor) || valor < 0) {
+                    valor = 0;
+                }
+                if (valor > disponible) {
+                    valor = disponible;
+                    porcentaje.value = valor > 0 ? valor.toFixed(2) : '';
+                }
+                porcentaje.max = disponible.toFixed(2);
+                suma += valor;
+            });
+
+            const restante = Math.max(0, 100 - suma);
+            const excede = suma > 100;
+
+            // Si ya se consumió el 100 %, no se pueden marcar nuevas opciones.
+            opciones.forEach((opcion) => {
+                const check = opcion.querySelector('.criterio-check');
+                if (! check.checked) {
+                    check.disabled = restante < 1;
                 }
             });
 
-            const excede = suma > 100;
             valorTotal.textContent = suma.toFixed(2).replace(/\.00$/, '');
             total.classList.toggle('es-invalido', excede);
             botonGuardar.disabled = excede;
-            total.title = excede ? 'La suma de los porcentajes no puede ser mayor a 100.' : '';
+            total.title = restante > 0
+                ? 'Disponible para otros criterios: '.concat(restante.toFixed(2).replace(/\.00$/, ''), ' %')
+                : 'Límite de 100 % alcanzado. Deselecciona un criterio para liberar porcentaje.';
         }
 
         banco.addEventListener('change', recalcular);

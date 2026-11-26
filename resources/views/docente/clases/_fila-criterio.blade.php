@@ -13,7 +13,7 @@
             <input type="number" class="criterio-porcentaje"
                    name="criterios[{{ $indice }}][porcentaje]"
                    value="{{ old('criterios.'.$indice.'.porcentaje', $criterio?->porcentaje) }}"
-                   min="1" step="0.01" placeholder="%" {{ $criterio ? '' : 'disabled' }}>
+                   min="1" max="100" step="0.01" placeholder="%" {{ $criterio ? '' : 'disabled' }}>
         </label>
         <label>
             Fecha de entrega
