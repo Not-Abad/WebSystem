@@ -180,6 +180,7 @@ class ModulosAcademicosTest extends TestCase
             'id_semestre' => 3,
             'nombre' => '3-C',
             'cupo_maximo' => 30,
+            'fecha_conclusion' => '2027-06-30',
         ])->assertRedirect(route('admin.grupos.index'));
 
         $grupo = Grupo::where('nombre', '3-C')->firstOrFail();
@@ -190,6 +191,7 @@ class ModulosAcademicosTest extends TestCase
             'id_semestre' => 3,
             'id_area_propedeutica' => null,
             'cupo_maximo' => 30,
+            'fecha_conclusion' => '2027-06-30',
         ]);
         $this->assertDatabaseHas('bitacora_auditoria', [
             'tabla_afectada' => 'grupos',
@@ -202,13 +204,22 @@ class ModulosAcademicosTest extends TestCase
             'id_semestre' => 3,
             'nombre' => '3-C',
             'cupo_maximo' => 30,
+            'fecha_conclusion' => '2027-06-30',
         ])->assertSessionHasErrors('nombre');
+
+        $this->post(route('admin.grupos.store'), [
+            'id_plan' => 1,
+            'id_semestre' => 2,
+            'nombre' => '2-D',
+            'cupo_maximo' => 30,
+        ])->assertSessionHasErrors('fecha_conclusion');
 
         $this->post(route('admin.grupos.store'), [
             'id_plan' => 1,
             'id_semestre' => 5,
             'nombre' => 'C',
             'cupo_maximo' => 30,
+            'fecha_conclusion' => '2027-06-30',
         ])->assertSessionHasErrors('id_area_propedeutica');
 
         $this->post(route('admin.grupos.store'), [
@@ -217,6 +228,7 @@ class ModulosAcademicosTest extends TestCase
             'id_area_propedeutica' => 2,
             'nombre' => 'C',
             'cupo_maximo' => 30,
+            'fecha_conclusion' => '2027-06-30',
         ])->assertRedirect(route('admin.grupos.index'));
 
         $grupoArea = Grupo::where('nombre', 'C')->firstOrFail();
@@ -284,7 +296,7 @@ class ModulosAcademicosTest extends TestCase
         $this->get(route('admin.horarios.index', ['id_plan' => 1, 'id_grupo' => 9]))
             ->assertOk()
             ->assertSee('Lunes|15:00:00|15:50:00', false)
-            ->assertSee('Las celdas marcadas ya están ocupadas en otro horario')
+            ->assertSee('Ocupado')
             ->assertDontSee('RFC HEVC800920MV4')
             ->assertDontSee('site-footer');
     }
@@ -569,6 +581,7 @@ class ModulosAcademicosTest extends TestCase
             'id_area_propedeutica' => null,
             'nombre' => 'SIN-ALUMNOS',
             'cupo_maximo' => 45,
+            'fecha_conclusion' => '2027-06-30',
         ]);
 
         $grupo = Grupo::findOrFail($idGrupo);

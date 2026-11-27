@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-user-plus"></i> Datos del nuevo tutor</h2>
-                <p>Se creará una cuenta de acceso con el rol Tutor.</p>
             </div>
         </div>
 

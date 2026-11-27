@@ -55,9 +55,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Mis datos</h2>
-            <p class="docente-ayuda">
-                Aquí consultas toda tu ficha institucional. La imagen que subas se muestra al inicio de tu panel.
-            </p>
         </div>
         <a href="{{ route('docente.horario.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Volver a mi horario

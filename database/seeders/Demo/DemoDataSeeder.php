@@ -28,6 +28,9 @@ class DemoDataSeeder extends Seeder
         $this->call(EvaluacionesCompletasSeeder::class);
         $this->call(GruposCompletosSeeder::class);
         (new HorariosCompletosSeeder())->unificarDocentePorMateria();
+        $this->call(KardexDemoSeeder::class);
+        $this->call(RecursamientosDemoSeeder::class);
+        $this->call(AlumnoTutoresDemoSeeder::class);
         $this->call(ArchivosSeeder::class);
     }
 }

@@ -5,7 +5,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar en mis alumnos</h2>
-                <p>Solo puedes consultar a los estudiantes asignados a tu perfil de tutor.</p>
             </div>
         </div>
 
@@ -63,6 +62,9 @@
                             <td>
                                 <a href="{{ route('tutor.alumnos.show', $alumno) }}" class="vinculo">
                                     <i class="fas fa-eye"></i> Ver expediente
+                                </a>
+                                <a href="{{ route('tutor.alumnos.kardex', $alumno) }}" class="vinculo">
+                                    <i class="fas fa-file-archive"></i> Ver kardex (R)
                                 </a>
                             </td>
                         </tr>

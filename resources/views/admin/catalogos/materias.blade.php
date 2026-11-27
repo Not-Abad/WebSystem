@@ -15,7 +15,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar materias</h2>
-                <p>Filtra por nombre o clave. Selecciona un plan para agregar materias.</p>
             </div>
         </div>
 

@@ -9,7 +9,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Detalle de la clase</h2>
-            <p class="docente-ayuda">Información de la materia, el grupo y los alumnos de esta asignación.</p>
         </div>
         <a href="{{ route('docente.horario.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Volver a mi horario
@@ -62,7 +61,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Asistencia diaria</h2>
-            <p class="docente-ayuda">Se registra por alumno, fecha y materia. Al volver a guardar se actualiza el registro.</p>
         </div>
     </div>
 
@@ -131,7 +129,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Fechas de exámenes y entregas</h2>
-            <p class="docente-ayuda">Configura las tres evaluaciones. El tipo determina qué fechas se capturan; serán visibles para los alumnos.</p>
         </div>
     </div>
 
@@ -183,10 +180,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Banco de criterios de evaluación</h2>
-            <p class="docente-ayuda">
-                Selecciona simultáneamente los criterios que aplicarás (examen, tareas, asistencia, proyecto,
-                actividades en clase y otros). Cada porcentaje mínimo es 1 y el total de la evaluación no puede ser mayor a 100%.
-            </p>
         </div>
     </div>
 
@@ -198,7 +191,6 @@
         <div class="docente-bloque" data-criterios-parcial="{{ $parcial }}">
             <h3>{{ ['Primera', 'Segunda', 'Tercera'][$parcial - 1] }} evaluación</h3>
             @if (! $evaluacion)
-                <p class="docente-ayuda">Guarda primero las fechas de evaluación para poder seleccionar los criterios.</p>
             @else
                 <form method="POST" action="{{ route('docente.clases.criterios', [$clase, $evaluacion]) }}" class="formulario-criterios">
                     @csrf
@@ -225,10 +217,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Calificaciones por criterio</h2>
-            <p class="docente-ayuda">
-                Captura el porcentaje obtenido por alumno (0–100). Cada evidencia se convierte a una nota de 0.00 a
-                10.00 y la calificación del parcial es el promedio ponderado de esas notas.
-            </p>
         </div>
     </div>
 
@@ -239,8 +227,8 @@
         @endphp
         <div class="docente-bloque">
             <h3>{{ ['Primera', 'Segunda', 'Tercera'][$parcial - 1] }} evaluación</h3>
+            <p class="docente-ayuda">Captura al menos 50 % por criterio; las ponderaciones de la evaluación se conservan.</p>
             @if ($criteriosEvaluacion->isEmpty())
-                <p class="docente-ayuda">Captura los criterios de esta evaluación para poder calificar.</p>
             @else
                 <form method="POST" action="{{ route('docente.clases.calificaciones', [$clase, $evaluacion]) }}">
                     @csrf
@@ -271,10 +259,10 @@
                                                 $campo = 'calificaciones.'.$alumno->id_alumno.'.'.$criterio->id_criterio;
                                             @endphp
                                             <td>
-                                                <input type="number" min="0" max="100" step="0.01"
+                                                <input type="number" min="50" max="100" step="0.01"
                                                        name="calificaciones[{{ $alumno->id_alumno }}][{{ $criterio->id_criterio }}]"
                                                        value="{{ old($campo, $nota?->porcentaje_obtenido) }}"
-                                                       placeholder="0–100" required>
+                                                       placeholder="50–100" required>
                                             </td>
                                         @endforeach
                                         <td><strong class="docente-nota">{{ number_format($calificacion, 2) }}</strong></td>
@@ -298,15 +286,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Formatos REINCO</h2>
-            <p class="docente-ayuda">
-                Evaluación que aplican los docentes a los alumnos: Registran asistencias, evidencias y calificaciones
-                de exámenes en el formato REINCO.
-            </p>
-            <p class="docente-ayuda">
-                Genera el Excel con REINCO 205 (asistencia por parcial), 206-A (evidencias y porcentajes), su reverso
-                y 206-B (calificación integrada y estatus). Incluye CURP, firmas para cotejo DGB y configuración de
-                impresión. Puedes descargarlo o guardarlo en el gestor de archivos.
-            </p>
         </div>
         <a href="{{ route('docente.reinco.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-folder-open"></i> Ver formatos guardados
@@ -320,7 +299,6 @@
         <div class="docente-bloque">
             <h3>{{ ['Primera', 'Segunda', 'Tercera'][$parcial - 1] }} evaluación</h3>
             @if (! $evaluacion || $evaluacion->criterios->isEmpty())
-                <p class="docente-ayuda">Guarda las fechas y los criterios de esta evaluación para generar el formato.</p>
             @else
                 <form method="POST" action="{{ route('docente.clases.reinco', [$clase, $evaluacion]) }}">
                     @csrf
@@ -362,15 +340,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Boleta oficial de calificaciones</h2>
-            <p class="docente-ayuda">
-                Exporta las calificaciones capturadas en el formato oficial de la Dirección General de Bachillerato.
-                El archivo conserva las cuatro hojas, las fórmulas y la configuración de impresión de la boleta.
-            </p>
-            <p class="docente-ayuda">
-                Selecciona la unidad de aprendizaje que corresponde a esta materia; el sistema coloca su calificación
-                en la columna oficial y completa los datos del grupo, el periodo y los alumnos. La boleta admite hasta
-                25 estudiantes por grupo. Actualmente hay {{ $alumnos->count() }} alumnos activos en este grupo.
-            </p>
         </div>
     </div>
 
@@ -381,7 +350,6 @@
         <div class="docente-bloque">
             <h3>{{ ['Primera', 'Segunda', 'Tercera'][$parcial - 1] }} evaluación</h3>
             @if (! $evaluacion || $evaluacion->criterios->isEmpty())
-                <p class="docente-ayuda">Guarda las fechas, los criterios y las calificaciones para generar la boleta.</p>
             @else
                 <form method="POST" action="{{ route('docente.clases.boleta', [$clase, $evaluacion]) }}">
                     @csrf

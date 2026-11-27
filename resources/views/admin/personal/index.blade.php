@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar personal</h2>
-                <p>Filtra por nombre, matrícula, RFC, CURP, personal SEP, nombramiento, sindicato, título, correo o usuario.</p>
             </div>
         </div>
 
@@ -188,7 +187,4 @@
         </div>
     </section>
 
-    <p style="color:#57606a;font-size:.8rem;margin-top:20px;text-align:center;">
-        Las bajas son lógicas: la cuenta queda inactiva y no se elimina información. Puedes reactivarla desde “Editar”.
-    </p>
 @endsection

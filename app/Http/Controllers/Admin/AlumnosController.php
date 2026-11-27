@@ -9,11 +9,14 @@ use App\Models\AreaPropedeutica;
 use App\Models\Capacitacion;
 use App\Models\EstadoAlumno;
 use App\Models\Grupo;
+use App\Models\KardexMateria;
 use App\Models\PlanEstudio;
+use App\Models\Recursamiento;
 use App\Models\Rol;
 use App\Models\Semestre;
 use App\Models\User;
 use App\Services\BitacoraService;
+use App\Services\KardexService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -70,9 +73,9 @@ class AlumnosController extends Controller
     {
         Validator::make($request->all(), $this->rules($request), $this->mensajes())->validate();
 
-        $camposSemestre = $this->camposPorSemestre($request);
+        $datos = $this->datosAlumno($request);
 
-        DB::transaction(function () use ($request, $camposSemestre) {
+        DB::transaction(function () use ($request, $datos) {
             $usuario = User::create([
                 'id_rol' => Rol::ALUMNO,
                 'username' => $request->input('username'),
@@ -80,25 +83,10 @@ class AlumnosController extends Controller
                 'is_active' => true,
             ]);
 
-            $alumno = Alumno::create([
+            $alumno = Alumno::create(array_merge($datos, [
                 'id_usuario' => $usuario->id_usuario,
                 'id_tutor' => null,
-                'id_grupo' => $request->input('id_grupo'),
-                'id_estado_alumno' => $request->input('id_estado_alumno'),
-                'id_plan' => $request->input('id_plan'),
-                'id_semestre' => $request->input('id_semestre'),
-                'id_capacitacion' => $request->input('id_capacitacion') ?: null,
-                'id_area_propedeutica' => $camposSemestre['id_area_propedeutica'],
-                'actividad_escolar_apa' => $camposSemestre['actividad_escolar_apa'],
-                'nombre' => $request->input('nombre'),
-                'apellido_paterno' => $request->input('apellido_paterno'),
-                'apellido_materno' => $request->input('apellido_materno'),
-                'curp' => strtoupper((string) $request->input('curp')),
-                'acta_nacimiento_ruta' => $request->input('acta_nacimiento_ruta'),
-                'boleta_secundaria_ruta' => $request->input('boleta_secundaria_ruta'),
-                'correo' => $request->input('correo'),
-                'promedio_general' => $request->input('promedio_general'),
-            ]);
+            ]));
 
             BitacoraService::registrar(
                 'alumnos',
@@ -136,9 +124,27 @@ class AlumnosController extends Controller
             return back()->withErrors(['is_active' => 'No puedes desactivar tu propia cuenta.'])->withInput();
         }
 
-        $camposSemestre = $this->camposPorSemestre($request);
+        $datos = $this->datosAlumno($request);
 
-        DB::transaction(function () use ($request, $alumno, $usuario, $camposSemestre) {
+        // Asignar el grupo del semestre siguiente reactiva al alumno que estaba
+        // en reinscripción; no se altera una baja ni una graduación.
+        if ((int) $alumno->id_estado_alumno === EstadoAlumno::REINSCRIPCION
+            && (int) ($request->input('id_estado_alumno') ?: EstadoAlumno::REINSCRIPCION) === EstadoAlumno::REINSCRIPCION
+            && $request->filled('id_grupo')
+            && $this->semestreEsValido($request, $alumno)) {
+            $datos['id_estado_alumno'] = EstadoAlumno::ACTIVO;
+        }
+
+        if ((int) ($datos['id_estado_alumno'] ?? 0) === EstadoAlumno::GRADUADO) {
+            $kardex = app(KardexService::class);
+            if ($kardex->puedeGraduarse($alumno)) {
+                $datos['promedio_general'] = $kardex->promedioFinal($alumno);
+                $datos['id_grupo'] = null;
+                $datos['id_semestre'] = null;
+            }
+        }
+
+        DB::transaction(function () use ($request, $alumno, $usuario, $datos) {
             $datosUsuario = [
                 'username' => $request->input('username'),
                 'is_active' => $request->boolean('is_active'),
@@ -150,23 +156,7 @@ class AlumnosController extends Controller
 
             $usuario->update($datosUsuario);
 
-            $alumno->update([
-                'id_grupo' => $request->input('id_grupo'),
-                'id_estado_alumno' => $request->input('id_estado_alumno'),
-                'id_plan' => $request->input('id_plan'),
-                'id_semestre' => $request->input('id_semestre'),
-                'id_capacitacion' => $request->input('id_capacitacion') ?: null,
-                'id_area_propedeutica' => $camposSemestre['id_area_propedeutica'],
-                'actividad_escolar_apa' => $camposSemestre['actividad_escolar_apa'],
-                'nombre' => $request->input('nombre'),
-                'apellido_paterno' => $request->input('apellido_paterno'),
-                'apellido_materno' => $request->input('apellido_materno'),
-                'curp' => strtoupper((string) $request->input('curp')),
-                'acta_nacimiento_ruta' => $request->input('acta_nacimiento_ruta'),
-                'boleta_secundaria_ruta' => $request->input('boleta_secundaria_ruta'),
-                'correo' => $request->input('correo'),
-                'promedio_general' => $request->input('promedio_general'),
-            ]);
+            $alumno->update($datos);
 
             BitacoraService::registrar(
                 'alumnos',
@@ -217,12 +207,18 @@ class AlumnosController extends Controller
         return Semestre::whereKey((int) $idSemestre)->value('numero_semestre');
     }
 
-    private function grupoEsValido(Request $request): bool
+    private function grupoEsValido(Request $request, ?Alumno $alumno = null): bool
     {
         $idGrupo = $request->input('id_grupo');
         $idSemestre = $request->input('id_semestre');
 
+        // Grupo y semestre son opcionales: solo se valida la correspondencia
+        // cuando el usuario capturó ambos.
         if (! is_numeric($idGrupo) || ! is_numeric($idSemestre)) {
+            return true;
+        }
+
+        if ($alumno && $this->tieneRecursamientoPendiente($alumno)) {
             return false;
         }
 
@@ -230,17 +226,97 @@ class AlumnosController extends Controller
         $consulta = Grupo::whereKey((int) $idGrupo)
             ->where('id_semestre', (int) $idSemestre);
 
-        if (in_array($numeroSemestre, [5, 6], true)) {
-            $idArea = $request->input('id_area_propedeutica');
-
-            if (! is_numeric($idArea)) {
-                return false;
-            }
-
-            $consulta->where('id_area_propedeutica', (int) $idArea);
+        if (in_array($numeroSemestre, [5, 6], true) && is_numeric($request->input('id_area_propedeutica'))) {
+            $consulta->where('id_area_propedeutica', (int) $request->input('id_area_propedeutica'));
         }
 
-        return $consulta->exists();
+        if (! $consulta->exists()) {
+            return false;
+        }
+
+        if (! $alumno) {
+            return true;
+        }
+
+        if ($alumno->id_plan && (int) $consulta->value('id_plan') !== (int) $alumno->id_plan) {
+            return false;
+        }
+
+        return $this->semestreEsValido($request, $alumno);
+    }
+
+    /**
+     * Un alumno con avance registrado solo puede inscribirse en el semestre
+     * inmediatamente posterior al último que cursó; los semestres pasados
+     * quedan bloqueados también cuando no se selecciona un grupo.
+     */
+    private function semestreEsValido(Request $request, ?Alumno $alumno = null): bool
+    {
+        if (! $alumno || ! $alumno->id_plan) {
+            return true;
+        }
+
+        if ((int) $alumno->id_estado_alumno === EstadoAlumno::GRADUADO) {
+            return false;
+        }
+
+        if ($this->tieneRecursamientoPendiente($alumno)) {
+            return false;
+        }
+
+        if (! KardexMateria::where('id_alumno', $alumno->id_alumno)->exists()) {
+            return true;
+        }
+
+        $numeroSemestre = $this->numeroSemestre($request);
+
+        if ($numeroSemestre === null) {
+            return true;
+        }
+
+        return $numeroSemestre === app(KardexService::class)->semestreSiguiente($alumno);
+    }
+
+    private function tieneRecursamientoPendiente(Alumno $alumno): bool
+    {
+        return $alumno->recursamientos()
+            ->where('estatus', Recursamiento::PENDIENTE)
+            ->exists();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function datosAlumno(Request $request): array
+    {
+        $camposSemestre = $this->camposPorSemestre($request);
+
+        return [
+            'id_grupo' => $request->input('id_grupo') ?: null,
+            'id_estado_alumno' => $request->input('id_estado_alumno') ?: EstadoAlumno::PREINSCRITO,
+            'id_plan' => $request->input('id_plan') ?: null,
+            'id_semestre' => $request->input('id_semestre') ?: null,
+            'id_capacitacion' => $request->input('id_capacitacion') ?: null,
+            'id_area_propedeutica' => $camposSemestre['id_area_propedeutica'],
+            'actividad_escolar_apa' => $camposSemestre['actividad_escolar_apa'],
+            'nombre' => $request->input('nombre'),
+            'apellido_paterno' => $request->input('apellido_paterno'),
+            'apellido_materno' => $this->opcional($request, 'apellido_materno'),
+            'curp' => $request->filled('curp') ? strtoupper(trim((string) $request->input('curp'))) : null,
+            'acta_nacimiento_ruta' => $this->opcional($request, 'acta_nacimiento_ruta'),
+            'boleta_secundaria_ruta' => $this->opcional($request, 'boleta_secundaria_ruta'),
+            'correo' => $this->opcional($request, 'correo'),
+            'promedio_general' => $request->input('promedio_general') === null || $request->input('promedio_general') === ''
+                ? 0
+                : $request->input('promedio_general'),
+        ];
+    }
+
+    private function opcional(Request $request, string $campo): ?string
+    {
+        $valor = trim((string) $request->input($campo, ''));
+
+        return $valor === '' ? null : $valor;
     }
 
     /**
@@ -248,15 +324,9 @@ class AlumnosController extends Controller
      */
     private function camposPorSemestre(Request $request): array
     {
-        $numero = $this->numeroSemestre($request);
-
         return [
-            'id_area_propedeutica' => in_array($numero, [5, 6], true)
-                ? ($request->input('id_area_propedeutica') ?: null)
-                : null,
-            'actividad_escolar_apa' => in_array($numero, [1, 2, 3, 4], true)
-                ? trim((string) $request->input('actividad_escolar_apa'))
-                : null,
+            'id_area_propedeutica' => $this->opcional($request, 'id_area_propedeutica'),
+            'actividad_escolar_apa' => $this->opcional($request, 'actividad_escolar_apa'),
         ];
     }
 
@@ -265,10 +335,6 @@ class AlumnosController extends Controller
      */
     private function rules(Request $request, ?User $usuario = null, ?Alumno $alumno = null): array
     {
-        $numeroSemestre = $this->numeroSemestre($request);
-        $requiereArea = in_array($numeroSemestre, [5, 6], true);
-        $requiereApa = in_array($numeroSemestre, [1, 2, 3, 4], true);
-
         $usernameRule = Rule::unique('usuarios', 'username');
         if ($usuario) {
             $usernameRule->ignore($usuario->id_usuario, 'id_usuario');
@@ -283,39 +349,47 @@ class AlumnosController extends Controller
 
         return [
             'id_grupo' => [
-                'required',
+                'nullable',
                 'exists:grupos,id_grupo',
-                function (string $attribute, mixed $value, Closure $fail) use ($request) {
-                    if (! $this->grupoEsValido($request)) {
-                        $fail('El grupo seleccionado no corresponde al semestre y área elegidos.');
+                function (string $attribute, mixed $value, Closure $fail) use ($request, $alumno) {
+                    if (! $this->grupoEsValido($request, $alumno)) {
+                        $fail('El grupo seleccionado no corresponde al semestre, área o avance escolar del alumno, o tiene un R pendiente.');
                     }
                 },
             ],
-            'id_estado_alumno' => ['required', 'exists:estados_alumno,id_estado_alumno'],
-            'id_plan' => ['required', 'exists:planes_estudio,id_plan'],
-            'id_semestre' => ['required', 'exists:semestres,id_semestre'],
+            'id_estado_alumno' => [
+                'nullable',
+                'exists:estados_alumno,id_estado_alumno',
+                function (string $attribute, mixed $value, Closure $fail) use ($alumno) {
+                    if ((int) $value === EstadoAlumno::GRADUADO
+                        && (! $alumno || ! app(KardexService::class)->puedeGraduarse($alumno))) {
+                        $fail('No se puede marcar como graduado: faltan materias del plan o el sexto semestre.');
+                    }
+                },
+            ],
+            'id_plan' => ['nullable', 'exists:planes_estudio,id_plan'],
+            'id_semestre' => [
+                'nullable',
+                'exists:semestres,id_semestre',
+                function (string $attribute, mixed $value, Closure $fail) use ($request, $alumno) {
+                    if (! $this->semestreEsValido($request, $alumno)) {
+                        $fail('El alumno solo puede continuar en el semestre inmediatamente siguiente a su avance y sin recursamientos pendientes.');
+                    }
+                },
+            ],
             'id_capacitacion' => ['nullable', 'exists:capacitaciones,id_capacitacion'],
-            'id_area_propedeutica' => [
-                'nullable',
-                Rule::requiredIf($requiereArea),
-                'exists:areas_propedeuticas,id_area_propedeutica',
-            ],
-            'actividad_escolar_apa' => [
-                'nullable',
-                Rule::requiredIf($requiereApa),
-                'string',
-                'max:120',
-            ],
+            'id_area_propedeutica' => ['nullable', 'exists:areas_propedeuticas,id_area_propedeutica'],
+            'actividad_escolar_apa' => ['nullable', 'string', 'max:120'],
             'nombre' => ['required', 'string', 'max:60'],
             'apellido_paterno' => ['required', 'string', 'max:60'],
             'apellido_materno' => ['nullable', 'string', 'max:60'],
             'curp' => [
-                'required', 'string', 'size:18', 'regex:/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z]{2}$/', $curpRule,
+                'nullable', 'string', 'size:18', 'regex:/^[A-Z]{4}[0-9]{6}[HM][A-Z]{5}[0-9A-Z]{2}$/', $curpRule,
             ],
-            'acta_nacimiento_ruta' => ['required', 'string', 'max:255'],
-            'boleta_secundaria_ruta' => ['required', 'string', 'max:255'],
-            'correo' => ['required', 'email', 'max:120', $correoRule],
-            'promedio_general' => ['required', 'numeric', 'min:0', 'max:10'],
+            'acta_nacimiento_ruta' => ['nullable', 'string', 'max:255'],
+            'boleta_secundaria_ruta' => ['nullable', 'string', 'max:255'],
+            'correo' => ['nullable', 'email', 'max:120', $correoRule],
+            'promedio_general' => ['nullable', 'numeric', 'min:0', 'max:10'],
             'username' => ['required', 'string', 'max:60', 'regex:/^[A-Za-z0-9._-]+$/', $usernameRule],
             'password' => $usuario
                 ? ['nullable', 'string', 'min:8', 'confirmed']
@@ -330,27 +404,16 @@ class AlumnosController extends Controller
     private function mensajes(): array
     {
         return [
-            'id_grupo.required' => 'Selecciona un grupo.',
             'id_grupo.exists' => 'Selecciona un grupo válido.',
-            'id_estado_alumno.required' => 'Selecciona un estatus escolar.',
-            'id_plan.required' => 'Selecciona un plan de estudios.',
-            'id_semestre.required' => 'Selecciona un semestre.',
-            'id_area_propedeutica.required' => 'Selecciona el área propedéutica desde 5to semestre.',
-            'actividad_escolar_apa.required' => 'Ingresa la actividad para escolar (APA).',
             'actividad_escolar_apa.max' => 'La actividad APA no puede superar los 120 caracteres.',
             'exists' => 'Selecciona una opción válida.',
             'nombre.required' => 'Ingresa el nombre del alumno.',
             'apellido_paterno.required' => 'Ingresa el apellido paterno.',
-            'curp.required' => 'Ingresa la CURP.',
             'curp.size' => 'La CURP debe tener 18 caracteres.',
             'curp.regex' => 'Ingresa una CURP válida en mayúsculas.',
             'curp.unique' => 'Esa CURP ya está registrada.',
-            'acta_nacimiento_ruta.required' => 'Ingresa la ruta del acta de nacimiento.',
-            'boleta_secundaria_ruta.required' => 'Ingresa la ruta de la boleta de secundaria.',
-            'correo.required' => 'Ingresa el correo.',
             'correo.email' => 'Ingresa un correo válido.',
             'correo.unique' => 'Ese correo ya está registrado.',
-            'promedio_general.required' => 'Ingresa el promedio.',
             'promedio_general.numeric' => 'El promedio debe ser un número.',
             'promedio_general.min' => 'El promedio mínimo es 0.',
             'promedio_general.max' => 'El promedio máximo es 10.',

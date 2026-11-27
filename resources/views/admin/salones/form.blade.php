@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas {{ isset($salon) ? 'fa-pen' : 'fa-plus' }}"></i> Datos del salón</h2>
-                <p>La clave y la capacidad se usarán al asignar el salón en el horario.</p>
             </div>
         </div>
 

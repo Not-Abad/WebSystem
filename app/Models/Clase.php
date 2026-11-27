@@ -76,7 +76,12 @@ class Clase extends Model
         }
 
         return $grupo->alumnos()
-            ->whereNotIn('id_estado_alumno', [EstadoAlumno::BAJA_DEFINITIVA, EstadoAlumno::GRADUADO])
+            ->whereNotIn('id_estado_alumno', [
+                EstadoAlumno::BAJA_DEFINITIVA,
+                EstadoAlumno::BAJA_TEMPORAL,
+                EstadoAlumno::GRADUADO,
+                EstadoAlumno::REINSCRIPCION,
+            ])
             ->with('usuario')
             ->orderBy('apellido_paterno')
             ->orderBy('apellido_materno')

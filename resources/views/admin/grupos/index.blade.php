@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar grupos</h2>
-                <p>Filtra por grupo, plan, semestre o área propedéutica.</p>
             </div>
         </div>
 
@@ -76,6 +75,7 @@
                         <th>Semestre</th>
                         <th>Área propedéutica</th>
                         <th>Cupo</th>
+                        <th>Fecha de conclusión</th>
                         <th>Alumnos</th>
                         <th>Clases</th>
                         <th>Acciones</th>
@@ -89,6 +89,16 @@
                             <td>{{ $grupo->semestre?->numero_semestre ?? '—' }}</td>
                             <td class="texto-sutil">{{ $grupo->area?->nombre ?? 'No aplica' }}</td>
                             <td>{{ $grupo->cupo_maximo }}</td>
+                            <td>
+                                <span class="estado {{ $grupo->vencimiento_procesado_at ? 'estado-inactivo' : ($grupo->fecha_conclusion?->isPast() ? 'estado-alerta' : 'estado-activo') }}">
+                                    {{ $grupo->fecha_conclusion?->format('d/m/Y') ?? '—' }}
+                                    @if ($grupo->vencimiento_procesado_at)
+                                        · Cerrado
+                                    @elseif ($grupo->fecha_conclusion?->isPast())
+                                        · Por vencer
+                                    @endif
+                                </span>
+                            </td>
                             <td>{{ $grupo->alumnos_count }}</td>
                             <td>{{ $grupo->clases_count }}</td>
                             <td>
@@ -112,7 +122,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="vacio">No hay grupos que coincidan con los filtros.</td>
+                            <td colspan="9" class="vacio">No hay grupos que coincidan con los filtros.</td>
                         </tr>
                     @endforelse
                 </tbody>

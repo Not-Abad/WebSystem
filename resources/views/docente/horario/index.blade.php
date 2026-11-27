@@ -5,9 +5,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Mi carga horaria</h2>
-            <p class="docente-ayuda">
-                Da clic en una materia para consultar el grupo, los alumnos, la asistencia y la evaluación.
-            </p>
         </div>
         <div class="docente-chips">
             <span><i class="fas fa-book"></i> {{ $clases->count() }} materias</span>
@@ -19,7 +16,6 @@
         <div class="docente-vacio">
             <i class="fas fa-calendar-xmark"></i>
             <strong>Aún no tienes clases asignadas.</strong>
-            <p>Cuando el administrador configure los horarios, tus materias aparecerán aquí.</p>
         </div>
     @else
         <div class="tabla-wrap">

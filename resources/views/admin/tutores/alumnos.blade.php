@@ -9,13 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-link"></i> Alumnos vinculados</h2>
-                <p>
-                    Tutor:
-                    <strong style="color:#0066ff;">
-                        {{ $tutor->nombre }} {{ $tutor->apellido_paterno }} {{ $tutor->apellido_materno }}
-                    </strong>
-                    · {{ $tutor->alumnos->count() }} estudiante(s)
-                </p>
             </div>
         </div>
 
@@ -69,7 +62,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-user-plus"></i> Vincular alumno</h2>
-                <p>Busca por nombre, apellido, CURP o correo. No necesitas recorrer un listado completo.</p>
             </div>
         </div>
 
@@ -112,7 +104,7 @@
                         <th>Expediente</th>
                         <th>Alumno</th>
                         <th>CURP</th>
-                        <th>Tutor actual</th>
+                        <th>Tutores actuales (máx. 3)</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
@@ -123,9 +115,13 @@
                             <td>{{ $alumno->nombre }} {{ $alumno->apellido_paterno }} {{ $alumno->apellido_materno }}</td>
                             <td class="texto-sutil">{{ $alumno->curp }}</td>
                             <td class="texto-sutil">
-                                {{ $alumno->tutor
-                                    ? trim($alumno->tutor->nombre.' '.$alumno->tutor->apellido_paterno)
-                                    : '—' }}
+                                @forelse ($alumno->tutores as $tutorAsignado)
+                                    {{ trim($tutorAsignado->nombre.' '.$tutorAsignado->apellido_paterno) }}{{ $loop->last ? '' : ', ' }}
+                                @empty
+                                    {{ $alumno->tutor
+                                        ? trim($alumno->tutor->nombre.' '.$alumno->tutor->apellido_paterno)
+                                        : '—' }}
+                                @endforelse
                             </td>
                             <td>
                                 <form method="POST" action="{{ route('admin.tutores.alumnos.vincular', $tutor) }}">

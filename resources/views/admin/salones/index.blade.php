@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar salones</h2>
-                <p>Filtra por clave, nombre o edificio.</p>
             </div>
         </div>
 

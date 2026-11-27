@@ -37,9 +37,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Mis datos</h2>
-            <p class="docente-ayuda">
-                Consulta tu información personal como tutor. Si necesitas corregir algún dato, solicítalo a control escolar.
-            </p>
         </div>
         <a href="{{ route('tutor.alumnos.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Volver a mis alumnos

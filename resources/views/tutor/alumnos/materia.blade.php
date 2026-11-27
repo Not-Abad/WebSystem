@@ -12,9 +12,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>{{ $materia->clave }} · {{ $materia->nombre }}</h2>
-            <p class="docente-ayuda">
-                Seguimiento de {{ $nombreAlumno }} · {{ $clase->grupo->etiqueta() }}
-            </p>
         </div>
         <a href="{{ route('tutor.alumnos.show', $alumno) }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Expediente del alumno
@@ -69,9 +66,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Criterios de evaluación y calificaciones</h2>
-            <p class="docente-ayuda">
-                Calificaciones obtenidas por {{ $nombreAlumno }} hasta el momento. Cada criterio se convierte a una nota de 0.00 a 10.00 y el parcial es el promedio ponderado de esas notas.
-            </p>
         </div>
     </div>
 
@@ -79,10 +73,6 @@
         @php
             $evaluacion = $parcial['evaluacion'];
             $criterios = $parcial['criterios'];
-            $rubroDistinto = $criterios->contains(function ($criterio) {
-                return trim((string) ($criterio['tipo_evidencia'] ?? ''))
-                    !== trim((string) ($criterio['nombre_rubro'] ?? ''));
-            });
         @endphp
         <div class="docente-bloque">
             <div class="docente-cabecera">
@@ -108,42 +98,16 @@
                     <table class="tabla-docente-grid">
                         <thead>
                             <tr>
-                                @if ($rubroDistinto)
-                                    <th>Evidencia</th>
-                                    <th>Rubro</th>
-                                @else
-                                    <th>Criterio de evaluación</th>
-                                @endif
+                                <th>Criterio de evaluación</th>
                                 <th>Ponderación</th>
-                                <th>Porcentaje obtenido</th>
-                                <th>Calificación (0–10)</th>
-                                <th>Aportación al parcial</th>
                                 <th>Fecha de entrega</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($criterios as $criterio)
                                 <tr>
-                                    @if ($rubroDistinto)
-                                        <td>{{ $criterio['tipo_evidencia'] ?: '—' }}</td>
-                                    @endif
                                     <td>{{ $criterio['nombre_rubro'] ?: ($criterio['tipo_evidencia'] ?: '—') }}</td>
-                                    <td>{{ number_format($criterio['porcentaje'], 2) }} %</td>
-                                    <td>
-                                        {{ $criterio['porcentaje_obtenido'] !== null
-                                            ? number_format($criterio['porcentaje_obtenido'], 2).' %'
-                                            : 'Pendiente' }}
-                                    </td>
-                                    <td>
-                                        {{ $criterio['calificacion'] !== null
-                                            ? number_format($criterio['calificacion'], 2)
-                                            : 'Pendiente' }}
-                                    </td>
-                                    <td>
-                                        {{ $criterio['aportacion'] !== null
-                                            ? number_format($criterio['aportacion'], 2)
-                                            : 'Pendiente' }}
-                                    </td>
+                                    <td>{{ number_format((float) $criterio['porcentaje'], 2) }} %</td>
                                     <td>
                                         {{ $criterio['fecha_entrega']
                                             ? \Illuminate\Support\Carbon::parse($criterio['fecha_entrega'])->format('d/m/Y')
@@ -175,7 +139,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Calificación total de la materia</h2>
-            <p class="docente-ayuda">Promedio de los tres parciales cuando todos están calificados.</p>
         </div>
     </div>
 

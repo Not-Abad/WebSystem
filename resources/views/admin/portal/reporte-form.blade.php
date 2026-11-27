@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas {{ $reporte->exists ? 'fa-pen' : 'fa-plus' }}"></i> {{ $titulo }}</h2>
-                <p>{{ $subtitulo }}</p>
             </div>
         </div>
 

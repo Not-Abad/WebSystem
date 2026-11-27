@@ -11,9 +11,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>{{ $materia->clave }} · {{ $materia->nombre }}</h2>
-            <p class="docente-ayuda">
-                {{ $clase->grupo->etiqueta() }} · {{ $nombreDocente }}
-            </p>
         </div>
         <a href="{{ route('alumno.materias.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Mis materias
@@ -75,9 +72,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Criterios de evaluación y calificaciones</h2>
-            <p class="docente-ayuda">
-                Acepta los criterios de cada parcial una sola vez. Después de aceptarlos podrás consultar tu calificación.
-            </p>
         </div>
     </div>
 
@@ -85,10 +79,6 @@
         @php
             $evaluacion = $parcial['evaluacion'];
             $criterios = $parcial['criterios'];
-            $rubroDistinto = $criterios->contains(function ($criterio) {
-                return trim((string) ($criterio['tipo_evidencia'] ?? ''))
-                    !== trim((string) ($criterio['nombre_rubro'] ?? ''));
-            });
         @endphp
         <div class="docente-bloque">
             <div class="docente-cabecera">
@@ -113,24 +103,38 @@
                     <table class="tabla-docente-grid">
                         <thead>
                             <tr>
-                                @if ($rubroDistinto)
-                                    <th>Evidencia</th>
-                                    <th>Rubro</th>
-                                @else
-                                    <th>Criterio de evaluación</th>
-                                @endif
+                                <th>Criterio de evaluación</th>
                                 <th>Ponderación</th>
+                                @if ($parcial['aceptada'])
+                                    <th>Porcentaje obtenido</th>
+                                    <th>Calificación (0–10)</th>
+                                    <th>Aportación al parcial</th>
+                                @endif
                                 <th>Fecha de entrega</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($criterios as $criterio)
                                 <tr>
-                                    @if ($rubroDistinto)
-                                        <td>{{ $criterio['tipo_evidencia'] ?: '—' }}</td>
-                                    @endif
                                     <td>{{ $criterio['nombre_rubro'] ?: ($criterio['tipo_evidencia'] ?: '—') }}</td>
                                     <td>{{ number_format((float) $criterio['porcentaje'], 2) }} %</td>
+                                    @if ($parcial['aceptada'])
+                                        <td>
+                                            {{ $criterio['porcentaje_obtenido'] !== null
+                                                ? number_format($criterio['porcentaje_obtenido'], 2).' %'
+                                                : 'Pendiente' }}
+                                        </td>
+                                        <td>
+                                            {{ $criterio['calificacion'] !== null
+                                                ? number_format($criterio['calificacion'], 2)
+                                                : 'Pendiente' }}
+                                        </td>
+                                        <td>
+                                            {{ $criterio['aportacion'] !== null
+                                                ? number_format($criterio['aportacion'], 2)
+                                                : 'Pendiente' }}
+                                        </td>
+                                    @endif
                                     <td>
                                         {{ ! empty($criterio['fecha_entrega'])
                                             ? \Illuminate\Support\Carbon::parse($criterio['fecha_entrega'])->format('d/m/Y')
@@ -176,7 +180,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Calificación final de la materia</h2>
-            <p class="docente-ayuda">Se calcula al tener los tres parciales aceptados y calificados.</p>
         </div>
     </div>
 
@@ -192,7 +195,6 @@
         <div class="docente-vacio">
             <i class="fas fa-hourglass-half"></i>
             <strong>Pendiente de los tres parciales.</strong>
-            <p>Acepta los criterios y espera a que tu docente publique las calificaciones de cada evaluación.</p>
         </div>
     @endif
 </section>
@@ -201,7 +203,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Asistencia registrada</h2>
-            <p class="docente-ayuda">Asistencias, faltas y observaciones registradas para esta materia.</p>
         </div>
     </div>
 

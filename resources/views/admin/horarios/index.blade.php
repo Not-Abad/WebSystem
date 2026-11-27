@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-filter"></i> Selecciona el grupo</h2>
-                <p>Primero elige el plan y después el grupo. Desde 5º semestre los grupos se identifican por área propedéutica.</p>
             </div>
         </div>
 
@@ -73,8 +72,7 @@
         <section class="modulo-card selector-panel {{ $hayGrupo ? '' : 'panel-bloqueado' }}">
             <div class="modulo-card-header">
                 <div>
-                    <h2><i class="fas fa-book-bookmark"></i> 1. Materia</h2>
-                    <p>Solo materias del plan, semestre y área del grupo, más el tronco común. Cada materia se imparte siempre con el mismo docente en este horario.</p>
+                    <h2><i class="fas fa-book-bookmark"></i> Materia</h2>
                 </div>
             </div>
 
@@ -103,8 +101,7 @@
         <section class="modulo-card selector-panel panel-bloqueado" id="panel-docente">
             <div class="modulo-card-header">
                 <div>
-                    <h2><i class="fas fa-chalkboard-user"></i> 2. Docente</h2>
-                    <p>Se habilita al seleccionar una materia. Si la materia ya tiene docente en este horario, se selecciona automáticamente.</p>
+                    <h2><i class="fas fa-chalkboard-user"></i> Docente</h2>
                 </div>
             </div>
 
@@ -134,8 +131,7 @@
         <section class="modulo-card selector-panel panel-bloqueado" id="panel-salon">
             <div class="modulo-card-header">
                 <div>
-                    <h2><i class="fas fa-door-open"></i> 3. Salón</h2>
-                    <p>Se habilita al seleccionar un docente. La capacidad se valida contra los alumnos activos del grupo.</p>
+                    <h2><i class="fas fa-door-open"></i> Salón</h2>
                 </div>
             </div>
 
@@ -162,8 +158,7 @@
     <section class="modulo-card">
         <div class="modulo-card-header">
             <div>
-                <h2><i class="fas fa-calendar-day"></i> 4. Horario semanal</h2>
-                <p>Selecciona materia, docente y salón, luego haz clic en la celda donde se impartirá la clase.</p>
+                <h2><i class="fas fa-calendar-day"></i> Horario semanal</h2>
             </div>
         </div>
 
@@ -209,11 +204,6 @@
             </table>
         </div>
 
-        <p class="leyenda-horario">
-            <i class="fas fa-lock"></i>
-            Las celdas marcadas ya están ocupadas en otro horario: el docente o el salón seleccionado no puede
-            usarse en ese día y hora. Cambia de docente, de salón o de bloque para evitar empalmes.
-        </p>
 
         @if ($hayGrupo)
             <form method="POST" action="{{ route('admin.horarios.guardar') }}" id="formulario-guardar" style="margin-top: 22px;">

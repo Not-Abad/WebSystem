@@ -11,6 +11,7 @@ class EstadoAlumno extends Model
     public const BAJA_TEMPORAL = 3;
     public const BAJA_DEFINITIVA = 4;
     public const GRADUADO = 5;
+    public const REINSCRIPCION = 6;
 
     protected $table = 'estados_alumno';
     protected $primaryKey = 'id_estado_alumno';

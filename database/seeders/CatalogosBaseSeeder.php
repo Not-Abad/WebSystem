@@ -37,6 +37,7 @@ class CatalogosBaseSeeder extends Seeder
             ['id_estado_alumno' => 3, 'nombre' => 'baja temporal'],
             ['id_estado_alumno' => 4, 'nombre' => 'baja definitiva'],
             ['id_estado_alumno' => 5, 'nombre' => 'graduado'],
+            ['id_estado_alumno' => 6, 'nombre' => 'reinscripcion'],
         ]);
 
         DB::table('semestres')->insertOrIgnore([
@@ -73,28 +74,28 @@ class CatalogosBaseSeeder extends Seeder
 
         // Grupos por semestre. Desde 5º se organizan por área propedéutica.
         DB::table('grupos')->insertOrIgnore([
-            ['id_grupo' => 1, 'id_semestre' => 1, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '1-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 2, 'id_semestre' => 2, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '2-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 3, 'id_semestre' => 3, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '3-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 4, 'id_semestre' => 4, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '4-A', 'cupo_maximo' => 45],
-            ['id_grupo' => 5, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 6, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 7, 'id_semestre' => 1, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '1-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 8, 'id_semestre' => 2, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '2-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 9, 'id_semestre' => 3, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '3-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 10, 'id_semestre' => 4, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '4-B', 'cupo_maximo' => 45],
-            ['id_grupo' => 11, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'B', 'cupo_maximo' => 45],
-            ['id_grupo' => 12, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'B', 'cupo_maximo' => 45],
-            ['id_grupo' => 13, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'B', 'cupo_maximo' => 45],
-            ['id_grupo' => 14, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'B', 'cupo_maximo' => 45],
-            ['id_grupo' => 15, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 16, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 17, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 3, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 18, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 3, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 19, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 4, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 20, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 4, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 21, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 5, 'nombre' => 'A', 'cupo_maximo' => 45],
-            ['id_grupo' => 22, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 5, 'nombre' => 'A', 'cupo_maximo' => 45],
+            ['id_grupo' => 1, 'id_semestre' => 1, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '1-A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 2, 'id_semestre' => 2, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '2-A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 3, 'id_semestre' => 3, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '3-A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 4, 'id_semestre' => 4, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '4-A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 5, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 6, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 7, 'id_semestre' => 1, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '1-B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 8, 'id_semestre' => 2, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '2-B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 9, 'id_semestre' => 3, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '3-B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 10, 'id_semestre' => 4, 'id_plan' => 1, 'id_area_propedeutica' => null, 'nombre' => '4-B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 11, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 12, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 13, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 14, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 2, 'nombre' => 'B', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 15, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 16, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 1, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 17, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 3, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 18, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 3, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 19, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 4, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 20, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 4, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 21, 'id_semestre' => 5, 'id_plan' => 1, 'id_area_propedeutica' => 5, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
+            ['id_grupo' => 22, 'id_semestre' => 6, 'id_plan' => 1, 'id_area_propedeutica' => 5, 'nombre' => 'A', 'cupo_maximo' => 45, 'fecha_conclusion' => '2027-06-30'],
         ]);
     }
 }

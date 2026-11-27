@@ -5,7 +5,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-folder-tree"></i> Explorador de documentos</h2>
-                <p>Sube, organiza y descarga boletas, certificados y cualquier documento institucional.</p>
             </div>
         </div>
 

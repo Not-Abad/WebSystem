@@ -115,6 +115,10 @@ class PortalAlumnoTest extends TestCase
             ->assertOk()
             ->assertSee('Criterios aceptados')
             ->assertSee('Pendiente')
+            ->assertSee('Porcentaje obtenido')
+            ->assertSee('Calificación (0–10)')
+            ->assertSee('Aportación al parcial')
+            ->assertSee('80.00 %')
             ->assertSee('Calificación final de la materia');
 
         $this->assertStringNotContainsString(

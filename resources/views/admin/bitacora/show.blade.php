@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-file-circle-check"></i> Evento #{{ $registro->id_bitacora }}</h2>
-                <p>Registro inalterable de auditoría.</p>
             </div>
             <a href="{{ route('admin.bitacora.export') }}" class="btn-modulo btn-secundario">
                 <i class="fas fa-file-csv"></i> Exportar bitácora

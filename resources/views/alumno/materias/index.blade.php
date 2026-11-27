@@ -5,9 +5,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Mi horario</h2>
-            <p class="docente-ayuda">
-                Este es el horario asignado a tu grupo. Da clic en una materia para ver sus datos, los criterios del docente y tus calificaciones.
-            </p>
         </div>
         <div class="docente-chips">
             <span><i class="fas fa-book"></i> {{ $clases->count() }} materias</span>

@@ -9,7 +9,9 @@ use App\Models\Clase;
 use App\Models\CriterioEvaluacion;
 use App\Models\EstadoAlumno;
 use App\Models\Evaluacion;
+use App\Models\KardexMateria;
 use App\Services\BitacoraService;
+use App\Services\KardexService;
 use App\Support\CalificacionService;
 use App\Services\PlanEstudioPdfService;
 use App\Support\HorariosPortal;
@@ -31,6 +33,11 @@ class MateriasController extends Controller
     private function claseAutorizada(Clase $clase, Alumno $alumno): Clase
     {
         abort_unless($clase->id_grupo === $alumno->id_grupo && $clase->is_active, 404);
+        abort_if((int) $alumno->id_estado_alumno === EstadoAlumno::GRADUADO, 404);
+
+        $clase->loadMissing('materia.semestre');
+        $numeroSemestre = (int) ($clase->materia?->semestre?->numero_semestre ?? 0);
+        abort_if(app(KardexService::class)->semestreYaCursado($alumno, $numeroSemestre), 404);
 
         return $clase;
     }
@@ -42,7 +49,7 @@ class MateriasController extends Controller
         $clases = Clase::where('id_grupo', $alumno->id_grupo)
             ->where('is_active', true)
             ->with([
-                'materia',
+                'materia.semestre',
                 'grupo.semestre',
                 'docente',
                 'horarios.salon',
@@ -50,6 +57,13 @@ class MateriasController extends Controller
             ])
             ->orderBy('id_clase')
             ->get();
+
+        $semestreMax = (int) (KardexMateria::where('id_alumno', $alumno->id_alumno)->max('semestre') ?? 0);
+        if ($semestreMax > 0) {
+            $clases = $clases->filter(function (Clase $clase) use ($semestreMax) {
+                return (int) ($clase->materia?->semestre?->numero_semestre ?? 0) > $semestreMax;
+            })->values();
+        }
 
         $asignaciones = [];
         foreach ($clases as $clase) {

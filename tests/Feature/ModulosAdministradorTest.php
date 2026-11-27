@@ -188,79 +188,64 @@ class ModulosAdministradorTest extends TestCase
             ->assertSee('Actividad para escolar (APA)');
     }
 
-    public function test_area_propedeutica_es_obligatoria_desde_quinto_semestre(): void
+    public function test_datos_institucionales_son_opcionales_en_el_alta_de_alumnos(): void
     {
         $this->actingAs($this->administrador());
 
-        $datos = [
+        $this->post(route('admin.alumnos.store'), [
+            'nombre' => 'Solo',
+            'apellido_paterno' => 'Basico',
+            'username' => 'alumno.solo.basico',
+            'password' => 'Prueba123!',
+            'password_confirmation' => 'Prueba123!',
+        ])->assertRedirect(route('admin.alumnos.index'));
+
+        $alumno = Alumno::whereHas('usuario', fn ($q) => $q->where('username', 'alumno.solo.basico'))->firstOrFail();
+
+        $this->assertDatabaseHas('alumnos', [
+            'id_alumno' => $alumno->id_alumno,
+            'id_grupo' => null,
+            'id_plan' => null,
+            'id_semestre' => null,
+            'id_area_propedeutica' => null,
+            'actividad_escolar_apa' => null,
+            'curp' => null,
+            'correo' => null,
+            'acta_nacimiento_ruta' => null,
+            'boleta_secundaria_ruta' => null,
+            'promedio_general' => 0,
+            'id_estado_alumno' => \App\Models\EstadoAlumno::PREINSCRITO,
+        ]);
+    }
+
+    public function test_datos_institucionales_se_guardan_cuando_se_capturan(): void
+    {
+        $this->actingAs($this->administrador());
+
+        $this->post(route('admin.alumnos.store'), [
             'id_grupo' => 5,
             'id_estado_alumno' => 1,
             'id_plan' => 1,
             'id_semestre' => 5,
+            'id_area_propedeutica' => 2,
             'actividad_escolar_apa' => 'Deportes',
             'promedio_general' => 8,
-            'nombre' => 'Area',
-            'apellido_paterno' => 'Obligatoria',
+            'nombre' => 'Datos',
+            'apellido_paterno' => 'Completos',
             'curp' => 'AREA900102HDFRRS02',
             'correo' => 'area.obligatoria@eba-amr.edu.mx',
-            'acta_nacimiento_ruta' => 'alumnos/acta_area.pdf',
-            'boleta_secundaria_ruta' => 'alumnos/boleta_area.pdf',
             'username' => 'alumno.area.prueba',
             'password' => 'Prueba123!',
             'password_confirmation' => 'Prueba123!',
-        ];
-
-        $this->post(route('admin.alumnos.store'), $datos)
-            ->assertSessionHasErrors('id_area_propedeutica');
-
-        $this->post(route('admin.alumnos.store'), array_merge($datos, [
-            'id_area_propedeutica' => 2,
-        ]))->assertRedirect(route('admin.alumnos.index'));
+        ])->assertRedirect(route('admin.alumnos.index'));
 
         $alumno = Alumno::where('correo', 'area.obligatoria@eba-amr.edu.mx')->firstOrFail();
 
         $this->assertDatabaseHas('alumnos', [
             'id_alumno' => $alumno->id_alumno,
             'id_area_propedeutica' => 2,
-            'actividad_escolar_apa' => null,
-        ]);
-    }
-
-    public function test_apa_es_obligatoria_hasta_cuarto_semestre(): void
-    {
-        $this->actingAs($this->administrador());
-
-        $datos = [
-            'id_grupo' => 2,
-            'id_estado_alumno' => 1,
-            'id_plan' => 1,
-            'id_semestre' => 2,
-            'id_area_propedeutica' => 1,
-            'promedio_general' => 8,
-            'nombre' => 'Apa',
-            'apellido_paterno' => 'Obligatoria',
-            'curp' => 'APAA900102HDFRRS03',
-            'correo' => 'apa.obligatoria@eba-amr.edu.mx',
-            'acta_nacimiento_ruta' => 'alumnos/acta_apa.pdf',
-            'boleta_secundaria_ruta' => 'alumnos/boleta_apa.pdf',
-            'username' => 'alumno.apa.prueba',
-            'password' => 'Prueba123!',
-            'password_confirmation' => 'Prueba123!',
-        ];
-
-        $this->post(route('admin.alumnos.store'), $datos)
-            ->assertSessionHasErrors('actividad_escolar_apa');
-
-        $this->post(route('admin.alumnos.store'), array_merge($datos, [
-            'actividad_escolar_apa' => 'Tecnología',
-        ]))->assertRedirect(route('admin.alumnos.index'));
-
-        $alumno = Alumno::where('correo', 'apa.obligatoria@eba-amr.edu.mx')->firstOrFail();
-
-        $this->assertDatabaseHas('alumnos', [
-            'id_alumno' => $alumno->id_alumno,
-            'id_area_propedeutica' => null,
-            'actividad_escolar_apa' => 'Tecnología',
+            'actividad_escolar_apa' => 'Deportes',
+            'curp' => 'AREA900102HDFRRS02',
         ]);
     }
 
@@ -378,7 +363,7 @@ class ModulosAdministradorTest extends TestCase
 
         $this->post(route('admin.alumnos.store'), [
             'nombre' => 'Sin datos',
-        ])->assertSessionHasErrors(['id_grupo', 'curp', 'username', 'password']);
+        ])->assertSessionHasErrors(['username', 'password']);
 
         $this->post(route('admin.portal.reportes.guardar'), [
             'titulo' => 'Reporte duplicado',

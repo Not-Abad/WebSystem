@@ -5,7 +5,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-filter"></i> Filtros de seguridad</h2>
-                <p>Busca cuentas por usuario, nombre o correo y revisa su estatus de acceso.</p>
             </div>
         </div>
 

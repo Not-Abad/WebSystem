@@ -96,7 +96,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-clock-rotate-left"></i> Últimos eventos de la cuenta</h2>
-                <p>Máximo 10 registros más recientes.</p>
             </div>
         </div>
 

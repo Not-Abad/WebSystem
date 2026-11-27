@@ -18,10 +18,14 @@ class Grupo extends Model
         'id_area_propedeutica',
         'nombre',
         'cupo_maximo',
+        'fecha_conclusion',
+        'vencimiento_procesado_at',
     ];
 
     protected $casts = [
         'cupo_maximo' => 'integer',
+        'fecha_conclusion' => 'date:Y-m-d',
+        'vencimiento_procesado_at' => 'datetime',
     ];
 
     public function area(): BelongsTo

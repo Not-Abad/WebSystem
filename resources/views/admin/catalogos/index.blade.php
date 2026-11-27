@@ -13,7 +13,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar planes</h2>
-                <p>Filtra por clave o nombre del plan de estudios.</p>
             </div>
         </div>
 

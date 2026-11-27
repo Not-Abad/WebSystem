@@ -8,6 +8,7 @@ use App\Models\Rol;
 use App\Models\Tutor;
 use App\Models\User;
 use App\Services\BitacoraService;
+use App\Services\TutorVinculacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,10 @@ use Illuminate\Validation\Rule;
 
 class TutoresController extends Controller
 {
+    public function __construct(private readonly TutorVinculacionService $vinculacion)
+    {
+    }
+
     public function index(Request $request)
     {
         $busqueda = trim((string) $request->input('q', ''));
@@ -182,10 +187,9 @@ class TutoresController extends Controller
         $busqueda = trim((string) $request->input('q', ''));
         $like = '%'.addcslashes($busqueda, '%_\\').'%';
 
-        $disponibles = Alumno::with('tutor')
-            ->where(function ($query) use ($tutor) {
-                $query->where('id_tutor', '!=', $tutor->id_tutor)
-                    ->orWhereNull('id_tutor');
+        $disponibles = Alumno::with(['tutor', 'tutores'])
+            ->whereDoesntHave('tutores', function ($query) use ($tutor) {
+                $query->where('tutores.id_tutor', $tutor->id_tutor);
             })
             ->when($busqueda !== '', function ($query) use ($like) {
                 $query->where(function ($query) use ($like) {
@@ -223,44 +227,40 @@ class TutoresController extends Controller
 
         $alumno = Alumno::findOrFail($request->input('id_alumno'));
 
-        if ($alumno->id_tutor === $tutor->id_tutor) {
-            return back()->withErrors(['id_alumno' => 'Ese alumno ya está vinculado a este tutor.']);
+        try {
+            DB::transaction(function () use ($alumno, $tutor) {
+                $this->vinculacion->vincular($alumno, $tutor);
+
+                BitacoraService::registrar(
+                    'alumnos',
+                    'VINCULACION',
+                    sprintf(
+                        'Alumno %s %s vinculado al tutor %s %s.',
+                        $alumno->nombre,
+                        $alumno->apellido_paterno,
+                        $tutor->nombre,
+                        $tutor->apellido_paterno
+                    ),
+                    $alumno->id_alumno
+                );
+            });
+        } catch (\InvalidArgumentException $exception) {
+            return back()->withErrors(['id_alumno' => $exception->getMessage()])->withInput();
         }
 
-        $tutorAnterior = $alumno->tutor;
+        $total = $alumno->tutores()->count();
 
-        DB::transaction(function () use ($alumno, $tutor) {
-            $alumno->update(['id_tutor' => $tutor->id_tutor]);
-
-            BitacoraService::registrar(
-                'alumnos',
-                'VINCULACION',
-                sprintf(
-                    'Alumno %s %s vinculado al tutor %s %s.',
-                    $alumno->nombre,
-                    $alumno->apellido_paterno,
-                    $tutor->nombre,
-                    $tutor->apellido_paterno
-                ),
-                $alumno->id_alumno
-            );
-        });
-
-        $detalle = $tutorAnterior
-            ? ' Antes estaba con '.$tutorAnterior->nombre.' '.$tutorAnterior->apellido_paterno.'.'
-            : '';
-
-        return back()->with('status', 'Alumno vinculado correctamente.'.$detalle);
+        return back()->with('status', "Alumno vinculado correctamente. Tutores asignados: {$total}/3.");
     }
 
     public function desasignarAlumno(Tutor $tutor, Alumno $alumno)
     {
-        if ($alumno->id_tutor !== $tutor->id_tutor) {
+        if (! $this->vinculacion->estaVinculado($alumno, $tutor)) {
             abort(404);
         }
 
         DB::transaction(function () use ($alumno, $tutor) {
-            $alumno->update(['id_tutor' => null]);
+            $this->vinculacion->desvincular($alumno, $tutor);
 
             BitacoraService::registrar(
                 'alumnos',
@@ -276,7 +276,9 @@ class TutoresController extends Controller
             );
         });
 
-        return back()->with('status', 'Alumno desasignado correctamente. Ahora aparece como disponible para vincular.');
+        $total = $alumno->tutores()->count();
+
+        return back()->with('status', "Alumno desasignado correctamente. Tutores restantes: {$total}/3.");
     }
 
     /**

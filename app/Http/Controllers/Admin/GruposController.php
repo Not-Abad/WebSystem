@@ -138,6 +138,7 @@ class GruposController extends Controller
                 : null,
             'nombre' => strtoupper(trim((string) $request->input('nombre'))),
             'cupo_maximo' => (int) $request->input('cupo_maximo'),
+            'fecha_conclusion' => $request->input('fecha_conclusion'),
         ];
     }
 
@@ -181,6 +182,7 @@ class GruposController extends Controller
                 },
             ],
             'cupo_maximo' => ['required', 'integer', 'min:1', 'max:100'],
+            'fecha_conclusion' => ['required', 'date_format:Y-m-d'],
         ];
     }
 
@@ -219,6 +221,8 @@ class GruposController extends Controller
             'nombre.regex' => 'El nombre solo puede contener letras, números y guiones.',
             'cupo_maximo.required' => 'Ingresa el cupo máximo.',
             'cupo_maximo.min' => 'El cupo debe ser al menos 1.',
+            'fecha_conclusion.required' => 'Ingresa la fecha de conclusión del semestre.',
+            'fecha_conclusion.date_format' => 'La fecha de conclusión debe tener el formato AAAA-MM-DD.',
         ];
     }
 }

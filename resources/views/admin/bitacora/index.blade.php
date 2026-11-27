@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-filter"></i> Filtros</h2>
-                <p>Los filtros se conservan al paginar y al exportar.</p>
             </div>
         </div>
 

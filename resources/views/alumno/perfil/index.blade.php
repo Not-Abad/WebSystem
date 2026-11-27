@@ -50,9 +50,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Mis datos</h2>
-            <p class="docente-ayuda">
-                Consulta tu expediente, tu grupo y tus datos escolares. Si necesitas corregir algún dato, solicítalo a control escolar.
-            </p>
         </div>
         <a href="{{ route('alumno.materias.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Volver a mis materias

@@ -139,11 +139,11 @@ class ModulosTutorTest extends TestCase
             ->assertDontSee('<th>Evidencia</th>', false)
             ->assertDontSee('<th>Rubro</th>', false)
             ->assertSee('70.00 %')
-            ->assertSee('80.00 %')
-            ->assertSee('Calificación (0–10)')
-            ->assertSee('Aportación al parcial')
             ->assertSee('8.00')
             ->assertSee('Calificación obtenida en el parcial')
+            ->assertDontSee('80.00 %')
+            ->assertDontSee('Calificación (0–10)')
+            ->assertDontSee('Aportación al parcial')
             ->assertDontSee('5.60')
             ->assertDontSee('site-footer');
     }
@@ -184,6 +184,10 @@ class ModulosTutorTest extends TestCase
             'id_alumno' => $alumno->id_alumno,
             'id_tutor' => $tutorDestino->id_tutor,
         ]);
+        $this->assertDatabaseHas('alumno_tutores', [
+            'id_alumno' => $alumno->id_alumno,
+            'id_tutor' => $tutorDestino->id_tutor,
+        ]);
         $this->assertDatabaseHas('bitacora_auditoria', [
             'tabla_afectada' => 'alumnos',
             'accion' => 'VINCULACION',
@@ -193,9 +197,13 @@ class ModulosTutorTest extends TestCase
         $this->delete(route('admin.tutores.alumnos.desasignar', [$tutorDestino, $alumno]))
             ->assertRedirect();
 
+        $this->assertDatabaseMissing('alumno_tutores', [
+            'id_alumno' => $alumno->id_alumno,
+            'id_tutor' => $tutorDestino->id_tutor,
+        ]);
         $this->assertDatabaseHas('alumnos', [
             'id_alumno' => $alumno->id_alumno,
-            'id_tutor' => null,
+            'id_tutor' => 1,
         ]);
         $this->assertDatabaseHas('bitacora_auditoria', [
             'tabla_afectada' => 'alumnos',

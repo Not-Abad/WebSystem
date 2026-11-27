@@ -368,13 +368,13 @@ class ClaseController extends Controller
         ];
         foreach ($alumnos as $alumno) {
             foreach ($criterios as $criterio) {
-                $reglas['calificaciones.'.$alumno->id_alumno.'.'.$criterio->id_criterio] = ['required', 'numeric', 'min:0', 'max:100'];
+                $reglas['calificaciones.'.$alumno->id_alumno.'.'.$criterio->id_criterio] = ['required', 'numeric', 'min:50', 'max:100'];
             }
         }
 
         Validator::make($request->all(), $reglas, [
             'calificaciones.required' => 'Captura las calificaciones de la evaluación.',
-            'calificaciones.*.*.min' => 'El porcentaje obtenido no puede ser menor a 0.',
+            'calificaciones.*.*.min' => 'El porcentaje obtenido por criterio no puede ser menor a 50 %.',
             'calificaciones.*.*.max' => 'El porcentaje obtenido no puede ser mayor a 100.',
         ])->validate();
 
@@ -389,6 +389,7 @@ class ClaseController extends Controller
             foreach ($request->input('calificaciones') as $idAlumno => $filas) {
                 foreach ($criterios as $criterio) {
                     $porcentaje = (float) $filas[$criterio->id_criterio];
+                    abort_if($porcentaje < 50, 422, 'El porcentaje obtenido por criterio no puede ser menor a 50 %.');
 
                     Calificacion::updateOrCreate(
                         [

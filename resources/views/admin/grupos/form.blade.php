@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas {{ isset($grupo) ? 'fa-pen' : 'fa-plus' }}"></i> Datos del grupo</h2>
-                <p>El plan define qué materias podrán usarse en el horario del grupo.</p>
             </div>
         </div>
 
@@ -63,6 +62,13 @@
                     <label for="cupo_maximo">Cupo máximo <span style="color:#0066ff;">*</span></label>
                     <input type="number" id="cupo_maximo" name="cupo_maximo"
                            value="{{ old('cupo_maximo', $grupo->cupo_maximo ?? 45) }}" required min="1" max="100">
+                </div>
+
+                <div class="form-campo">
+                    <label for="fecha_conclusion">Fecha de conclusión del semestre <span style="color:#0066ff;">*</span></label>
+                    <input type="date" id="fecha_conclusion" name="fecha_conclusion"
+                           value="{{ old('fecha_conclusion', $grupo->fecha_conclusion?->format('Y-m-d') ?? now()->addMonths(4)->toDateString()) }}"
+                           required>
                 </div>
             </div>
 

@@ -5,7 +5,6 @@
         <header class="archivos-picker-head">
             <div>
                 <h2><i class="fas fa-folder-open"></i> Seleccionar archivo</h2>
-                <p>El archivo elegido se colocará en el campo del formulario.</p>
             </div>
             <button type="button" class="btn-modulo btn-secundario btn-mini" onclick="window.parent.cerrarGestorArchivos()">
                 <i class="fas fa-xmark"></i> Cerrar

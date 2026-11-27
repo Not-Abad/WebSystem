@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar docente</h2>
-                <p>Filtra por nombre, CURP, RFC, personal SEP, nombramiento, sindicato, título, licenciatura o usuario.</p>
             </div>
         </div>
 
@@ -32,7 +31,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-chalkboard-user"></i> Personal docente</h2>
-                <p>{{ $docentes->count() }} registro(s). La formación académica se muestra al asignar materias en Horarios.</p>
             </div>
         </div>
 
@@ -133,7 +131,4 @@
         </div>
     </section>
 
-    <p class="nota-modulo">
-        Las bajas son lógicas: la cuenta queda inactiva y se conserva toda la información del docente.
-    </p>
 @endsection

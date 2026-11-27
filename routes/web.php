@@ -12,12 +12,14 @@ use App\Http\Controllers\Admin\PortalController;
 use App\Http\Controllers\Admin\SalonesController;
 use App\Http\Controllers\Admin\SeguridadController;
 use App\Http\Controllers\Admin\TutoresController;
+use App\Http\Controllers\Alumno\KardexController as AlumnoKardexController;
 use App\Http\Controllers\Alumno\MateriasController as AlumnoMateriasController;
 use App\Http\Controllers\Alumno\PerfilController as AlumnoPerfilController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Docente\ClaseController as DocenteClaseController;
 use App\Http\Controllers\Docente\HorarioController as DocenteHorarioController;
 use App\Http\Controllers\Docente\PerfilController as DocentePerfilController;
+use App\Http\Controllers\Docente\RecursamientosController as DocenteRecursamientosController;
 use App\Http\Controllers\PanelController;
 use App\Http\Controllers\PortalPublicoController;
 use App\Http\Controllers\Tutor\AlumnosController as TutorAlumnosController;
@@ -184,6 +186,10 @@ Route::middleware(['auth', 'role:Docente'])
 
         Route::get('/formatos-reinco', [DocenteClaseController::class, 'exportaciones'])->name('reinco.index');
         Route::get('/formatos-reinco/{exportacion}/descargar', [DocenteClaseController::class, 'descargarReinco'])->name('reinco.descargar');
+
+        Route::get('/recursamientos', [DocenteRecursamientosController::class, 'index'])->name('recursamientos.index');
+        Route::get('/recursamientos/{recursamiento}', [DocenteRecursamientosController::class, 'show'])->name('recursamientos.show');
+        Route::post('/recursamientos/{recursamiento}/calificar', [DocenteRecursamientosController::class, 'calificar'])->name('recursamientos.calificar');
     });
 
 Route::middleware(['auth', 'role:Alumno'])
@@ -191,6 +197,7 @@ Route::middleware(['auth', 'role:Alumno'])
     ->name('alumno.')
     ->group(function () {
         Route::get('/mis-datos', [AlumnoPerfilController::class, 'index'])->name('perfil.index');
+        Route::get('/kardex', [AlumnoKardexController::class, 'index'])->name('kardex.index');
 
         Route::get('/materias', [AlumnoMateriasController::class, 'index'])->name('materias.index');
         Route::get('/materias/{clase}', [AlumnoMateriasController::class, 'show'])->name('materias.show');
@@ -207,4 +214,5 @@ Route::middleware(['auth', 'role:Tutor'])
         Route::get('/alumnos', [TutorAlumnosController::class, 'index'])->name('alumnos.index');
         Route::get('/alumnos/{alumno}', [TutorAlumnosController::class, 'show'])->name('alumnos.show');
         Route::get('/alumnos/{alumno}/materias/{clase}', [TutorAlumnosController::class, 'materia'])->name('alumnos.materia');
+        Route::get('/alumnos/{alumno}/kardex', [TutorAlumnosController::class, 'kardex'])->name('alumnos.kardex');
     });

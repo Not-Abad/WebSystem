@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Alumno extends Model
@@ -43,6 +44,14 @@ class Alumno extends Model
     public function tutor(): BelongsTo
     {
         return $this->belongsTo(Tutor::class, 'id_tutor', 'id_tutor');
+    }
+
+    /** @return BelongsToMany<Tutor, $this> */
+    public function tutores(): BelongsToMany
+    {
+        return $this->belongsToMany(Tutor::class, 'alumno_tutores', 'id_alumno', 'id_tutor')
+            ->using(AlumnoTutor::class)
+            ->withTimestamps();
     }
 
     public function grupo(): BelongsTo
@@ -88,6 +97,16 @@ class Alumno extends Model
     public function aceptacionesCriterios(): HasMany
     {
         return $this->hasMany(AceptacionCriterio::class, 'id_alumno', 'id_alumno');
+    }
+
+    public function kardexMaterias(): HasMany
+    {
+        return $this->hasMany(KardexMateria::class, 'id_alumno', 'id_alumno');
+    }
+
+    public function recursamientos(): HasMany
+    {
+        return $this->hasMany(Recursamiento::class, 'id_alumno', 'id_alumno');
     }
 
     public function nombreCompleto(): string

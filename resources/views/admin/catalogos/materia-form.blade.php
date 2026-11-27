@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas {{ isset($materia) ? 'fa-pen' : 'fa-book-bookmark' }}"></i> Datos de la materia</h2>
-                <p>Plan <strong>{{ $plan->clave }}</strong>. La materia se mostrará en el semestre seleccionado.</p>
             </div>
         </div>
 

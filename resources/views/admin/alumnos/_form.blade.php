@@ -3,7 +3,8 @@
 
     <div class="form-campo">
         <label for="id_semestre">Semestre</label>
-        <select id="id_semestre" name="id_semestre" required>
+        <select id="id_semestre" name="id_semestre">
+            <option value="">Sin especificar</option>
             @foreach ($semestres as $id => $nombre)
                 <option value="{{ $id }}" @selected(old('id_semestre', $alumno->id_semestre ?? '') == $id)>{{ $nombre }}</option>
             @endforeach
@@ -11,20 +12,19 @@
     </div>
 
     <div class="form-campo">
-        <label for="id_grupo">Grupo <span style="color:#0066ff;">*</span></label>
-        <select id="id_grupo" name="id_grupo" required>
-            <option value="">Selecciona el grupo</option>
+        <label for="id_grupo">Grupo</label>
+        <select id="id_grupo" name="id_grupo">
+            <option value="">Sin asignar</option>
             @foreach ($grupos as $grupo)
                 <option value="{{ $grupo['id'] }}" data-semestre="{{ $grupo['id_semestre'] }}" data-area="{{ $grupo['id_area'] ?? '' }}"
                         @selected(old('id_grupo', $alumno->id_grupo ?? '') == $grupo['id'])>{{ $grupo['etiqueta'] }}</option>
             @endforeach
         </select>
-        <small>Los grupos se filtran según el semestre y, desde 5º, el área propedéutica.</small>
     </div>
 
     <div class="form-campo">
         <label for="id_estado_alumno">Estatus escolar</label>
-        <select id="id_estado_alumno" name="id_estado_alumno" required>
+        <select id="id_estado_alumno" name="id_estado_alumno">
             @foreach ($estados as $id => $nombre)
                 <option value="{{ $id }}" @selected(old('id_estado_alumno', $alumno->id_estado_alumno ?? \App\Models\EstadoAlumno::PREINSCRITO) == $id)>{{ $nombre }}</option>
             @endforeach
@@ -33,7 +33,8 @@
 
     <div class="form-campo">
         <label for="id_plan">Plan de estudios</label>
-        <select id="id_plan" name="id_plan" required>
+        <select id="id_plan" name="id_plan">
+            <option value="">Sin especificar</option>
             @foreach ($planes as $id => $nombre)
                 <option value="{{ $id }}" @selected(old('id_plan', $alumno->id_plan ?? '') == $id)>{{ $nombre }}</option>
             @endforeach
@@ -57,28 +58,25 @@
     @endphp
 
     <div id="campo-area-propedeutica" class="form-campo" @if (! $mostrarArea) style="display: none;" @endif>
-        <label for="id_area_propedeutica">Área propedéutica <span style="color:#0066ff;">*</span></label>
-        <select id="id_area_propedeutica" name="id_area_propedeutica" @if ($mostrarArea) required @endif>
-            <option value="">{{ $mostrarArea ? 'Selecciona el área' : 'Sin área' }}</option>
+        <label for="id_area_propedeutica">Área propedéutica</label>
+        <select id="id_area_propedeutica" name="id_area_propedeutica">
+            <option value="">Sin especificar</option>
             @foreach ($areas as $id => $nombre)
                 <option value="{{ $id }}" @selected(old('id_area_propedeutica', $alumno->id_area_propedeutica ?? '') == $id)>{{ $nombre }}</option>
             @endforeach
         </select>
-        <small>Obligatoria desde 5to semestre.</small>
     </div>
 
     <div id="campo-apa" class="form-campo" @if (! $mostrarApa) style="display: none;" @endif>
-        <label for="actividad_escolar_apa">Actividad para escolar (APA) <span style="color:#0066ff;">*</span></label>
+        <label for="actividad_escolar_apa">Actividad para escolar (APA)</label>
         <input type="text" id="actividad_escolar_apa" name="actividad_escolar_apa"
                value="{{ old('actividad_escolar_apa', $alumno->actividad_escolar_apa ?? '') }}"
-               maxlength="120" placeholder="Ej. Deportes, arte, tecnología"
-               @if ($mostrarApa) required @endif>
-        <small>Obligatoria hasta 4to semestre.</small>
+               maxlength="120" placeholder="Ej. Deportes, arte, tecnología">
     </div>
 
     <div class="form-campo">
         <label for="promedio_general">Promedio general</label>
-        <input type="number" id="promedio_general" name="promedio_general" value="{{ old('promedio_general', $alumno->promedio_general ?? 0) }}" required min="0" max="10" step="0.01">
+        <input type="number" id="promedio_general" name="promedio_general" value="{{ old('promedio_general', $alumno->promedio_general ?? '') }}" min="0" max="10" step="0.01">
     </div>
 
     <div class="form-separador">Datos personales</div>
@@ -100,12 +98,12 @@
 
     <div class="form-campo">
         <label for="curp">CURP</label>
-        <input type="text" id="curp" name="curp" value="{{ old('curp', $alumno->curp ?? '') }}" required maxlength="18" minlength="18" placeholder="ABCD123456HABCDF12">
+        <input type="text" id="curp" name="curp" value="{{ old('curp', $alumno->curp ?? '') }}" maxlength="18" placeholder="ABCD123456HABCDF12">
     </div>
 
     <div class="form-campo">
         <label for="correo">Correo</label>
-        <input type="email" id="correo" name="correo" value="{{ old('correo', $alumno->correo ?? '') }}" required maxlength="120">
+        <input type="email" id="correo" name="correo" value="{{ old('correo', $alumno->correo ?? '') }}" maxlength="120">
     </div>
 
     @include('components.ruta-archivo', [
@@ -114,7 +112,7 @@
         'etiqueta' => 'Ruta del acta de nacimiento',
         'valor' => old('acta_nacimiento_ruta', $alumno->acta_nacimiento_ruta ?? ''),
         'placeholder' => 'alumnos/acta-01.pdf',
-        'requerido' => true,
+        'requerido' => false,
     ])
 
     @include('components.ruta-archivo', [
@@ -123,7 +121,7 @@
         'etiqueta' => 'Ruta de la boleta de secundaria',
         'valor' => old('boleta_secundaria_ruta', $alumno->boleta_secundaria_ruta ?? ''),
         'placeholder' => 'alumnos/boleta-01.pdf',
-        'requerido' => true,
+        'requerido' => false,
     ])
 
     <div class="form-separador">Datos de acceso</div>
@@ -136,7 +134,6 @@
     <div class="form-campo">
         <label for="password">{{ isset($alumno) ? 'Nueva contraseña (opcional)' : 'Contraseña temporal' }}</label>
         <input type="password" id="password" name="password" {{ isset($alumno) ? '' : 'required' }} minlength="8" autocomplete="new-password">
-        <small>{{ isset($alumno) ? 'Déjala en blanco para conservar la contraseña actual.' : 'Mínimo 8 caracteres.' }}</small>
     </div>
 
     <div class="form-campo">
@@ -150,7 +147,6 @@
                 <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $usuario->is_active))>
                 Cuenta activa
             </label>
-            <small>Si la desactivas, el alumno no podrá iniciar sesión pero el expediente se conserva.</small>
         </div>
     @endif
 </div>
@@ -194,22 +190,8 @@
             campoArea.style.display = conArea ? '' : 'none';
             campoApa.style.display = conApa ? '' : 'none';
 
-            const inputApa = campoApa.querySelector('input');
-
             selectArea.disabled = !conArea;
-            inputApa.disabled = !conApa;
-
-            if (conArea) {
-                selectArea.setAttribute('required', 'required');
-            } else {
-                selectArea.removeAttribute('required');
-            }
-
-            if (conApa) {
-                inputApa.setAttribute('required', 'required');
-            } else {
-                inputApa.removeAttribute('required');
-            }
+            campoApa.querySelector('input').disabled = !conApa;
         }
 
         function alCambiarSemestre() {

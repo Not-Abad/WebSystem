@@ -9,13 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-user-pen"></i> Editar docente</h2>
-                <p>
-                    Usuario de acceso:
-                    <strong style="color:#0066ff;">{{ $usuario->username }}</strong>
-                    @if (! $docente->is_active)
-                        · <span class="estado estado-inactivo">Inactivo</span>
-                    @endif
-                </p>
             </div>
         </div>
 

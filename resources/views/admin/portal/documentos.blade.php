@@ -13,7 +13,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-magnifying-glass"></i> Buscar documentos</h2>
-                <p>Filtra por título o categoría.</p>
             </div>
         </div>
 

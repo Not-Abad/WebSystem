@@ -5,10 +5,6 @@
     <div class="docente-cabecera">
         <div>
             <h2>Formatos guardados</h2>
-            <p class="docente-ayuda">
-                Los archivos generados se almacenan en la carpeta <code>reinco</code> del gestor de archivos y
-                pueden descargarse desde aquí.
-            </p>
         </div>
         <a href="{{ route('docente.horario.index') }}" class="btn-modulo btn-secundario">
             <i class="fas fa-arrow-left"></i> Volver a mi horario
@@ -19,7 +15,6 @@
         <div class="docente-vacio">
             <i class="fas fa-file-excel"></i>
             <strong>Aún no hay formatos REINCO guardados.</strong>
-            <p>Genera uno desde la sección REINCO de cada materia en tu horario.</p>
         </div>
     @else
         <div class="tabla-wrap">

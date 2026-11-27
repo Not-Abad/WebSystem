@@ -9,11 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-user-pen"></i> Editar alumno</h2>
-                <p>
-                    Expediente <strong style="color:#0066ff;">#{{ $alumno->id_alumno }}</strong> ·
-                    Grupo <strong style="color:#0066ff;">{{ $alumno->grupo?->nombre ?? '—' }}</strong> ·
-                    Usuario <strong style="color:#0066ff;">{{ $usuario->username }}</strong>
-                </p>
             </div>
         </div>
 

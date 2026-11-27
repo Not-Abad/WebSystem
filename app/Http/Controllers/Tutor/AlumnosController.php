@@ -8,12 +8,18 @@ use App\Models\Alumno;
 use App\Models\Clase;
 use App\Models\Evaluacion;
 use App\Models\Tutor;
+use App\Services\KardexService;
+use App\Services\TutorVinculacionService;
 use App\Support\CalificacionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AlumnosController extends Controller
 {
+    public function __construct(private readonly TutorVinculacionService $vinculacion)
+    {
+    }
+
     private function tutorAutenticado(): Tutor
     {
         $tutor = Auth::user()?->tutor;
@@ -27,7 +33,7 @@ class AlumnosController extends Controller
 
     private function alumnoAutorizado(Alumno $alumno, Tutor $tutor): Alumno
     {
-        abort_unless($alumno->id_tutor === $tutor->id_tutor, 404);
+        abort_unless($this->vinculacion->estaVinculado($alumno, $tutor), 404);
 
         return $alumno;
     }
@@ -38,7 +44,9 @@ class AlumnosController extends Controller
         $busqueda = trim((string) $request->input('q', ''));
         $like = '%'.addcslashes($busqueda, '%_\\').'%';
 
-        $alumnos = Alumno::where('id_tutor', $tutor->id_tutor)
+        $alumnos = Alumno::whereHas('tutores', function ($query) use ($tutor) {
+                $query->where('tutores.id_tutor', $tutor->id_tutor);
+            })
             ->with(['estado', 'plan', 'semestre'])
             ->when($busqueda !== '', function ($query) use ($like) {
                 $query->where(function ($query) use ($like) {
@@ -69,7 +77,7 @@ class AlumnosController extends Controller
         $tutor = $this->tutorAutenticado();
         $alumno = $this->alumnoAutorizado($alumno, $tutor);
 
-        $alumno->load(['grupo', 'estado', 'plan', 'semestre', 'capacitacion', 'area', 'tutor']);
+        $alumno->load(['grupo', 'estado', 'plan', 'semestre', 'capacitacion', 'area', 'tutor', 'tutores']);
 
         $clases = Clase::where('id_grupo', $alumno->id_grupo)
             ->where('is_active', true)
@@ -89,6 +97,32 @@ class AlumnosController extends Controller
             'etiqueta' => 'Tutor',
             'alumno' => $alumno,
             'clases' => $clases,
+        ]);
+    }
+
+    public function kardex(Alumno $alumno, KardexService $kardex)
+    {
+        $tutor = $this->tutorAutenticado();
+        $alumno = $this->alumnoAutorizado($alumno, $tutor);
+
+        $alumno->load(['plan', 'estado', 'tutores']);
+        $reticula = $kardex->reticula($alumno);
+        $recursamientos = $alumno->recursamientos()
+            ->with('materia')
+            ->orderBy('id_materia')
+            ->orderBy('ronda')
+            ->get();
+
+        return view('tutor.alumnos.kardex', [
+            'titulo' => 'Kardex de '.$alumno->nombre,
+            'subtitulo' => 'Retícula, avance y recursamientos del estudiante bajo tu tutela.',
+            'icono' => 'fa-file-archive',
+            'etiqueta' => 'Tutor',
+            'tutor' => $tutor,
+            'alumno' => $alumno,
+            'reticula' => $reticula,
+            'recursamientos' => $recursamientos,
+            'promedio' => $kardex->promedioFinal($alumno),
         ]);
     }
 

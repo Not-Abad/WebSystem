@@ -9,7 +9,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas fa-user-plus"></i> Datos del nuevo docente</h2>
-                <p>Se creará una cuenta de acceso con el rol Docente.</p>
             </div>
         </div>
 

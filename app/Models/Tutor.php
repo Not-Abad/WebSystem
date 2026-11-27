@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tutor extends Model
@@ -31,7 +32,16 @@ class Tutor extends Model
         return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
     }
 
-    public function alumnos(): HasMany
+    /** @return BelongsToMany<Alumno, $this> */
+    public function alumnos(): BelongsToMany
+    {
+        return $this->belongsToMany(Alumno::class, 'alumno_tutores', 'id_tutor', 'id_alumno')
+            ->using(AlumnoTutor::class)
+            ->withTimestamps();
+    }
+
+    /** Vínculo principal histórico, conservado por compatibilidad. */
+    public function alumnosDirectos(): HasMany
     {
         return $this->hasMany(Alumno::class, 'id_tutor', 'id_tutor');
     }

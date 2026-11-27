@@ -11,7 +11,6 @@
         <div class="modulo-card-header">
             <div>
                 <h2><i class="fas {{ isset($plan) ? 'fa-pen' : 'fa-file-circle-plus' }}"></i> Datos del plan</h2>
-                <p>La clave se usa para identificar el plan en grupos y catálogos.</p>
             </div>
         </div>
 

@@ -1901,3 +1901,113 @@ body.modulo-body {
         flex-direction: column;
     }
 }
+
+.kardex-resumen {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    margin-bottom: 18px;
+}
+
+.kardex-tarjeta {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 14px;
+}
+
+.kardex-tarjeta span {
+    color: #8b949e;
+    display: block;
+    font-size: .72rem;
+    text-transform: uppercase;
+}
+
+.kardex-tarjeta strong {
+    color: #e6edf3;
+    font-size: 1.5rem;
+}
+
+.kardex-estado {
+    align-items: center;
+    border: 1px solid #30363d;
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: .75rem;
+    gap: 6px;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.kardex-estado--cursada {
+    background: rgba(0, 102, 255, .12);
+    border-color: rgba(0, 102, 255, .5);
+    color: #79b8ff;
+}
+
+.kardex-estado--en_curso {
+    background: rgba(255, 202, 58, .1);
+    border-color: rgba(255, 202, 58, .45);
+    color: #ffca3a;
+}
+
+.kardex-estado--pendiente {
+    background: rgba(139, 148, 158, .08);
+    color: #8b949e;
+}
+
+.kardex-estado--r1,
+.kardex-estado--r2,
+.kardex-estado--r3,
+.kardex-estado--r4 {
+    background: rgba(255, 202, 58, .12);
+    border-color: rgba(255, 202, 58, .5);
+    color: #ffca3a;
+}
+
+.kardex-estado--aprobada_r {
+    background: rgba(0, 102, 255, .14);
+    border-color: rgba(0, 102, 255, .55);
+    color: #79b8ff;
+}
+
+.kardex-estado--baja_temporal {
+    background: rgba(248, 81, 73, .12);
+    border-color: rgba(248, 81, 73, .45);
+    color: #ff7b72;
+}
+
+.docente-filtros {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.docente-filtros label,
+.docente-formulario label {
+    color: #8b949e;
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.docente-filtros select,
+.docente-formulario input {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #e6edf3;
+    padding: 10px 12px;
+}
+
+.docente-formulario {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.docente-formulario input {
+    max-width: 220px;
+}
